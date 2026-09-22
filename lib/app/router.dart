@@ -7,8 +7,8 @@ import '../features/home/presentation/home_screen.dart';
 final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     routes: [
-      GoRoute(path: '/', builder: (_, __) => const HomeScreen()),
-      GoRoute(path: '/login', builder: (_, __) => const LoginScreen()),
+      GoRoute(path: '/', builder: (_, _) => const HomeScreen()),
+      GoRoute(path: '/login', builder: (_, _) => const LoginScreen()),
     ],
   );
 });
