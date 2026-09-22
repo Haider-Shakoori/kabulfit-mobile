@@ -1,0 +1,3 @@
+#include "Debug.xcconfig"
+PRODUCT_BUNDLE_IDENTIFIER=af.kabulfit.mobile.dev
+PRODUCT_NAME=KabulFit Dev

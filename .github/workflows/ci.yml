@@ -1,0 +1,63 @@
+name: Mobile CI
+
+on:
+  push:
+    branches: [main, 'feat/**', 'fix/**']
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mobile-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: dart format --output=none --set-exit-if-changed lib test
+      - run: flutter analyze --fatal-infos
+      - run: flutter test --coverage
+      - name: Build development APK
+        run: flutter build apk --debug --flavor dev -t lib/main_dev.dart
+
+  android-release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - name: Build unsigned production APK
+        run: >-
+          flutter build apk --release --flavor production
+          -t lib/main_production.dart
+          --dart-define=API_BASE_URL=https://example.invalid/api/v1
+
+  ios-compile:
+    runs-on: macos-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - name: Compile iOS without signing
+        run: >-
+          flutter build ios --release --no-codesign
+          -t lib/main_production.dart
+          --dart-define=API_BASE_URL=https://example.invalid/api/v1
