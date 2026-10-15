@@ -84,12 +84,17 @@ class NewMeasurementProfileScreen extends ConsumerStatefulWidget {
 }
 
 class _NewMeasurementProfileScreenState extends ConsumerState<NewMeasurementProfileScreen> {
+  static String _existingCm(Object? value, Object? unit) {
+    final numeric = double.tryParse(value?.toString() ?? '');
+    if (numeric == null) return '';
+    return (unit == 'in' ? numeric * 2.54 : numeric).toStringAsFixed(2);
+  }
+
   final form = GlobalKey<FormState>();
   final name = TextEditingController();
   final values = <String, TextEditingController>{};
   String garmentType = garmentTypes.first;
   bool saving = false;
-  bool initialized = false;
 
   @override
   void initState() {
@@ -104,7 +109,7 @@ class _NewMeasurementProfileScreenState extends ConsumerState<NewMeasurementProf
         final code = m['code']?.toString();
         if (code == null) continue;
         values['${garmentType}_$code'] = TextEditingController(
-          text: m['value']?.toString() ?? '',
+          text: _existingCm(m['value'], existing['display_unit']),
         );
       }
     }
