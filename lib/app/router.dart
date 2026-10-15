@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../features/auth/presentation/login_screen.dart';
 import '../features/catalog/presentation/catalog_screen.dart';
 import '../features/commerce/presentation/commerce_screens.dart';
+import '../features/commerce/presentation/address_order_screens.dart';
 import '../features/home/presentation/home_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -17,6 +18,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(path: '/cart', builder: (_, _) => const CartScreen()),
       GoRoute(path: '/wishlist', builder: (_, _) => const WishlistScreen()),
+      GoRoute(path: '/addresses', builder: (_, _) => const AddressesScreen()),
+      GoRoute(path: '/addresses/new', builder: (_, _) => const NewAddressScreen()),
+      GoRoute(path: '/orders', builder: (_, _) => const OrdersScreen()),
+      GoRoute(path: '/orders/:uuid/tracking', builder: (_, state) => TrackingScreen(uuid: state.pathParameters['uuid']!)),
       GoRoute(path: '/login', builder: (_, _) => const LoginScreen()),
     ],
   );
