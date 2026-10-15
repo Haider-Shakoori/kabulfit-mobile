@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/config/providers.dart';
+import '../../auth/application/auth_controller.dart';
+import '../../commerce/application/commerce_providers.dart';
 
 /// These products are loaded from Laravel, never from hard-coded demo data.
 final catalogProvider = FutureProvider<List<KabulProduct>>((ref) async {
@@ -240,15 +242,131 @@ class ProductScreen extends ConsumerWidget {
               if (data['tailoring_enabled'] == true)
                 const Chip(label: Text('Custom tailoring available')),
               const SizedBox(height: 12),
-              const Text('Choose your options and sign in to order.'),
-              FilledButton(
-                onPressed: () => context.push('/login'),
-                child: const Text('Sign in to shop'),
-              ),
+              _ProductActions(slug: slug, product: data),
             ],
           );
         },
       ),
+    );
+  }
+}
+
+
+class _ProductActions extends ConsumerStatefulWidget {
+  const _ProductActions({required this.slug, required this.product});
+
+  final String slug;
+  final Map<String, dynamic> product;
+
+  @override
+  ConsumerState<_ProductActions> createState() => _ProductActionsState();
+}
+
+class _ProductActionsState extends ConsumerState<_ProductActions> {
+  bool busy = false;
+  String? selectedVariant;
+
+  @override
+  Widget build(BuildContext context) {
+    final variants = (widget.product['variants'] as List?)
+            ?.whereType<Map<String, dynamic>>()
+            .toList() ??
+        [];
+    final available = variants.where((variant) {
+      final stock = variant['stock'];
+      return stock is Map && stock['in_stock'] == true;
+    }).toList();
+    final signedIn = ref.watch(authControllerProvider).value != null;
+
+    if (!signedIn) {
+      return FilledButton(
+        onPressed: () => context.push('/login'),
+        child: const Text('Sign in to shop'),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (variants.isNotEmpty)
+          DropdownButtonFormField<String>(
+            value: selectedVariant,
+            decoration: const InputDecoration(labelText: 'Choose size / color'),
+            items: available.map((variant) {
+              final color = variant['color'];
+              final label = [
+                variant['size']?.toString() ?? '',
+                if (color is Map) color['name']?.toString() ?? '',
+              ].where((part) => part.isNotEmpty).join(' · ');
+              return DropdownMenuItem(
+                value: variant['sku']?.toString(),
+                child: Text(label.isEmpty ? variant['sku'].toString() : label),
+              );
+            }).toList(),
+            onChanged: busy ? null : (value) => setState(() => selectedVariant = value),
+          ),
+        const SizedBox(height: 12),
+        FilledButton.icon(
+          onPressed: busy ||
+                  (variants.isNotEmpty && selectedVariant == null) ||
+                  (variants.isEmpty && widget.product['stock'] is Map &&
+                      (widget.product['stock'] as Map)['in_stock'] != true)
+              ? null
+              : () async {
+                  setState(() => busy = true);
+                  try {
+                    await ref.read(commerceActionsProvider).addToCart(
+                      widget.slug,
+                      variantSku: selectedVariant,
+                    );
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Added to cart')),
+                      );
+                    }
+                  } catch (error) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(error.toString())),
+                      );
+                    }
+                  } finally {
+                    if (mounted) setState(() => busy = false);
+                  }
+                },
+          icon: const Icon(Icons.shopping_bag_outlined),
+          label: Text(busy ? 'Adding…' : 'Add to cart'),
+        ),
+        TextButton.icon(
+          onPressed: busy
+              ? null
+              : () async {
+                  setState(() => busy = true);
+                  try {
+                    await ref.read(commerceActionsProvider).addToWishlist(widget.slug);
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Added to wishlist')),
+                      );
+                    }
+                  } catch (error) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(error.toString())),
+                      );
+                    }
+                  } finally {
+                    if (mounted) setState(() => busy = false);
+                  }
+                },
+          icon: const Icon(Icons.favorite_border),
+          label: const Text('Save to wishlist'),
+        ),
+        TextButton(
+          onPressed: () => context.push('/cart'),
+          child: const Text('View cart'),
+        ),
+      ],
     );
   }
 }
