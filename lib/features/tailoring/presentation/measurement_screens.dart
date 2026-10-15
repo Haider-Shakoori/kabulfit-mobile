@@ -1,0 +1,168 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import '../../auth/application/auth_controller.dart';
+import '../application/measurement_providers.dart';
+
+class MeasurementProfilesScreen extends ConsumerWidget {
+  const MeasurementProfilesScreen({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (ref.watch(authControllerProvider).value == null) {
+      return Scaffold(appBar: AppBar(title: const Text('Measurements')),
+        body: Center(child: FilledButton(
+          onPressed: () => context.push('/login'),
+          child: const Text('Sign in to manage measurements'))));
+    }
+    return Scaffold(
+      appBar: AppBar(title: const Text('My measurements')),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => context.push('/measurements/new'),
+        icon: const Icon(Icons.add), label: const Text('New profile')),
+      body: ref.watch(measurementProfilesProvider).when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, _) => Center(child: TextButton(
+          onPressed: () => ref.invalidate(measurementProfilesProvider),
+          child: Text('Retry: $error'))),
+        data: (profiles) => profiles.isEmpty
+          ? const Center(child: Text('No measurement profiles saved'))
+          : ListView.builder(itemCount: profiles.length, itemBuilder: (context, i) {
+              final profile = profiles[i];
+              return ListTile(
+                title: Text(profile['name']?.toString() ?? ''),
+                subtitle: Text(profile['garment_type']?.toString() ?? ''),
+                trailing: profile['is_default'] == true
+                  ? const Icon(Icons.check_circle_outline) : null);
+            }),
+      ),
+    );
+  }
+}
+
+class NewMeasurementProfileScreen extends ConsumerStatefulWidget {
+  const NewMeasurementProfileScreen({super.key});
+  @override
+  ConsumerState<NewMeasurementProfileScreen> createState() =>
+      _NewMeasurementProfileScreenState();
+}
+
+class _NewMeasurementProfileScreenState extends ConsumerState<NewMeasurementProfileScreen> {
+  final form = GlobalKey<FormState>();
+  final name = TextEditingController();
+  final values = <String, TextEditingController>{};
+  String garmentType = garmentTypes.first;
+  bool saving = false;
+
+  @override
+  void dispose() {
+    name.dispose();
+    for (final controller in values.values) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final definitions = ref.watch(measurementDefinitionsProvider(garmentType));
+    return Scaffold(
+      appBar: AppBar(title: const Text('New measurement profile')),
+      body: Form(key: form, child: ListView(padding: const EdgeInsets.all(20), children: [
+        TextFormField(controller: name, decoration: const InputDecoration(labelText: 'Profile name'),
+          validator: (s) => (s == null || s.trim().isEmpty) ? 'Required' : null),
+        const SizedBox(height: 16),
+        DropdownButtonFormField<String>(
+          value: garmentType,
+          decoration: const InputDecoration(labelText: 'Garment type'),
+          items: garmentTypes.map((type) =>
+            DropdownMenuItem(value: type, child: Text(type.replaceAll('_', ' ')))).toList(),
+          onChanged: saving ? null : (v) {
+            if (v != null) setState(() => garmentType = v);
+          },
+        ),
+        const SizedBox(height: 20),
+        definitions.when(
+          loading: () => const LinearProgressIndicator(),
+          error: (error, _) => TextButton(
+            onPressed: () => ref.invalidate(measurementDefinitionsProvider(garmentType)),
+            child: Text('Retry definitions: $error')),
+          data: (items) => Column(children: [
+            for (final item in items) Padding(
+              padding: const EdgeInsets.only(bottom: 14),
+              child: TextFormField(
+                key: ValueKey('${garmentType}_${item['code']}'),
+                controller: values.putIfAbsent('${garmentType}_${item['code']}',
+                  TextEditingController.new),
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                decoration: InputDecoration(
+                  labelText: '${item['name'] ?? item['code']} (cm)',
+                  helperText: item['instructions']?.toString(),
+                ),
+                validator: (raw) {
+                  if ((raw == null || raw.trim().isEmpty) && item['required'] != true) return null;
+                  final number = double.tryParse(raw?.trim() ?? '');
+                  final min = (item['min'] as num?)?.toDouble() ?? 0;
+                  final max = (item['max'] as num?)?.toDouble() ?? double.infinity;
+                  return number == null || number < min || number > max
+                    ? 'Enter a value between $min and $max cm' : null;
+                },
+              ),
+            ),
+          ]),
+        ),
+        const SizedBox(height: 16),
+        FilledButton(
+          onPressed: saving || !definitions.hasValue ? null : () async {
+            if (!form.currentState!.validate()) return;
+            final measurements = <Map<String, dynamic>>[];
+            for (final item in definitions.value!) {
+              final code = item['code'].toString();
+              final raw = values['${garmentType}_$code']?.text.trim();
+              if (raw == null || raw.isEmpty) continue;
+              measurements.add({'code': code, 'value': double.parse(raw)});
+            }
+            setState(() => saving = true);
+            try {
+              await ref.read(measurementActionsProvider).saveProfile(
+                name: name.text.trim(), garmentType: garmentType,
+                measurements: measurements);
+              if (context.mounted) context.pop();
+            } catch (error) {
+              if (context.mounted) ScaffoldMessenger.of(context)
+                .showSnackBar(SnackBar(content: Text(error.toString())));
+            } finally {
+              if (mounted) setState(() => saving = false);
+            }
+          },
+          child: Text(saving ? 'Saving…' : 'Save measurements')),
+      ])),
+    );
+  }
+}
+
+class TailoringRequestsScreen extends ConsumerWidget {
+  const TailoringRequestsScreen({super.key});
+  @override
+  Widget build(BuildContext context, WidgetRef ref) => Scaffold(
+    appBar: AppBar(title: const Text('My tailoring requests')),
+    body: ref.watch(tailoringRequestsProvider).when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (e, _) => Center(child: TextButton(
+        onPressed: () => ref.invalidate(tailoringRequestsProvider),
+        child: Text('Retry: $e'))),
+      data: (requests) => requests.isEmpty
+        ? const Center(child: Text('No tailoring requests yet'))
+        : ListView.builder(itemCount: requests.length, itemBuilder: (context, i) {
+            final item = requests[i];
+            final product = item['product'];
+            final order = item['order'];
+            return ListTile(
+              title: Text(product is Map ? product['name']?.toString() ?? '' : ''),
+              subtitle: Text('Status: ${item['status']} · Profile: ${(item['measurement_profile'] as Map?)?['name'] ?? ''}'),
+              trailing: order is Map
+                ? Text(order['number']?.toString() ?? '') : null);
+          }),
+    ),
+  );
+}
