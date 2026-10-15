@@ -6,6 +6,7 @@ import '../features/catalog/presentation/catalog_screen.dart';
 import '../features/commerce/presentation/commerce_screens.dart';
 import '../features/commerce/presentation/address_order_screens.dart';
 import '../features/commerce/presentation/checkout_screen.dart';
+import '../features/tailoring/presentation/measurement_screens.dart';
 import '../features/home/presentation/home_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -17,6 +18,9 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/products/:slug',
         builder: (_, state) => ProductScreen(slug: state.pathParameters['slug']!),
       ),
+      GoRoute(path: '/measurements', builder: (_, _) => const MeasurementProfilesScreen()),
+      GoRoute(path: '/measurements/new', builder: (_, _) => const NewMeasurementProfileScreen()),
+      GoRoute(path: '/tailoring', builder: (_, _) => const TailoringRequestsScreen()),
       GoRoute(path: '/checkout', builder: (_, _) => const CheckoutScreen()),
       GoRoute(path: '/cart', builder: (_, _) => const CartScreen()),
       GoRoute(path: '/wishlist', builder: (_, _) => const WishlistScreen()),
