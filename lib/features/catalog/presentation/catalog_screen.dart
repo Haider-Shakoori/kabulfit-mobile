@@ -239,8 +239,14 @@ class ProductScreen extends ConsumerWidget {
               const SizedBox(height: 16),
               Text(data['description']?.toString() ?? ''),
               const SizedBox(height: 24),
-              if (data['tailoring_enabled'] == true)
+              if (data['tailoring_enabled'] == true) ...[
                 const Chip(label: Text('Custom tailoring available')),
+                OutlinedButton.icon(
+                  onPressed: () => context.push('/products/${Uri.encodeComponent(slug)}/tailor'),
+                  icon: const Icon(Icons.straighten),
+                  label: const Text('Customize with my measurements'),
+                ),
+              ],
               const SizedBox(height: 12),
               _ProductActions(slug: slug, product: data),
             ],

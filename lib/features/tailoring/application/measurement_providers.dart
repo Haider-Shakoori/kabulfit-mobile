@@ -37,15 +37,26 @@ class MeasurementActions {
     required String garmentType,
     required List<Map<String, dynamic>> measurements,
     bool isDefault = false,
+    String? profileUuid,
   }) async {
     if (!garmentTypes.contains(garmentType)) throw ArgumentError.value(garmentType);
-    await ref.read(apiClientProvider).post('/measurement-profiles', data: {
+    final payload = <String, dynamic>{
       'name': name,
       'garment_type': garmentType,
       'display_unit': 'cm',
       'is_default': isDefault,
       'measurements': measurements,
-    });
+    };
+    if (profileUuid == null) {
+      await ref.read(apiClientProvider).post('/measurement-profiles', data: payload);
+    } else {
+      await ref.read(apiClientProvider).put('/measurement-profiles/${Uri.encodeComponent(profileUuid)}', data: payload);
+    }
+    ref.invalidate(measurementProfilesProvider);
+  }
+
+  Future<void> deleteProfile(String uuid) async {
+    await ref.read(apiClientProvider).delete('/measurement-profiles/${Uri.encodeComponent(uuid)}');
     ref.invalidate(measurementProfilesProvider);
   }
 
