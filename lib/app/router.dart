@@ -5,6 +5,7 @@ import '../features/auth/presentation/login_screen.dart';
 import '../features/catalog/presentation/catalog_screen.dart';
 import '../features/commerce/presentation/commerce_screens.dart';
 import '../features/commerce/presentation/address_order_screens.dart';
+import '../features/commerce/presentation/checkout_screen.dart';
 import '../features/home/presentation/home_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -16,6 +17,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/products/:slug',
         builder: (_, state) => ProductScreen(slug: state.pathParameters['slug']!),
       ),
+      GoRoute(path: '/checkout', builder: (_, _) => const CheckoutScreen()),
       GoRoute(path: '/cart', builder: (_, _) => const CartScreen()),
       GoRoute(path: '/wishlist', builder: (_, _) => const WishlistScreen()),
       GoRoute(path: '/addresses', builder: (_, _) => const AddressesScreen()),
