@@ -125,12 +125,12 @@ class _NewMeasurementProfileScreenState extends ConsumerState<NewMeasurementProf
     return Scaffold(
       appBar: AppBar(title: Text(widget.existing == null ? 'New measurement profile' : 'Edit measurement profile')),
       body: Form(key: form, child: ListView(padding: const EdgeInsets.all(20), children: [
-        TextFormField(controller: name, decoration: const InputDecoration(labelText: AppLocalizations.of(context).text('profileName')),
+        TextFormField(controller: name, decoration: InputDecoration(labelText: AppLocalizations.of(context).text('profileName')),
           validator: (s) => (s == null || s.trim().isEmpty) ? 'Required' : null),
         const SizedBox(height: 16),
         DropdownButtonFormField<String>(
           value: garmentType,
-          decoration: const InputDecoration(labelText: AppLocalizations.of(context).text('garmentType')),
+          decoration: InputDecoration(labelText: AppLocalizations.of(context).text('garmentType')),
           items: garmentTypes.map((type) =>
             DropdownMenuItem(value: type, child: Text(type.replaceAll('_', ' ')))).toList(),
           onChanged: saving ? null : (v) {
