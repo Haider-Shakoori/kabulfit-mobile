@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/localization/app_localizations.dart';
 import '../../auth/application/auth_controller.dart';
+import '../../catalog/presentation/catalog_screen.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -46,7 +47,14 @@ class HomeScreen extends ConsumerWidget {
                   style: Theme.of(context).textTheme.displaySmall,
                 ),
                 const SizedBox(height: 16),
-                Text(strings.text('comingSoon'), textAlign: TextAlign.center),
+                const SizedBox(height: 20),
+                FilledButton.icon(
+                  onPressed: () => context.go('/shop'),
+                  icon: const Icon(Icons.storefront_outlined),
+                  label: Text(strings.text('shop')),
+                ),
+                const SizedBox(height: 24),
+                const Expanded(child: _FeaturedPreview()),
               ],
             ),
           ),
@@ -54,6 +62,10 @@ class HomeScreen extends ConsumerWidget {
       ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: 0,
+        onDestinationSelected: (index) {
+          if (index == 1) context.go('/shop');
+          if (index == 2) context.go('/login');
+        },
         destinations: [
           NavigationDestination(
             icon: const Icon(Icons.home_outlined),
@@ -70,6 +82,58 @@ class HomeScreen extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+
+class _FeaturedPreview extends ConsumerWidget {
+  const _FeaturedPreview();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return ref.watch(catalogProvider).when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (_, _) => TextButton(
+        onPressed: () => ref.invalidate(catalogProvider),
+        child: Text(AppLocalizations.of(context).text('retry')),
+      ),
+      data: (products) => products.isEmpty
+          ? const SizedBox.shrink()
+          : ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: products.length > 6 ? 6 : products.length,
+              separatorBuilder: (_, _) => const SizedBox(width: 12),
+              itemBuilder: (context, index) {
+                final product = products[index];
+                return SizedBox(
+                  width: 180,
+                  child: Card(
+                    clipBehavior: Clip.antiAlias,
+                    child: InkWell(
+                      onTap: () => context.push('/products/${Uri.encodeComponent(product.slug)}'),
+                      child: Column(
+                        children: [
+                          Expanded(
+                            child: SizedBox.expand(
+                              child: product.imageUrl == null
+                                  ? const Icon(Icons.checkroom)
+                                  : Image.network(product.imageUrl!, fit: BoxFit.cover,
+                                      errorBuilder: (_, _, _) => const Icon(Icons.broken_image_outlined)),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(12),
+                            child: Text(product.name, maxLines: 2,
+                                overflow: TextOverflow.ellipsis),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
     );
   }
 }
