@@ -120,6 +120,12 @@ class CartScreen extends ConsumerWidget {
                     style: Theme.of(context).textTheme.titleLarge),
                 const SizedBox(height: 8),
                 const Text('Shipping, discounts, and final charges are calculated by KabulFit at checkout.'),
+                const SizedBox(height: 16),
+                FilledButton.icon(
+                  onPressed: () => context.push('/checkout'),
+                  icon: const Icon(Icons.lock_outline),
+                  label: Text(AppLocalizations.of(context).text('checkout')),
+                ),
               ],
             ),
           );
