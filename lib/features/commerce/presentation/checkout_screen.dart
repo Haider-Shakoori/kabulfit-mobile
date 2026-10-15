@@ -9,8 +9,7 @@ import '../application/commerce_providers.dart';
 import '../application/stripe_payment_gateway.dart';
 import '../../../core/localization/app_localizations.dart';
 
-/// Preflight only: payment is deliberately not initiated until the native
-/// Stripe PaymentSheet integration is available and tested.
+/// Checkout creates a pending order. Only the backend webhook confirms payment.
 class CheckoutScreen extends ConsumerStatefulWidget {
   const CheckoutScreen({super.key});
 
@@ -104,7 +103,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             loading: () => const LinearProgressIndicator(),
             error: (error, _) => Text('Cart unavailable: $error'),
             data: (data) => Text(
-              'Cart subtotal (before shipping/discounts): ${data['subtotal_minor']} minor units · ${data['currency']}',
+              'Cart subtotal (before shipping/discounts): ${data['subtotal_minor'] is num ? ((data['subtotal_minor'] as num) / 100).toStringAsFixed(2) : '—'} ${data['currency'] ?? ''}',
             ),
           ),
           const SizedBox(height: 20),
