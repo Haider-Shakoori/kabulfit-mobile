@@ -75,7 +75,7 @@ class HomeScreen extends ConsumerWidget {
         selectedIndex: 0,
         onDestinationSelected: (index) {
           if (index == 1) context.go('/shop');
-          if (index == 2) context.go('/login');
+          if (index == 2) context.go('/cart');
         },
         destinations: [
           NavigationDestination(
@@ -88,8 +88,8 @@ class HomeScreen extends ConsumerWidget {
             label: strings.text('shop'),
           ),
           NavigationDestination(
-            icon: const Icon(Icons.person_outline),
-            label: strings.text('account'),
+            icon: const Icon(Icons.shopping_bag_outlined),
+            label: strings.text('cart'),
           ),
         ],
       ),
