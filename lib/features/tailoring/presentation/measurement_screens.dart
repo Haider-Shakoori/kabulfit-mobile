@@ -27,7 +27,7 @@ class MeasurementProfilesScreen extends ConsumerWidget {
           onPressed: () => ref.invalidate(measurementProfilesProvider),
           child: Text('Retry: $error'))),
         data: (profiles) => profiles.isEmpty
-          ? const Center(child: Text('No measurement profiles saved'))
+          ? Center(child: Text(AppLocalizations.of(context).text('emptyProfiles')))
           : ListView.builder(itemCount: profiles.length, itemBuilder: (context, i) {
               final profile = profiles[i];
               return ListTile(
@@ -210,7 +210,7 @@ class TailoringRequestsScreen extends ConsumerWidget {
         onPressed: () => ref.invalidate(tailoringRequestsProvider),
         child: Text('Retry: $e'))),
       data: (requests) => requests.isEmpty
-        ? const Center(child: Text('No tailoring requests yet'))
+        ? Center(child: Text(AppLocalizations.of(context).text('emptyTailoring')))
         : ListView.builder(itemCount: requests.length, itemBuilder: (context, i) {
             final item = requests[i];
             final product = item['product'];
