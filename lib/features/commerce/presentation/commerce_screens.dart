@@ -66,11 +66,13 @@ class CartScreen extends ConsumerWidget {
                         title: Text(item['name']?.toString() ?? ''),
                         subtitle: Text('Qty: ${item['quantity']}  ·  ${item['sku']}'),
                         trailing: SizedBox(
-                          width: 152,
+                          width: 194,
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
                               IconButton(
+                                visualDensity: VisualDensity.compact,
+                                constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
                                 tooltip: 'Decrease quantity',
                                 onPressed: (item['quantity'] is num &&
                                         (item['quantity'] as num) > 1)
@@ -84,6 +86,8 @@ class CartScreen extends ConsumerWidget {
                               ),
                               Text(item['quantity']?.toString() ?? '0'),
                               IconButton(
+                                visualDensity: VisualDensity.compact,
+                                constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
                                 tooltip: 'Increase quantity',
                                 onPressed: (item['quantity'] is num &&
                                         (item['quantity'] as num) < 99)
@@ -96,6 +100,8 @@ class CartScreen extends ConsumerWidget {
                                 icon: const Icon(Icons.add_circle_outline),
                               ),
                               IconButton(
+                                visualDensity: VisualDensity.compact,
+                                constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
                                 tooltip: 'Remove item',
                                 onPressed: () => _mutate(context, ref, () =>
                                     ref.read(commerceActionsProvider).removeItem(
