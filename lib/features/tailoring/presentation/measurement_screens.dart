@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../auth/application/auth_controller.dart';
 import '../application/measurement_providers.dart';
+import '../../../core/localization/app_localizations.dart';
 
 class MeasurementProfilesScreen extends ConsumerWidget {
   const MeasurementProfilesScreen({super.key});
@@ -16,10 +17,10 @@ class MeasurementProfilesScreen extends ConsumerWidget {
           child: const Text('Sign in to manage measurements'))));
     }
     return Scaffold(
-      appBar: AppBar(title: const Text('My measurements')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context).text('myMeasurements'))),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.push('/measurements/new'),
-        icon: const Icon(Icons.add), label: const Text('New profile')),
+        icon: const Icon(Icons.add), label: Text(AppLocalizations.of(context).text('newProfile'))),
       body: ref.watch(measurementProfilesProvider).when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(child: TextButton(
@@ -124,12 +125,12 @@ class _NewMeasurementProfileScreenState extends ConsumerState<NewMeasurementProf
     return Scaffold(
       appBar: AppBar(title: Text(widget.existing == null ? 'New measurement profile' : 'Edit measurement profile')),
       body: Form(key: form, child: ListView(padding: const EdgeInsets.all(20), children: [
-        TextFormField(controller: name, decoration: const InputDecoration(labelText: 'Profile name'),
+        TextFormField(controller: name, decoration: const InputDecoration(labelText: AppLocalizations.of(context).text('profileName')),
           validator: (s) => (s == null || s.trim().isEmpty) ? 'Required' : null),
         const SizedBox(height: 16),
         DropdownButtonFormField<String>(
           value: garmentType,
-          decoration: const InputDecoration(labelText: 'Garment type'),
+          decoration: const InputDecoration(labelText: AppLocalizations.of(context).text('garmentType')),
           items: garmentTypes.map((type) =>
             DropdownMenuItem(value: type, child: Text(type.replaceAll('_', ' ')))).toList(),
           onChanged: saving ? null : (v) {
@@ -202,7 +203,7 @@ class TailoringRequestsScreen extends ConsumerWidget {
   const TailoringRequestsScreen({super.key});
   @override
   Widget build(BuildContext context, WidgetRef ref) => Scaffold(
-    appBar: AppBar(title: const Text('My tailoring requests')),
+    appBar: AppBar(title: Text(AppLocalizations.of(context).text('myTailoring'))),
     body: ref.watch(tailoringRequestsProvider).when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (e, _) => Center(child: TextButton(
