@@ -6,11 +6,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'app/app.dart';
 import 'core/config/app_config.dart';
 import 'core/config/providers.dart';
+import 'features/commerce/application/stripe_payment_gateway.dart';
 
 Future<void> bootstrap(AppConfig config) async {
   await runZonedGuarded(
     () async {
       WidgetsFlutterBinding.ensureInitialized();
+      await StripePaymentGateway.initialize();
       FlutterError.onError = FlutterError.presentError;
 
       runApp(
