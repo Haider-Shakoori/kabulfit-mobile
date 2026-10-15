@@ -44,6 +44,11 @@ class ApiClient {
 
   Future<Map<String, dynamic>> get(String path) => _request('GET', path);
 
+  Future<Map<String, dynamic>> put(String path, {Map<String, dynamic>? data}) =>
+      _request('PUT', path, data: data);
+
+  Future<Map<String, dynamic>> delete(String path) => _request('DELETE', path);
+
   Future<Map<String, dynamic>> post(
     String path, {
     Map<String, dynamic>? data,

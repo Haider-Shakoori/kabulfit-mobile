@@ -65,10 +65,53 @@ class CartScreen extends ConsumerWidget {
                       child: ListTile(
                         title: Text(item['name']?.toString() ?? ''),
                         subtitle: Text('Qty: ${item['quantity']}  ·  ${item['sku']}'),
-                        trailing: Text(item['line_total_minor'] is num
-                            ? ((item['line_total_minor'] as num) / 100)
-                                .toStringAsFixed(2)
-                            : '—'),
+                        trailing: SizedBox(
+                          width: 194,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              IconButton(
+                                visualDensity: VisualDensity.compact,
+                                constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                                tooltip: 'Decrease quantity',
+                                onPressed: (item['quantity'] is num &&
+                                        (item['quantity'] as num) > 1)
+                                    ? () => _mutate(context, ref, () =>
+                                        ref.read(commerceActionsProvider).changeQuantity(
+                                          item['uuid'].toString(),
+                                          (item['quantity'] as num).toInt() - 1,
+                                        ))
+                                    : null,
+                                icon: const Icon(Icons.remove_circle_outline),
+                              ),
+                              Text(item['quantity']?.toString() ?? '0'),
+                              IconButton(
+                                visualDensity: VisualDensity.compact,
+                                constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                                tooltip: 'Increase quantity',
+                                onPressed: (item['quantity'] is num &&
+                                        (item['quantity'] as num) < 99)
+                                    ? () => _mutate(context, ref, () =>
+                                        ref.read(commerceActionsProvider).changeQuantity(
+                                          item['uuid'].toString(),
+                                          (item['quantity'] as num).toInt() + 1,
+                                        ))
+                                    : null,
+                                icon: const Icon(Icons.add_circle_outline),
+                              ),
+                              IconButton(
+                                visualDensity: VisualDensity.compact,
+                                constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                                tooltip: 'Remove item',
+                                onPressed: () => _mutate(context, ref, () =>
+                                    ref.read(commerceActionsProvider).removeItem(
+                                      item['uuid'].toString(),
+                                    )),
+                                icon: const Icon(Icons.delete_outline),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
                 const SizedBox(height: 16),
@@ -131,5 +174,21 @@ class WishlistScreen extends ConsumerWidget {
               ),
       ),
     );
+  }
+}
+
+Future<void> _mutate(
+  BuildContext context,
+  WidgetRef ref,
+  Future<void> Function() request,
+) async {
+  try {
+    await request();
+  } catch (error) {
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(error.toString())),
+      );
+    }
   }
 }

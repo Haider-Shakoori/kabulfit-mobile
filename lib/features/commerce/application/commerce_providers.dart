@@ -31,6 +31,24 @@ class CommerceActions {
     ref.invalidate(cartProvider);
   }
 
+  Future<void> changeQuantity(String itemUuid, int quantity) async {
+    if (quantity < 0 || quantity > 99) {
+      throw RangeError.range(quantity, 0, 99, 'quantity');
+    }
+    await ref.read(apiClientProvider).put(
+      '/cart/items/${Uri.encodeComponent(itemUuid)}',
+      data: {'quantity': quantity},
+    );
+    ref.invalidate(cartProvider);
+  }
+
+  Future<void> removeItem(String itemUuid) async {
+    await ref.read(apiClientProvider).delete(
+      '/cart/items/${Uri.encodeComponent(itemUuid)}',
+    );
+    ref.invalidate(cartProvider);
+  }
+
   Future<void> addToWishlist(String slug) async {
     await ref.read(apiClientProvider).post('/wishlist', data: {'product_slug': slug});
     ref.invalidate(wishlistProvider);
