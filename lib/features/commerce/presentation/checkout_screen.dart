@@ -97,7 +97,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           TextField(
             controller: coupon,
             textCapitalization: TextCapitalization.characters,
-            decoration: const InputDecoration(labelText: AppLocalizations.of(context).text('coupon')),
+            decoration: InputDecoration(labelText: AppLocalizations.of(context).text('coupon')),
           ),
           const SizedBox(height: 20),
           cart.when(
