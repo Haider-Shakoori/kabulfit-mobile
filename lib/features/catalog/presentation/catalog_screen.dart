@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/config/providers.dart';
+import '../../../core/localization/app_localizations.dart';
 import '../../auth/application/auth_controller.dart';
 import '../../commerce/application/commerce_providers.dart';
 
@@ -72,6 +73,7 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
       'ps' => 'پلورنځی',
       _ => 'Shop the collection',
     };
+    final strings = AppLocalizations.of(context);
     final result = ref.watch(catalogProvider);
     return Scaffold(
       appBar: AppBar(title: Text(shop)),
@@ -84,11 +86,7 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
                 padding: const EdgeInsets.all(16),
                 child: SearchBar(
                   leading: const Icon(Icons.search),
-                  hintText: switch (locale) {
-                    'fa' => 'جستجوی محصولات',
-                    'ps' => 'محصولات ولټوئ',
-                    _ => 'Search products',
-                  },
+                  hintText: strings.text('searchProducts'),
                   onChanged: (value) => setState(() => query = value),
                 ),
               ),
@@ -102,10 +100,10 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Text('Unable to load products'),
+                      Text(strings.text('loadFailed')),
                       TextButton(
                         onPressed: () => ref.invalidate(catalogProvider),
-                        child: const Text('Retry'),
+                        child: Text(strings.text('retry')),
                       ),
                     ],
                   ),
@@ -116,8 +114,8 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
                     product.name.toLowerCase().contains(query.toLowerCase()) ||
                     product.category.toLowerCase().contains(query.toLowerCase())).toList();
                 if (visible.isEmpty) {
-                  return const SliverFillRemaining(
-                    child: Center(child: Text('No matching products')),
+                  return SliverFillRemaining(
+                    child: Center(child: Text(strings.text('noProducts'))),
                   );
                 }
                 return SliverPadding(
@@ -244,7 +242,7 @@ class ProductScreen extends ConsumerWidget {
                 OutlinedButton.icon(
                   onPressed: () => context.push('/products/${Uri.encodeComponent(slug)}/tailor'),
                   icon: const Icon(Icons.straighten),
-                  label: const Text('Customize with my measurements'),
+                  label: Text(AppLocalizations.of(context).text('customize')),
                 ),
               ],
               const SizedBox(height: 12),
@@ -287,7 +285,7 @@ class _ProductActionsState extends ConsumerState<_ProductActions> {
     if (!signedIn) {
       return FilledButton(
         onPressed: () => context.push('/login'),
-        child: const Text('Sign in to shop'),
+        child: Text(AppLocalizations.of(context).text('signInShop')),
       );
     }
 
@@ -341,7 +339,7 @@ class _ProductActionsState extends ConsumerState<_ProductActions> {
                   }
                 },
           icon: const Icon(Icons.shopping_bag_outlined),
-          label: Text(busy ? 'Adding…' : 'Add to cart'),
+          label: Text(busy ? 'Adding…' : AppLocalizations.of(context).text('addToCart')),
         ),
         TextButton.icon(
           onPressed: busy
@@ -366,11 +364,11 @@ class _ProductActionsState extends ConsumerState<_ProductActions> {
                   }
                 },
           icon: const Icon(Icons.favorite_border),
-          label: const Text('Save to wishlist'),
+          label: Text(AppLocalizations.of(context).text('addWishlist')),
         ),
         TextButton(
           onPressed: () => context.push('/cart'),
-          child: const Text('View cart'),
+          child: Text(AppLocalizations.of(context).text('viewCart')),
         ),
       ],
     );
