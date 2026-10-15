@@ -6,6 +6,7 @@ import '../../auth/application/auth_controller.dart';
 import '../application/address_order_providers.dart';
 import '../application/checkout_providers.dart';
 import '../application/commerce_providers.dart';
+import '../application/stripe_payment_gateway.dart';
 
 /// Preflight only: payment is deliberately not initiated until the native
 /// Stripe PaymentSheet integration is available and tested.
@@ -19,6 +20,8 @@ class CheckoutScreen extends ConsumerStatefulWidget {
 class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   String? addressUuid;
   String? shippingCode;
+  bool processing = false;
+  String? pendingOrderUuid;
   final coupon = TextEditingController();
 
   @override
@@ -104,16 +107,76 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             ),
           ),
           const SizedBox(height: 20),
-          const Text('Checkout payment is not yet enabled. Order creation is '
-              'disabled until secure Stripe PaymentSheet integration is verified. '
-              'Your cart will remain unchanged on this screen.'),
+          const Text('The final amount, including shipping and any coupon, '
+              'will be calculated by KabulFit. Placing an order reserves stock '
+              'and clears the cart even if you cancel the payment sheet.'),
           const SizedBox(height: 16),
-          const FilledButton(
-            onPressed: null,
-            child: Text('Payment integration pending'),
-          ),
+          if (pendingOrderUuid != null) ...[
+            Text('Payment has not been confirmed for order $pendingOrderUuid.'),
+            TextButton(
+              onPressed: () => context.push('/orders'),
+              child: const Text('Review order status'),
+            ),
+          ] else
+            FilledButton(
+              onPressed: processing ||
+                      !StripePaymentGateway.isConfigured ||
+                      addressUuid == null ||
+                      shippingCode == null ||
+                      !cart.hasValue ||
+                      ((cart.value?['items'] as List?)?.isEmpty ?? true)
+                  ? null
+                  : () => _pay(context),
+              child: Text(processing ? 'Preparing payment…' : 'Continue to secure payment'),
+            ),
+          if (!StripePaymentGateway.isConfigured)
+            const Text('Stripe is not configured in this build. Checkout is disabled.'),
         ],
       ),
     );
   }
+  Future<void> _pay(BuildContext context) async {
+    final approved = await showDialog<bool>(
+      context: context,
+      builder: (dialog) => AlertDialog(
+        title: const Text('Place your order?'),
+        content: const Text('KabulFit will create a pending order and reserve '
+            'stock before Stripe opens. Canceling the payment sheet does not '
+            'automatically restore the cart.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(dialog, false),
+              child: const Text('Not now')),
+          FilledButton(onPressed: () => Navigator.pop(dialog, true),
+              child: const Text('Continue')),
+        ],
+      ),
+    );
+    if (approved != true || !mounted) return;
+    setState(() => processing = true);
+    try {
+      final order = await ref.read(checkoutServiceProvider).createPaymentIntent(
+        addressUuid: addressUuid!,
+        shippingCode: shippingCode!,
+        coupon: coupon.text,
+      );
+      final uuid = order['order_uuid'].toString();
+      if (mounted) setState(() => pendingOrderUuid = uuid);
+      final stripe = order['stripe'] as Map;
+      await const StripePaymentGateway().present(stripe['client_secret'].toString());
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Payment submitted. Confirm status in your orders.')),
+      );
+      context.push('/orders');
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Checkout not confirmed: $error')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => processing = false);
+    }
+  }
+
 }
