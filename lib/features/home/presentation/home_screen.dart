@@ -29,6 +29,18 @@ class HomeScreen extends ConsumerWidget {
               PopupMenuItem(value: 'ps', child: Text('پښتو')),
             ],
           ),
+          PopupMenuButton<String>(
+            tooltip: strings.text('account'),
+            icon: const Icon(Icons.dashboard_outlined),
+            onSelected: (route) => context.push(route),
+            itemBuilder: (_) => [
+              PopupMenuItem(value: '/wishlist', child: Text(strings.text('wishlist'))),
+              PopupMenuItem(value: '/orders', child: Text(strings.text('orders'))),
+              PopupMenuItem(value: '/addresses', child: Text(strings.text('addresses'))),
+              PopupMenuItem(value: '/measurements', child: Text(strings.text('measurements'))),
+              PopupMenuItem(value: '/tailoring', child: Text(strings.text('tailoring'))),
+            ],
+          ),
           if (session == null)
             TextButton(
               onPressed: () => context.go('/login'),
