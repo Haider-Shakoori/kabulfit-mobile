@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/localization/app_localizations.dart';
+import '../core/localization/locale_controller.dart';
 import '../core/theme/app_theme.dart';
 import 'router.dart';
 
@@ -16,6 +17,7 @@ class KabulFitApp extends ConsumerWidget {
       debugShowCheckedModeBanner: false,
       theme: buildTheme(),
       routerConfig: ref.watch(routerProvider),
+      locale: ref.watch(appLocaleProvider).value,
       supportedLocales: AppLocalizations.supportedLocales,
       localizationsDelegates: const [
         AppLocalizations.delegate,
