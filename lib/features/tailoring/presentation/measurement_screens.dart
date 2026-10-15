@@ -32,8 +32,42 @@ class MeasurementProfilesScreen extends ConsumerWidget {
               return ListTile(
                 title: Text(profile['name']?.toString() ?? ''),
                 subtitle: Text(profile['garment_type']?.toString() ?? ''),
-                trailing: profile['is_default'] == true
-                  ? const Icon(Icons.check_circle_outline) : null);
+                trailing: PopupMenuButton<String>(
+                  onSelected: (choice) async {
+                    final uuid = profile['uuid']?.toString();
+                    if (uuid == null) return;
+                    if (choice == 'edit') {
+                      context.push('/measurements/edit', extra: profile);
+                    } else if (choice == 'delete') {
+                      final yes = await showDialog<bool>(
+                        context: context,
+                        builder: (dialog) => AlertDialog(
+                          title: const Text('Delete measurement profile?'),
+                          content: const Text('This cannot be undone.'),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(dialog, false),
+                              child: const Text('Cancel')),
+                            FilledButton(
+                              onPressed: () => Navigator.pop(dialog, true),
+                              child: const Text('Delete')),
+                          ],
+                        ),
+                      );
+                      if (yes != true) return;
+                      try {
+                        await ref.read(measurementActionsProvider).deleteProfile(uuid);
+                      } catch (error) {
+                        if (context.mounted) ScaffoldMessenger.of(context)
+                          .showSnackBar(SnackBar(content: Text(error.toString())));
+                      }
+                    }
+                  },
+                  itemBuilder: (_) => const [
+                    PopupMenuItem(value: 'edit', child: Text('Edit')),
+                    PopupMenuItem(value: 'delete', child: Text('Delete')),
+                  ],
+                ));
             }),
       ),
     );
@@ -41,7 +75,8 @@ class MeasurementProfilesScreen extends ConsumerWidget {
 }
 
 class NewMeasurementProfileScreen extends ConsumerStatefulWidget {
-  const NewMeasurementProfileScreen({super.key});
+  const NewMeasurementProfileScreen({this.existing, super.key});
+  final Map<String, dynamic>? existing;
   @override
   ConsumerState<NewMeasurementProfileScreen> createState() =>
       _NewMeasurementProfileScreenState();
@@ -53,6 +88,26 @@ class _NewMeasurementProfileScreenState extends ConsumerState<NewMeasurementProf
   final values = <String, TextEditingController>{};
   String garmentType = garmentTypes.first;
   bool saving = false;
+  bool initialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final existing = widget.existing;
+    if (existing != null) {
+      name.text = existing['name']?.toString() ?? '';
+      final type = existing['garment_type']?.toString();
+      if (type != null && garmentTypes.contains(type)) garmentType = type;
+      for (final m in (existing['measurements'] as List? ?? [])) {
+        if (m is! Map) continue;
+        final code = m['code']?.toString();
+        if (code == null) continue;
+        values['${garmentType}_$code'] = TextEditingController(
+          text: m['value']?.toString() ?? '',
+        );
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -67,7 +122,7 @@ class _NewMeasurementProfileScreenState extends ConsumerState<NewMeasurementProf
   Widget build(BuildContext context) {
     final definitions = ref.watch(measurementDefinitionsProvider(garmentType));
     return Scaffold(
-      appBar: AppBar(title: const Text('New measurement profile')),
+      appBar: AppBar(title: Text(widget.existing == null ? 'New measurement profile' : 'Edit measurement profile')),
       body: Form(key: form, child: ListView(padding: const EdgeInsets.all(20), children: [
         TextFormField(controller: name, decoration: const InputDecoration(labelText: 'Profile name'),
           validator: (s) => (s == null || s.trim().isEmpty) ? 'Required' : null),
@@ -126,7 +181,9 @@ class _NewMeasurementProfileScreenState extends ConsumerState<NewMeasurementProf
             try {
               await ref.read(measurementActionsProvider).saveProfile(
                 name: name.text.trim(), garmentType: garmentType,
-                measurements: measurements);
+                measurements: measurements,
+                profileUuid: widget.existing?['uuid']?.toString(),
+                isDefault: widget.existing?['is_default'] == true);
               if (context.mounted) context.pop();
             } catch (error) {
               if (context.mounted) ScaffoldMessenger.of(context)
