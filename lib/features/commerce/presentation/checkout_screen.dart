@@ -7,6 +7,7 @@ import '../application/address_order_providers.dart';
 import '../application/checkout_providers.dart';
 import '../application/commerce_providers.dart';
 import '../application/stripe_payment_gateway.dart';
+import '../../../core/localization/app_localizations.dart';
 
 /// Preflight only: payment is deliberately not initiated until the native
 /// Stripe PaymentSheet integration is available and tested.
@@ -34,7 +35,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   Widget build(BuildContext context) {
     if (ref.watch(authControllerProvider).value == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Checkout')),
+        appBar: AppBar(title: Text(AppLocalizations.of(context).text('checkout'))),
         body: Center(child: FilledButton(
           onPressed: () => context.push('/login'),
           child: const Text('Sign in to checkout'),
@@ -46,11 +47,11 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     final methods = ref.watch(shippingMethodsProvider);
     final cart = ref.watch(cartProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Checkout')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context).text('checkout'))),
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
-          Text('Delivery address', style: Theme.of(context).textTheme.titleLarge),
+          Text(AppLocalizations.of(context).text('deliveryAddress'), style: Theme.of(context).textTheme.titleLarge),
           addresses.when(
             loading: () => const LinearProgressIndicator(),
             error: (error, _) => TextButton(
@@ -73,7 +74,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                   ),
           ),
           const SizedBox(height: 20),
-          Text('Shipping method', style: Theme.of(context).textTheme.titleLarge),
+          Text(AppLocalizations.of(context).text('shippingMethod'), style: Theme.of(context).textTheme.titleLarge),
           methods.when(
             loading: () => const LinearProgressIndicator(),
             error: (error, _) => TextButton(
@@ -96,7 +97,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           TextField(
             controller: coupon,
             textCapitalization: TextCapitalization.characters,
-            decoration: const InputDecoration(labelText: 'Coupon (optional)'),
+            decoration: const InputDecoration(labelText: AppLocalizations.of(context).text('coupon')),
           ),
           const SizedBox(height: 20),
           cart.when(
