@@ -18,7 +18,7 @@ class CartScreen extends ConsumerWidget {
         body: Center(
           child: FilledButton(
             onPressed: () => context.push('/login'),
-            child: const Text('Sign in to view your cart'),
+            child: Text(AppLocalizations.of(context).text('signInCart')),
           ),
         ),
       );
@@ -46,7 +46,7 @@ class CartScreen extends ConsumerWidget {
             return Center(
               child: TextButton(
                 onPressed: () => context.go('/shop'),
-                child: const Text('Your cart is empty — browse products'),
+                child: Text(AppLocalizations.of(context).text('emptyCart')),
               ),
             );
           }
@@ -141,7 +141,7 @@ class WishlistScreen extends ConsumerWidget {
         body: Center(
           child: FilledButton(
             onPressed: () => context.push('/login'),
-            child: const Text('Sign in to view wishlist'),
+            child: Text(AppLocalizations.of(context).text('signInWishlist')),
           ),
         ),
       );
@@ -157,7 +157,7 @@ class WishlistScreen extends ConsumerWidget {
           ),
         ),
         data: (items) => items.isEmpty
-            ? const Center(child: Text('No saved products yet'))
+            ? Center(child: Text(AppLocalizations.of(context).text('emptyWishlist')))
             : ListView.builder(
                 itemCount: items.length,
                 itemBuilder: (context, index) {
