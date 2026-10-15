@@ -21,6 +21,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(path: '/measurements', builder: (_, _) => const MeasurementProfilesScreen()),
       GoRoute(path: '/measurements/new', builder: (_, _) => const NewMeasurementProfileScreen()),
+      GoRoute(path: '/measurements/edit', builder: (_, state) => NewMeasurementProfileScreen(existing: state.extra is Map<String, dynamic> ? state.extra as Map<String, dynamic> : null)),
       GoRoute(path: '/products/:slug/tailor', builder: (_, state) => TailorProductScreen(slug: state.pathParameters['slug']!)),
       GoRoute(path: '/tailoring', builder: (_, _) => const TailoringRequestsScreen()),
       GoRoute(path: '/checkout', builder: (_, _) => const CheckoutScreen()),
