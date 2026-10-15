@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/localization/app_localizations.dart';
+import '../../../core/localization/locale_controller.dart';
 import '../../auth/application/auth_controller.dart';
 import '../../catalog/presentation/catalog_screen.dart';
 
@@ -18,6 +19,16 @@ class HomeScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(strings.text('appName')),
         actions: [
+          PopupMenuButton<String>(
+            tooltip: strings.text('language'),
+            icon: const Icon(Icons.language),
+            onSelected: (language) => ref.read(appLocaleProvider.notifier).change(language),
+            itemBuilder: (_) => const [
+              PopupMenuItem(value: 'en', child: Text('English')),
+              PopupMenuItem(value: 'fa', child: Text('دری')),
+              PopupMenuItem(value: 'ps', child: Text('پښتو')),
+            ],
+          ),
           if (session == null)
             TextButton(
               onPressed: () => context.go('/login'),
