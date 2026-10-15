@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../auth/application/auth_controller.dart';
+import '../../../core/localization/app_localizations.dart';
 import '../application/commerce_providers.dart';
 
 class CartScreen extends ConsumerWidget {
@@ -13,7 +14,7 @@ class CartScreen extends ConsumerWidget {
     final session = ref.watch(authControllerProvider).value;
     if (session == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Your cart')),
+        appBar: AppBar(title: Text(AppLocalizations.of(context).text('cart'))),
         body: Center(
           child: FilledButton(
             onPressed: () => context.push('/login'),
@@ -24,7 +25,7 @@ class CartScreen extends ConsumerWidget {
     }
     final response = ref.watch(cartProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Your cart')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context).text('cart'))),
       body: response.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(
@@ -34,7 +35,7 @@ class CartScreen extends ConsumerWidget {
               Text(error.toString(), textAlign: TextAlign.center),
               TextButton(
                 onPressed: () => ref.invalidate(cartProvider),
-                child: const Text('Try again'),
+                child: Text(AppLocalizations.of(context).text('retry')),
               ),
             ],
           ),
@@ -136,7 +137,7 @@ class WishlistScreen extends ConsumerWidget {
     final session = ref.watch(authControllerProvider).value;
     if (session == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Wishlist')),
+        appBar: AppBar(title: Text(AppLocalizations.of(context).text('wishlist'))),
         body: Center(
           child: FilledButton(
             onPressed: () => context.push('/login'),
@@ -146,7 +147,7 @@ class WishlistScreen extends ConsumerWidget {
       );
     }
     return Scaffold(
-      appBar: AppBar(title: const Text('Wishlist')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context).text('wishlist'))),
       body: ref.watch(wishlistProvider).when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(
