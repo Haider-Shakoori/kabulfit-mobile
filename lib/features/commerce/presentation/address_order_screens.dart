@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../auth/application/auth_controller.dart';
 import '../application/address_order_providers.dart';
+import '../../../core/localization/app_localizations.dart';
 
 class AddressesScreen extends ConsumerWidget {
   const AddressesScreen({super.key});
@@ -16,7 +17,7 @@ class AddressesScreen extends ConsumerWidget {
           child: const Text('Sign in to manage addresses'))));
     }
     return Scaffold(
-      appBar: AppBar(title: const Text('Shipping addresses')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context).text('shippingAddress'))),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.push('/addresses/new'),
         label: const Text('Add address'), icon: const Icon(Icons.add)),
@@ -131,7 +132,7 @@ class OrdersScreen extends ConsumerWidget {
           child: const Text('Sign in to view orders'))));
     }
     return Scaffold(
-      appBar: AppBar(title: const Text('My orders')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context).text('myOrders'))),
       body: ref.watch(ordersProvider).when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(child: TextButton(
