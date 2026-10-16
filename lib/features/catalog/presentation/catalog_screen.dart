@@ -178,23 +178,23 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
                                           product.category,
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .labelSmall,
+                                          style: Theme.of(
+                                            context,
+                                          ).textTheme.labelSmall,
                                         ),
                                         Text(
                                           product.name,
                                           maxLines: 2,
                                           overflow: TextOverflow.ellipsis,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .titleSmall,
+                                          style: Theme.of(
+                                            context,
+                                          ).textTheme.titleSmall,
                                         ),
                                         Text(
                                           product.price,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .labelLarge,
+                                          style: Theme.of(
+                                            context,
+                                          ).textTheme.labelLarge,
                                         ),
                                       ],
                                     ),
