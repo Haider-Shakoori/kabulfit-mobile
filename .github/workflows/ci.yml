@@ -61,7 +61,8 @@ jobs:
         run: >-
           flutter build ios --release --no-codesign
           -t lib/main_production.dart
-          --dart-define=API_BASE_URL=https://example.invalid/api/v1
+          --dart-define=API_BASE_URL=https://kabulfit.com/api/v1
+          --dart-define=DEMO_CATALOG=${{ github.ref_name == 'feat/batch-18-opt-in-demo-catalog' && 'true' || 'false' }}
       - name: Package unsigned IPA for preflight only
         shell: bash
         run: |
