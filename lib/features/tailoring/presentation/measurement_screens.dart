@@ -13,11 +13,15 @@ class MeasurementProfilesScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     if (ref.watch(authControllerProvider).value == null) {
       return Scaffold(
-        appBar: AppBar(title: Text(AppLocalizations.of(context).text('measurements'))),
+        appBar: AppBar(
+          title: Text(AppLocalizations.of(context).text('measurements')),
+        ),
         body: Center(
           child: FilledButton(
             onPressed: () => context.push('/login'),
-            child: Text(AppLocalizations.of(context).text('signInMeasurements')),
+            child: Text(
+              AppLocalizations.of(context).text('signInMeasurements'),
+            ),
           ),
         ),
       );
@@ -69,18 +73,34 @@ class MeasurementProfilesScreen extends ConsumerWidget {
                               final yes = await showDialog<bool>(
                                 context: context,
                                 builder: (dialog) => AlertDialog(
-                                  title: Text(AppLocalizations.of(context).text('deleteProfileConfirm')),
-                                  content: Text(AppLocalizations.of(context).text('cannotUndo')),
+                                  title: Text(
+                                    AppLocalizations.of(
+                                      context,
+                                    ).text('deleteProfileConfirm'),
+                                  ),
+                                  content: Text(
+                                    AppLocalizations.of(
+                                      context,
+                                    ).text('cannotUndo'),
+                                  ),
                                   actions: [
                                     TextButton(
                                       onPressed: () =>
                                           Navigator.pop(dialog, false),
-                                      child: Text(AppLocalizations.of(context).text('cancel')),
+                                      child: Text(
+                                        AppLocalizations.of(
+                                          context,
+                                        ).text('cancel'),
+                                      ),
                                     ),
                                     FilledButton(
                                       onPressed: () =>
                                           Navigator.pop(dialog, true),
-                                      child: Text(AppLocalizations.of(context).text('delete')),
+                                      child: Text(
+                                        AppLocalizations.of(
+                                          context,
+                                        ).text('delete'),
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -100,10 +120,17 @@ class MeasurementProfilesScreen extends ConsumerWidget {
                             }
                           },
                           itemBuilder: (_) => [
-                            PopupMenuItem(value: 'edit', child: Text(AppLocalizations.of(context).text('edit'))),
+                            PopupMenuItem(
+                              value: 'edit',
+                              child: Text(
+                                AppLocalizations.of(context).text('edit'),
+                              ),
+                            ),
                             PopupMenuItem(
                               value: 'delete',
-                              child: Text(AppLocalizations.of(context).text('delete')),
+                              child: Text(
+                                AppLocalizations.of(context).text('delete'),
+                              ),
                             ),
                           ],
                         ),
@@ -186,8 +213,9 @@ class _NewMeasurementProfileScreenState
               decoration: InputDecoration(
                 labelText: AppLocalizations.of(context).text('profileName'),
               ),
-              validator: (s) =>
-                  (s == null || s.trim().isEmpty) ? AppLocalizations.of(context).text('required') : null,
+              validator: (s) => (s == null || s.trim().isEmpty)
+                  ? AppLocalizations.of(context).text('required')
+                  : null,
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
@@ -292,7 +320,11 @@ class _NewMeasurementProfileScreenState
                         if (mounted) setState(() => saving = false);
                       }
                     },
-              child: Text(saving ? AppLocalizations.of(context).text('saving') : AppLocalizations.of(context).text('saveMeasurements')),
+              child: Text(
+                saving
+                    ? AppLocalizations.of(context).text('saving')
+                    : AppLocalizations.of(context).text('saveMeasurements'),
+              ),
             ),
           ],
         ),

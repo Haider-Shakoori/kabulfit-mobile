@@ -69,13 +69,19 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             data: (items) => items.isEmpty
                 ? TextButton(
                     onPressed: () => context.push('/addresses/new'),
-                    child: Text(AppLocalizations.of(context).text('checkoutAddAddress')),
+                    child: Text(
+                      AppLocalizations.of(context).text('checkoutAddAddress'),
+                    ),
                   )
                 : DropdownButtonFormField<String>(
                     initialValue: items.any((e) => e['uuid'] == addressUuid)
                         ? addressUuid
                         : null,
-                    decoration: InputDecoration(labelText: AppLocalizations.of(context).text('checkoutShipTo')),
+                    decoration: InputDecoration(
+                      labelText: AppLocalizations.of(
+                        context,
+                      ).text('checkoutShipTo'),
+                    ),
                     items: items
                         .map(
                           (item) => DropdownMenuItem(
@@ -106,7 +112,11 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                     initialValue: items.any((e) => e['code'] == shippingCode)
                         ? shippingCode
                         : null,
-                    decoration: InputDecoration(labelText: AppLocalizations.of(context).text('checkoutShipping')),
+                    decoration: InputDecoration(
+                      labelText: AppLocalizations.of(
+                        context,
+                      ).text('checkoutShipping'),
+                    ),
                     items: items
                         .map(
                           (item) => DropdownMenuItem(
@@ -138,7 +148,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           Text(AppLocalizations.of(context).text('checkoutNotice')),
           const SizedBox(height: 16),
           if (pendingOrderUuid != null) ...[
-            Text("${AppLocalizations.of(context).text('checkoutPending')}: $pendingOrderUuid."),
+            Text(
+              "${AppLocalizations.of(context).text('checkoutPending')}: $pendingOrderUuid.",
+            ),
             TextButton(
               onPressed: () => context.push('/orders'),
               child: Text(AppLocalizations.of(context).text('checkoutReview')),
@@ -203,13 +215,19 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       );
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context).text('checkoutSubmitted'))),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).text('checkoutSubmitted')),
+        ),
       );
       context.push('/orders');
     } catch (error) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("${AppLocalizations.of(context).text('checkoutFailed')}: $error")),
+          SnackBar(
+            content: Text(
+              "${AppLocalizations.of(context).text('checkoutFailed')}: $error",
+            ),
+          ),
         );
       }
     } finally {
