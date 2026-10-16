@@ -3,20 +3,27 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/config/providers.dart';
+import '../application/demo_catalog.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../auth/application/auth_controller.dart';
 import '../../commerce/application/commerce_providers.dart';
 
 /// These products are loaded from Laravel, never from hard-coded demo data.
 final catalogProvider = FutureProvider<List<KabulProduct>>((ref) async {
-  final response = await ref.watch(apiClientProvider).get('/catalog');
-  final items = response['data'];
-  if (items is! List) throw const FormatException('Invalid catalog response');
-  return items
-      .whereType<Map<String, dynamic>>()
-      .map(KabulProduct.fromJson)
-      .where((product) => product.slug.isNotEmpty)
-      .toList(growable: false);
+  try {
+    final response = await ref.watch(apiClientProvider).get('/catalog');
+    final items = response['data'];
+    if (items is! List) throw const FormatException('Invalid catalog response');
+    final products = items
+        .whereType<Map<String, dynamic>>()
+        .map(KabulProduct.fromJson)
+        .where((product) => product.slug.isNotEmpty)
+        .toList(growable: false);
+    if (products.isNotEmpty || !demoCatalogEnabled) return products;
+  } catch (_) {
+    if (!demoCatalogEnabled) rethrow;
+  }
+  return demoCatalog.map(KabulProduct.fromJson).toList(growable: false);
 });
 
 class KabulProduct {
@@ -220,6 +227,10 @@ final productProvider = FutureProvider.family<Map<String, dynamic>, String>((
   ref,
   slug,
 ) async {
+  if (demoCatalogEnabled) {
+    final demo = demoProductBySlug(slug);
+    if (demo != null) return demo;
+  }
   final response = await ref
       .watch(apiClientProvider)
       .get('/products/${Uri.encodeComponent(slug)}');
@@ -259,6 +270,7 @@ class ProductScreen extends ConsumerWidget {
           final price = data['price'];
           return ListView(
             padding: const EdgeInsets.all(20),
+
             children: [
               AspectRatio(
                 aspectRatio: 4 / 5,
@@ -295,7 +307,10 @@ class ProductScreen extends ConsumerWidget {
                 ),
               ],
               const SizedBox(height: 12),
-              _ProductActions(slug: slug, product: data),
+              if (data['is_demo'] == true)
+                const Text('DEMO PREVIEW — not available to purchase')
+              else
+                _ProductActions(slug: slug, product: data),
             ],
           );
         },
