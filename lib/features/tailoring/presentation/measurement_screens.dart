@@ -13,11 +13,11 @@ class MeasurementProfilesScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     if (ref.watch(authControllerProvider).value == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Measurements')),
+        appBar: AppBar(title: Text(AppLocalizations.of(context).text('measurements'))),
         body: Center(
           child: FilledButton(
             onPressed: () => context.push('/login'),
-            child: const Text('Sign in to manage measurements'),
+            child: Text(AppLocalizations.of(context).text('signInMeasurements')),
           ),
         ),
       );
@@ -69,20 +69,18 @@ class MeasurementProfilesScreen extends ConsumerWidget {
                               final yes = await showDialog<bool>(
                                 context: context,
                                 builder: (dialog) => AlertDialog(
-                                  title: const Text(
-                                    'Delete measurement profile?',
-                                  ),
-                                  content: const Text('This cannot be undone.'),
+                                  title: Text(AppLocalizations.of(context).text('deleteProfileConfirm')),
+                                  content: Text(AppLocalizations.of(context).text('cannotUndo')),
                                   actions: [
                                     TextButton(
                                       onPressed: () =>
                                           Navigator.pop(dialog, false),
-                                      child: const Text('Cancel'),
+                                      child: Text(AppLocalizations.of(context).text('cancel')),
                                     ),
                                     FilledButton(
                                       onPressed: () =>
                                           Navigator.pop(dialog, true),
-                                      child: const Text('Delete'),
+                                      child: Text(AppLocalizations.of(context).text('delete')),
                                     ),
                                   ],
                                 ),
@@ -101,11 +99,11 @@ class MeasurementProfilesScreen extends ConsumerWidget {
                               }
                             }
                           },
-                          itemBuilder: (_) => const [
-                            PopupMenuItem(value: 'edit', child: Text('Edit')),
+                          itemBuilder: (_) => [
+                            PopupMenuItem(value: 'edit', child: Text(AppLocalizations.of(context).text('edit'))),
                             PopupMenuItem(
                               value: 'delete',
-                              child: Text('Delete'),
+                              child: Text(AppLocalizations.of(context).text('delete')),
                             ),
                           ],
                         ),
@@ -174,8 +172,8 @@ class _NewMeasurementProfileScreenState
       appBar: AppBar(
         title: Text(
           widget.existing == null
-              ? 'New measurement profile'
-              : 'Edit measurement profile',
+              ? AppLocalizations.of(context).text('newMeasurement')
+              : AppLocalizations.of(context).text('editMeasurement'),
         ),
       ),
       body: Form(
@@ -189,7 +187,7 @@ class _NewMeasurementProfileScreenState
                 labelText: AppLocalizations.of(context).text('profileName'),
               ),
               validator: (s) =>
-                  (s == null || s.trim().isEmpty) ? 'Required' : null,
+                  (s == null || s.trim().isEmpty) ? AppLocalizations.of(context).text('required') : null,
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
@@ -294,7 +292,7 @@ class _NewMeasurementProfileScreenState
                         if (mounted) setState(() => saving = false);
                       }
                     },
-              child: Text(saving ? 'Saving…' : 'Save measurements'),
+              child: Text(saving ? AppLocalizations.of(context).text('saving') : AppLocalizations.of(context).text('saveMeasurements')),
             ),
           ],
         ),
