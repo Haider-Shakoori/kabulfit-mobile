@@ -13,11 +13,11 @@ class AddressesScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     if (ref.watch(authControllerProvider).value == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Addresses')),
+        appBar: AppBar(title: Text(AppLocalizations.of(context).text('addresses'))),
         body: Center(
           child: FilledButton(
             onPressed: () => context.push('/login'),
-            child: const Text('Sign in to manage addresses'),
+            child: Text(AppLocalizations.of(context).text('signInAddresses')),
           ),
         ),
       );
@@ -28,7 +28,7 @@ class AddressesScreen extends ConsumerWidget {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.push('/addresses/new'),
-        label: const Text('Add address'),
+        label: Text(AppLocalizations.of(context).text('addAddress')),
         icon: const Icon(Icons.add),
       ),
       body: ref
@@ -42,7 +42,7 @@ class AddressesScreen extends ConsumerWidget {
               ),
             ),
             data: (items) => items.isEmpty
-                ? const Center(child: Text('No addresses saved'))
+                ? Center(child: Text(AppLocalizations.of(context).text('noAddresses')))
                 : ListView.builder(
                     itemCount: items.length,
                     itemBuilder: (context, i) {
@@ -60,22 +60,22 @@ class AddressesScreen extends ConsumerWidget {
                         ),
                         trailing: IconButton(
                           icon: const Icon(Icons.delete_outline),
-                          tooltip: 'Remove address',
+                          tooltip: AppLocalizations.of(context).text('removeAddress'),
                           onPressed: () async {
                             final confirmed = await showDialog<bool>(
                               context: context,
                               builder: (dialog) => AlertDialog(
-                                title: const Text('Remove address?'),
+                                title: Text(AppLocalizations.of(context).text('removeAddressConfirm')),
                                 actions: [
                                   TextButton(
                                     onPressed: () =>
                                         Navigator.pop(dialog, false),
-                                    child: const Text('Cancel'),
+                                    child: Text(AppLocalizations.of(context).text('cancel')),
                                   ),
                                   FilledButton(
                                     onPressed: () =>
                                         Navigator.pop(dialog, true),
-                                    child: const Text('Remove'),
+                                    child: Text(AppLocalizations.of(context).text('removeAddress')),
                                   ),
                                 ],
                               ),
@@ -127,23 +127,23 @@ class _NewAddressScreenState extends ConsumerState<NewAddressScreen> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('New shipping address')),
+    appBar: AppBar(title: Text(AppLocalizations.of(context).text('newAddress'))),
     body: Form(
       key: form,
       child: ListView(
         padding: const EdgeInsets.all(20),
         children: [
           for (final entry in [
-            (recipient, 'Recipient name'),
-            (phone, 'Phone'),
-            (city, 'City'),
-            (street, 'Street address'),
+            (recipient, AppLocalizations.of(context).text('recipientName')),
+            (phone, AppLocalizations.of(context).text('phone')),
+            (city, AppLocalizations.of(context).text('city')),
+            (street, AppLocalizations.of(context).text('street')),
           ]) ...[
             TextFormField(
               controller: entry.$1,
               decoration: InputDecoration(labelText: entry.$2),
               validator: (value) =>
-                  value == null || value.trim().isEmpty ? 'Required' : null,
+                  value == null || value.trim().isEmpty ? AppLocalizations.of(context).text('required') : null,
             ),
             const SizedBox(height: 16),
           ],
@@ -173,7 +173,7 @@ class _NewAddressScreenState extends ConsumerState<NewAddressScreen> {
                       if (mounted) setState(() => busy = false);
                     }
                   },
-            child: Text(busy ? 'Saving…' : 'Save address'),
+            child: Text(busy ? AppLocalizations.of(context).text('saving') : AppLocalizations.of(context).text('saveAddress')),
           ),
         ],
       ),
@@ -188,11 +188,11 @@ class OrdersScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     if (ref.watch(authControllerProvider).value == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Orders')),
+        appBar: AppBar(title: Text(AppLocalizations.of(context).text('orders'))),
         body: Center(
           child: FilledButton(
             onPressed: () => context.push('/login'),
-            child: const Text('Sign in to view orders'),
+            child: Text(AppLocalizations.of(context).text('signInOrders')),
           ),
         ),
       );
@@ -212,16 +212,16 @@ class OrdersScreen extends ConsumerWidget {
               ),
             ),
             data: (items) => items.isEmpty
-                ? const Center(child: Text('No orders yet'))
+                ? Center(child: Text(AppLocalizations.of(context).text('noOrders')))
                 : ListView.builder(
                     itemCount: items.length,
                     itemBuilder: (context, i) {
                       final order = items[i];
                       final uuid = order['uuid']?.toString() ?? '';
                       return ListTile(
-                        title: Text('Order ${order['number']}'),
+                        title: Text("${AppLocalizations.of(context).text('orderLabel')} ${order['number']}"),
                         subtitle: Text(
-                          'Order: ${order['status']} · Payment: ${order['payment_status']}',
+                          "${AppLocalizations.of(context).text('statusLabel')}: ${order['status']} · ${AppLocalizations.of(context).text('paymentLabel')}: ${order['payment_status']}",
                         ),
                         trailing: const Icon(Icons.chevron_right),
                         onTap: uuid.isEmpty
@@ -243,7 +243,7 @@ class TrackingScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) => Scaffold(
-    appBar: AppBar(title: const Text('Shipment tracking')),
+    appBar: AppBar(title: Text(AppLocalizations.of(context).text('shipmentTracking'))),
     body: ref
         .watch(orderTrackingProvider(uuid))
         .when(
@@ -259,18 +259,18 @@ class TrackingScreen extends ConsumerWidget {
             return ListView(
               children: [
                 ListTile(
-                  title: Text('Order ${data['order_number']}'),
-                  subtitle: Text('Status: ${data['order_status']}'),
+                  title: Text("${AppLocalizations.of(context).text('orderLabel')} ${data['order_number']}"),
+                  subtitle: Text("${AppLocalizations.of(context).text('statusLabel')}: ${data['order_status']}"),
                 ),
                 for (final shipment in shipments)
                   if (shipment is Map)
                     ListTile(
                       leading: const Icon(Icons.local_shipping_outlined),
                       title: Text(
-                        shipment['carrier']?.toString() ?? 'Shipment',
+                        shipment['carrier']?.toString() ?? AppLocalizations.of(context).text('shipmentLabel'),
                       ),
                       subtitle: Text(
-                        'Status: ${shipment['status']} · Tracking: ${shipment['tracking_number'] ?? 'Not assigned'}',
+                        "${AppLocalizations.of(context).text('statusLabel')}: ${shipment['status']} · ${AppLocalizations.of(context).text('trackingLabel')}: ${shipment['tracking_number'] ?? AppLocalizations.of(context).text('notAssigned')}",
                       ),
                     ),
               ],
