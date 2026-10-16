@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/localization/app_localizations.dart';
 import '../../auth/application/auth_controller.dart';
 import '../../catalog/presentation/catalog_screen.dart';
 import '../application/measurement_providers.dart';
@@ -30,11 +31,11 @@ class _TailorProductScreenState extends ConsumerState<TailorProductScreen> {
   Widget build(BuildContext context) {
     if (ref.watch(authControllerProvider).value == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Custom tailoring')),
+        appBar: AppBar(title: Text(AppLocalizations.of(context).text('tailorCustom'))),
         body: Center(
           child: FilledButton(
             onPressed: () => context.push('/login'),
-            child: const Text('Sign in to customize your garment'),
+            child: Text(AppLocalizations.of(context).text('tailorSignIn')),
           ),
         ),
       );
@@ -42,7 +43,7 @@ class _TailorProductScreenState extends ConsumerState<TailorProductScreen> {
     final product = ref.watch(productProvider(widget.slug));
     final profiles = ref.watch(measurementProfilesProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Customize garment')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context).text('tailorCustomize'))),
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
@@ -54,9 +55,7 @@ class _TailorProductScreenState extends ConsumerState<TailorProductScreen> {
             ),
             data: (item) {
               if (item['tailoring_enabled'] != true) {
-                return const Text(
-                  'Custom tailoring is not available for this product.',
-                );
+                return Text(AppLocalizations.of(context).text('tailorUnavailable'));
               }
               final tailoring = item['tailoring'];
               final garmentType = tailoring is Map
@@ -77,7 +76,7 @@ class _TailorProductScreenState extends ConsumerState<TailorProductScreen> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Measurement profile',
+                    AppLocalizations.of(context).text('profile'),
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   profiles.when(
@@ -98,9 +97,7 @@ class _TailorProductScreenState extends ConsumerState<TailorProductScreen> {
                       if (suitable.isEmpty) {
                         return TextButton(
                           onPressed: () => context.push('/measurements/new'),
-                          child: const Text(
-                            'Create a measurement profile for this garment',
-                          ),
+                          child: Text(AppLocalizations.of(context).text('tailorNewProfile')),
                         );
                       }
                       return DropdownButtonFormField<String>(
@@ -108,9 +105,7 @@ class _TailorProductScreenState extends ConsumerState<TailorProductScreen> {
                             suitable.any((p) => p['uuid'] == profileUuid)
                             ? profileUuid
                             : null,
-                        decoration: const InputDecoration(
-                          labelText: 'Saved measurements',
-                        ),
+                        decoration: InputDecoration(labelText: AppLocalizations.of(context).text('tailorSaved')),
                         items: suitable
                             .map(
                               (p) => DropdownMenuItem<String>(
@@ -131,9 +126,7 @@ class _TailorProductScreenState extends ConsumerState<TailorProductScreen> {
                       initialValue: variants.any((v) => v['sku'] == variantSku)
                           ? variantSku
                           : null,
-                      decoration: const InputDecoration(
-                        labelText: 'Size / color',
-                      ),
+                      decoration: InputDecoration(labelText: AppLocalizations.of(context).text('tailorSizeColor')),
                       items: variants
                           .map(
                             (v) => DropdownMenuItem<String>(
@@ -160,9 +153,7 @@ class _TailorProductScreenState extends ConsumerState<TailorProductScreen> {
                     controller: notes,
                     maxLines: 4,
                     maxLength: 2000,
-                    decoration: const InputDecoration(
-                      labelText: 'Instructions for your tailor',
-                    ),
+                    decoration: InputDecoration(labelText: AppLocalizations.of(context).text('tailorInstructions')),
                   ),
                   const SizedBox(height: 16),
                   FilledButton(
@@ -185,11 +176,7 @@ class _TailorProductScreenState extends ConsumerState<TailorProductScreen> {
                                   );
                               if (context.mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                      'Customized garment added to cart',
-                                    ),
-                                  ),
+                                  SnackBar(content: Text(AppLocalizations.of(context).text('tailorAdded'))),
                                 );
                                 context.go('/cart');
                               }
@@ -205,8 +192,8 @@ class _TailorProductScreenState extends ConsumerState<TailorProductScreen> {
                           },
                     child: Text(
                       saving
-                          ? 'Adding garment…'
-                          : 'Add customized garment to cart',
+                          ? AppLocalizations.of(context).text('tailorAdding')
+                          : AppLocalizations.of(context).text('tailorAdd'),
                     ),
                   ),
                 ],
