@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:dio/dio.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../config/app_config.dart';
 import '../security/token_store.dart';
@@ -25,7 +26,7 @@ class ApiClient {
           final token = await _tokenStore.read();
           final info = await PackageInfo.fromPlatform();
           options.headers.addAll({
-            'Accept-Language': _supportedLocale(),
+            'Accept-Language': await _supportedLocale(),
             'X-App-Version': info.version,
             if (token != null) 'Authorization': 'Bearer $token',
           });
@@ -60,7 +61,7 @@ class ApiClient {
     Map<String, dynamic>? data,
   }) async {
     try {
-      final locale = _supportedLocale();
+      final locale = await _supportedLocale();
       final response = await _dio.request<Map<String, dynamic>>(
         '/$locale${path.startsWith('/') ? path : '/$path'}',
         data: data,
@@ -80,8 +81,10 @@ class ApiClient {
     }
   }
 
-  String _supportedLocale() {
-    final locale = PlatformDispatcher.instance.locale.languageCode;
+  Future<String> _supportedLocale() async {
+    final locale =
+        (await SharedPreferences.getInstance()).getString('kabulfit.locale') ??
+        PlatformDispatcher.instance.locale.languageCode;
     return const {'en', 'fa', 'ps'}.contains(locale) ? locale : 'en';
   }
 

@@ -26,6 +26,18 @@ subprojects {
             .get()
     )
 }
+// Stripe Issuing push provisioning references Google's private TapAndPay SDK.
+// KabulFit uses PaymentSheet, not card-issuer push provisioning. Keep the Stripe
+// library itself (needed by the plugin's Kotlin code), and exclude only the
+// non-public Google dependency from resolution.
+subprojects {
+    if (name == "app" || name == "stripe_android") {
+        configurations.configureEach {
+            exclude(group = "com.google.android.gms", module = "play-services-tapandpay")
+        }
+    }
+}
+
 subprojects {
     project.evaluationDependsOn(":app")
 }

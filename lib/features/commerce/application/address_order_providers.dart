@@ -1,7 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../../core/config/providers.dart';
 
-final addressesProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
+final addressesProvider = FutureProvider<List<Map<String, dynamic>>>((
+  ref,
+) async {
   final result = await ref.watch(apiClientProvider).get('/account/addresses');
   final items = result['data'];
   if (items is! List) throw const FormatException('Invalid addresses response');
@@ -17,11 +20,15 @@ final ordersProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
 
 final orderTrackingProvider =
     FutureProvider.family<Map<String, dynamic>, String>((ref, uuid) async {
-  final result = await ref.watch(apiClientProvider).get('/orders/${Uri.encodeComponent(uuid)}/tracking');
-  final data = result['data'];
-  if (data is! Map<String, dynamic>) throw const FormatException('Invalid tracking response');
-  return data;
-});
+      final result = await ref
+          .watch(apiClientProvider)
+          .get('/orders/${Uri.encodeComponent(uuid)}/tracking');
+      final data = result['data'];
+      if (data is! Map<String, dynamic>) {
+        throw const FormatException('Invalid tracking response');
+      }
+      return data;
+    });
 
 class AddressActions {
   const AddressActions(this.ref);
@@ -34,20 +41,29 @@ class AddressActions {
     required String street,
     String country = 'AF',
   }) async {
-    await ref.read(apiClientProvider).post('/account/addresses', data: {
-      'recipient_name': recipient,
-      'phone': phone,
-      'country_code': country,
-      'city': city,
-      'address_line1': street,
-    });
+    await ref
+        .read(apiClientProvider)
+        .post(
+          '/account/addresses',
+          data: {
+            'recipient_name': recipient,
+            'phone': phone,
+            'country_code': country,
+            'city': city,
+            'address_line1': street,
+          },
+        );
     ref.invalidate(addressesProvider);
   }
 
   Future<void> remove(String uuid) async {
-    await ref.read(apiClientProvider).delete('/account/addresses/${Uri.encodeComponent(uuid)}');
+    await ref
+        .read(apiClientProvider)
+        .delete('/account/addresses/${Uri.encodeComponent(uuid)}');
     ref.invalidate(addressesProvider);
   }
 }
 
-final addressActionsProvider = Provider<AddressActions>((ref) => AddressActions(ref));
+final addressActionsProvider = Provider<AddressActions>(
+  (ref) => AddressActions(ref),
+);
