@@ -40,7 +40,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         body: Center(
           child: FilledButton(
             onPressed: () => context.push('/login'),
-            child: const Text('Sign in to checkout'),
+            child: Text(AppLocalizations.of(context).text('checkoutSignIn')),
           ),
         ),
       );
@@ -69,13 +69,13 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             data: (items) => items.isEmpty
                 ? TextButton(
                     onPressed: () => context.push('/addresses/new'),
-                    child: const Text('Add a shipping address'),
+                    child: Text(AppLocalizations.of(context).text('checkoutAddAddress')),
                   )
                 : DropdownButtonFormField<String>(
                     initialValue: items.any((e) => e['uuid'] == addressUuid)
                         ? addressUuid
                         : null,
-                    decoration: const InputDecoration(labelText: 'Ship to'),
+                    decoration: InputDecoration(labelText: AppLocalizations.of(context).text('checkoutShipTo')),
                     items: items
                         .map(
                           (item) => DropdownMenuItem(
@@ -101,12 +101,12 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
               child: Text('Could not load shipping. Retry: $error'),
             ),
             data: (items) => items.isEmpty
-                ? const Text('No shipping methods available for this cart.')
+                ? Text(AppLocalizations.of(context).text('checkoutNoShipping'))
                 : DropdownButtonFormField<String>(
                     initialValue: items.any((e) => e['code'] == shippingCode)
                         ? shippingCode
                         : null,
-                    decoration: const InputDecoration(labelText: 'Shipping'),
+                    decoration: InputDecoration(labelText: AppLocalizations.of(context).text('checkoutShipping')),
                     items: items
                         .map(
                           (item) => DropdownMenuItem(
@@ -131,21 +131,17 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             loading: () => const LinearProgressIndicator(),
             error: (error, _) => Text('Cart unavailable: $error'),
             data: (data) => Text(
-              'Cart subtotal (before shipping/discounts): ${data['subtotal_minor'] is num ? ((data['subtotal_minor'] as num) / 100).toStringAsFixed(2) : '—'} ${data['currency'] ?? ''}',
+              "${AppLocalizations.of(context).text('checkoutSubtotal')}: ${data['subtotal_minor'] is num ? ((data['subtotal_minor'] as num) / 100).toStringAsFixed(2) : '—'} ${data['currency'] ?? ''}",
             ),
           ),
           const SizedBox(height: 20),
-          const Text(
-            'The final amount, including shipping and any coupon, '
-            'will be calculated by KabulFit. Placing an order reserves stock '
-            'and clears the cart even if you cancel the payment sheet.',
-          ),
+          Text(AppLocalizations.of(context).text('checkoutNotice')),
           const SizedBox(height: 16),
           if (pendingOrderUuid != null) ...[
-            Text('Payment has not been confirmed for order $pendingOrderUuid.'),
+            Text("${AppLocalizations.of(context).text('checkoutPending')}: $pendingOrderUuid."),
             TextButton(
               onPressed: () => context.push('/orders'),
-              child: const Text('Review order status'),
+              child: Text(AppLocalizations.of(context).text('checkoutReview')),
             ),
           ] else
             FilledButton(
@@ -160,14 +156,12 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                   : _pay,
               child: Text(
                 processing
-                    ? 'Preparing payment…'
-                    : 'Continue to secure payment',
+                    ? AppLocalizations.of(context).text('checkoutPreparing')
+                    : AppLocalizations.of(context).text('checkoutPay'),
               ),
             ),
           if (!StripePaymentGateway.isConfigured)
-            const Text(
-              'Stripe is not configured in this build. Checkout is disabled.',
-            ),
+            Text(AppLocalizations.of(context).text('checkoutUnconfigured')),
         ],
       ),
     );
@@ -177,20 +171,16 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     final approved = await showDialog<bool>(
       context: context,
       builder: (dialog) => AlertDialog(
-        title: const Text('Place your order?'),
-        content: const Text(
-          'KabulFit will create a pending order and reserve '
-          'stock before Stripe opens. Canceling the payment sheet does not '
-          'automatically restore the cart.',
-        ),
+        title: Text(AppLocalizations.of(context).text('checkoutConfirm')),
+        content: Text(AppLocalizations.of(context).text('checkoutConfirmBody')),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialog, false),
-            child: const Text('Not now'),
+            child: Text(AppLocalizations.of(context).text('checkoutNotNow')),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(dialog, true),
-            child: const Text('Continue'),
+            child: Text(AppLocalizations.of(context).text('checkoutContinue')),
           ),
         ],
       ),
@@ -213,15 +203,13 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       );
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Payment submitted. Confirm status in your orders.'),
-        ),
+        SnackBar(content: Text(AppLocalizations.of(context).text('checkoutSubmitted'))),
       );
       context.push('/orders');
     } catch (error) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Checkout not confirmed: $error')),
+          SnackBar(content: Text("${AppLocalizations.of(context).text('checkoutFailed')}: $error")),
         );
       }
     } finally {
