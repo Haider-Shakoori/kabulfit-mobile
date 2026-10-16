@@ -12,6 +12,15 @@ void main() {
     }
   });
 
+  test('checkout labels exist for every supported locale', () {
+    for (final locale in AppLocalizations.supportedLocales) {
+      final strings = AppLocalizations(locale);
+      for (final key in ['checkout', 'shippingMethod', 'deliveryAddress']) {
+        expect(strings.text(key), isNot(key), reason: '${locale.languageCode}: $key');
+      }
+    }
+  });
+
   test('Dari and Pashto are resolved as RTL by Flutter', () {
     expect(Bidi.isRtlLanguage('fa'), isTrue);
     expect(Bidi.isRtlLanguage('ps'), isTrue);
