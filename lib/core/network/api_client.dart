@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:dio/dio.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -82,7 +84,7 @@ class ApiClient {
   Future<String> _supportedLocale() async {
     final locale =
         (await SharedPreferences.getInstance()).getString('kabulfit.locale') ??
-        'en';
+        PlatformDispatcher.instance.locale.languageCode;
     return const {'en', 'fa', 'ps'}.contains(locale) ? locale : 'en';
   }
 
