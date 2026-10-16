@@ -91,8 +91,25 @@ jobs:
           p = pathlib.Path('ios/Runner.xcodeproj/project.pbxproj')
           text = p.read_text()
           import re
-          text = re.sub(r'DEVELOPMENT_TEAM = [^;]*;', f'DEVELOPMENT_TEAM = {os.environ["TEAM_ID"]};', text)
-          text = re.sub(r'PRODUCT_BUNDLE_IDENTIFIER = [^;]*;', f'PRODUCT_BUNDLE_IDENTIFIER = {os.environ["BUNDLE_ID"]};', text)
+          team = os.environ['TEAM_ID']
+          bundle = os.environ['BUNDLE_ID']
+          profile = os.environ['PROFILE_UUID']
+          if not re.fullmatch(r'[A-Z0-9]{10}', team):
+              raise SystemExit('Invalid Apple Team ID')
+          if not re.fullmatch(r'[a-zA-Z0-9.-]+', bundle):
+              raise SystemExit('Invalid iOS bundle ID')
+          if not re.fullmatch(r'[A-Za-z0-9-]+', profile):
+              raise SystemExit('Invalid provisioning profile UUID')
+          settings = (
+              f'PRODUCT_BUNDLE_IDENTIFIER = {bundle};\\n'
+              f'                DEVELOPMENT_TEAM = {team};\\n'
+              '                CODE_SIGN_STYLE = Manual;\\n'
+              f'                PROVISIONING_PROFILE_SPECIFIER = {profile};\\n'
+              '                CODE_SIGN_IDENTITY = "Apple Distribution";'
+          )
+          text, count = re.subn(r'PRODUCT_BUNDLE_IDENTIFIER = [^;]*;', lambda _: settings, text)
+          if count == 0:
+              raise SystemExit('Cannot locate Runner iOS bundle identifier settings')
           p.write_text(text)
           PY
           cat > "$RUNNER_TEMP/ExportOptions.plist" <<EOF
