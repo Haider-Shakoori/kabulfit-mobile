@@ -26,11 +26,14 @@ final catalogProvider = FutureProvider<List<KabulProduct>>((ref) async {
   return demoCatalog.map(KabulProduct.fromJson).toList(growable: false);
 });
 
-final categoriesProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
+final categoriesProvider = FutureProvider<List<Map<String, dynamic>>>((
+  ref,
+) async {
   final response = await ref.watch(apiClientProvider).get('/categories');
   final data = response['data'];
   if (data is! List) throw const FormatException('Invalid categories response');
-  return data.whereType<Map<String, dynamic>>()
+  return data
+      .whereType<Map<String, dynamic>>()
       .where((entry) => entry['slug'] is String && entry['name'] is String)
       .toList(growable: false);
 });
@@ -45,8 +48,11 @@ class KabulProduct {
       slug: json['slug']?.toString() ?? '',
       name: json['name']?.toString() ?? '',
       price: price is Map && price['currency'] == 'USD' && price['minor'] is num
-          ? String.fromCharCode(36) + ((price['minor'] as num) / 100).toStringAsFixed(2)
-          : price is Map ? price['formatted']?.toString() ?? '' : '',
+          ? String.fromCharCode(36) +
+                ((price['minor'] as num) / 100).toStringAsFixed(2)
+          : price is Map
+          ? price['formatted']?.toString() ?? ''
+          : '',
       imageUrl: media is Map ? media['url']?.toString() : null,
       category: category is Map ? category['name']?.toString() ?? '' : '',
       categorySlug: category is Map ? category['slug']?.toString() : null,
@@ -128,7 +134,8 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
                             ChoiceChip(
                               label: const Text('All'),
                               selected: selectedCategory == null,
-                              onSelected: (_) => setState(() => selectedCategory = null),
+                              onSelected: (_) =>
+                                  setState(() => selectedCategory = null),
                             ),
                             for (final category in items) ...[
                               const SizedBox(width: 8),
@@ -136,7 +143,8 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
                                 label: Text(category['name'].toString()),
                                 selected: selectedCategory == category['slug'],
                                 onSelected: (_) => setState(
-                                  () => selectedCategory = category['slug'].toString(),
+                                  () => selectedCategory = category['slug']
+                                      .toString(),
                                 ),
                               ),
                             ],
@@ -167,13 +175,14 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
                 final visible = products
                     .where(
                       (product) =>
-                          (selectedCategory == null || product.categorySlug == selectedCategory) &&
+                          (selectedCategory == null ||
+                              product.categorySlug == selectedCategory) &&
                           (product.name.toLowerCase().contains(
-                            query.toLowerCase(),
-                          ) ||
-                          product.category.toLowerCase().contains(
-                            query.toLowerCase(),
-                          )),
+                                query.toLowerCase(),
+                              ) ||
+                              product.category.toLowerCase().contains(
+                                query.toLowerCase(),
+                              )),
                     )
                     .toList();
                 if (visible.isEmpty) {
@@ -233,23 +242,23 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
                                           product.category,
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
-                                          style: Theme.of(
-                                            context,
-                                          ).textTheme.labelSmall,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .labelSmall,
                                         ),
                                         Text(
                                           product.name,
                                           maxLines: 2,
                                           overflow: TextOverflow.ellipsis,
-                                          style: Theme.of(
-                                            context,
-                                          ).textTheme.titleSmall,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .titleSmall,
                                         ),
                                         Text(
                                           product.price,
-                                          style: Theme.of(
-                                            context,
-                                          ).textTheme.labelLarge,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .labelLarge,
                                         ),
                                       ],
                                     ),

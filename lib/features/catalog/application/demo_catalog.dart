@@ -11,8 +11,10 @@ const demoCatalog = <Map<String, dynamic>>[
     'price': {'formatted': 'Demo — no price'},
     'primary_media': null,
     'stock': {'in_stock': false},
-    'short_description': 'Classic Afghan traditional outfit, shown for preview only.',
-    'description': 'Illustrative KabulFit catalog preview. Not a real listed product.',
+    'short_description':
+        'Classic Afghan traditional outfit, shown for preview only.',
+    'description':
+        'Illustrative KabulFit catalog preview. Not a real listed product.',
     'tailoring_enabled': false,
     'is_demo': true,
   },
@@ -24,7 +26,8 @@ const demoCatalog = <Map<String, dynamic>>[
     'primary_media': null,
     'stock': {'in_stock': false},
     'short_description': 'Traditional embroidery and craftsmanship preview.',
-    'description': 'Illustrative KabulFit catalog preview. Not a real listed product.',
+    'description':
+        'Illustrative KabulFit catalog preview. Not a real listed product.',
     'tailoring_enabled': false,
     'is_demo': true,
   },
@@ -35,8 +38,10 @@ const demoCatalog = <Map<String, dynamic>>[
     'price': {'formatted': 'Demo — no price'},
     'primary_media': null,
     'stock': {'in_stock': false},
-    'short_description': 'A traditional waistcoat style for storefront demonstration.',
-    'description': 'Illustrative KabulFit catalog preview. Not a real listed product.',
+    'short_description':
+        'A traditional waistcoat style for storefront demonstration.',
+    'description':
+        'Illustrative KabulFit catalog preview. Not a real listed product.',
     'tailoring_enabled': false,
     'is_demo': true,
   },
@@ -48,7 +53,8 @@ const demoCatalog = <Map<String, dynamic>>[
     'primary_media': null,
     'stock': {'in_stock': false},
     'short_description': 'Traditional clothing concept for children.',
-    'description': 'Illustrative KabulFit catalog preview. Not a real listed product.',
+    'description':
+        'Illustrative KabulFit catalog preview. Not a real listed product.',
     'tailoring_enabled': false,
     'is_demo': true,
   },
