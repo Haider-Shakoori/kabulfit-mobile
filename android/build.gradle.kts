@@ -26,6 +26,18 @@ subprojects {
             .get()
     )
 }
+// Stripe PaymentSheet does not use Issuing push provisioning. That optional
+// artifact pulls Google's private play-services-tapandpay SDK, which is not
+// available from public Maven repositories on GitHub Actions.
+// Exclude only that unused Stripe module from the app and Stripe plugin.
+subprojects {
+    if (name == "app" || name == "stripe_android") {
+        configurations.configureEach {
+            exclude(group = "com.stripe", module = "stripe-android-issuing-push-provisioning")
+        }
+    }
+}
+
 subprojects {
     project.evaluationDependsOn(":app")
 }
