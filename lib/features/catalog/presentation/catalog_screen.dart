@@ -8,7 +8,7 @@ import '../../../core/localization/app_localizations.dart';
 import '../../auth/application/auth_controller.dart';
 import '../../commerce/application/commerce_providers.dart';
 
-/// These products are loaded from Laravel, never from hard-coded demo data.
+/// Live products are loaded from Laravel; optional preview data is read-only.
 final catalogProvider = FutureProvider<List<KabulProduct>>((ref) async {
   try {
     final response = await ref.watch(apiClientProvider).get('/catalog');
@@ -26,6 +26,15 @@ final catalogProvider = FutureProvider<List<KabulProduct>>((ref) async {
   return demoCatalog.map(KabulProduct.fromJson).toList(growable: false);
 });
 
+final categoriesProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
+  final response = await ref.watch(apiClientProvider).get('/categories');
+  final data = response['data'];
+  if (data is! List) throw const FormatException('Invalid categories response');
+  return data.whereType<Map<String, dynamic>>()
+      .where((entry) => entry['slug'] is String && entry['name'] is String)
+      .toList(growable: false);
+});
+
 class KabulProduct {
   factory KabulProduct.fromJson(Map<String, dynamic> json) {
     final price = json['price'];
@@ -38,6 +47,7 @@ class KabulProduct {
       price: price is Map ? price['formatted']?.toString() ?? '' : '',
       imageUrl: media is Map ? media['url']?.toString() : null,
       category: category is Map ? category['name']?.toString() ?? '' : '',
+      categorySlug: category is Map ? category['slug']?.toString() : null,
       inStock: stock is Map && stock['in_stock'] == true,
       description: json['short_description']?.toString() ?? '',
     );
@@ -48,6 +58,7 @@ class KabulProduct {
     required this.price,
     required this.imageUrl,
     required this.category,
+    required this.categorySlug,
     required this.inStock,
     required this.description,
   });
@@ -57,6 +68,7 @@ class KabulProduct {
   final String price;
   final String? imageUrl;
   final String category;
+  final String? categorySlug;
   final bool inStock;
   final String description;
 }
@@ -70,6 +82,7 @@ class CatalogScreen extends ConsumerStatefulWidget {
 
 class _CatalogScreenState extends ConsumerState<CatalogScreen> {
   String query = '';
+  String? selectedCategory;
 
   @override
   Widget build(BuildContext context) {
@@ -81,6 +94,7 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
     };
     final strings = AppLocalizations.of(context);
     final result = ref.watch(catalogProvider);
+    final categories = ref.watch(categoriesProvider);
     return Scaffold(
       appBar: AppBar(title: Text(shop)),
       body: RefreshIndicator(
@@ -95,6 +109,38 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
                   hintText: strings.text('searchProducts'),
                   onChanged: (value) => setState(() => query = value),
                 ),
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: categories.when(
+                loading: () => const SizedBox(height: 8),
+                error: (_, _) => const SizedBox.shrink(),
+                data: (items) => items.isEmpty
+                    ? const SizedBox.shrink()
+                    : SizedBox(
+                        height: 52,
+                        child: ListView(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          scrollDirection: Axis.horizontal,
+                          children: [
+                            ChoiceChip(
+                              label: const Text('All'),
+                              selected: selectedCategory == null,
+                              onSelected: (_) => setState(() => selectedCategory = null),
+                            ),
+                            for (final category in items) ...[
+                              const SizedBox(width: 8),
+                              ChoiceChip(
+                                label: Text(category['name'].toString()),
+                                selected: selectedCategory == category['slug'],
+                                onSelected: (_) => setState(
+                                  () => selectedCategory = category['slug'].toString(),
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
               ),
             ),
             result.when(
@@ -119,12 +165,13 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
                 final visible = products
                     .where(
                       (product) =>
-                          product.name.toLowerCase().contains(
+                          (selectedCategory == null || product.categorySlug == selectedCategory) &&
+                          (product.name.toLowerCase().contains(
                             query.toLowerCase(),
                           ) ||
                           product.category.toLowerCase().contains(
                             query.toLowerCase(),
-                          ),
+                          )),
                     )
                     .toList();
                 if (visible.isEmpty) {
