@@ -44,7 +44,9 @@ class KabulProduct {
     return KabulProduct(
       slug: json['slug']?.toString() ?? '',
       name: json['name']?.toString() ?? '',
-      price: price is Map ? price['formatted']?.toString() ?? '' : '',
+      price: price is Map && price['currency'] == 'USD' && price['minor'] is num
+          ? '\${((price['minor'] as num) / 100).toStringAsFixed(2)}'
+          : price is Map ? price['formatted']?.toString() ?? '' : '',
       imageUrl: media is Map ? media['url']?.toString() : null,
       category: category is Map ? category['name']?.toString() ?? '' : '',
       categorySlug: category is Map ? category['slug']?.toString() : null,
