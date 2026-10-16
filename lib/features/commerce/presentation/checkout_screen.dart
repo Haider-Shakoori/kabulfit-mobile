@@ -157,7 +157,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                       !cart.hasValue ||
                       ((cart.value?['items'] as List?)?.isEmpty ?? true)
                   ? null
-                  : () => _pay(context),
+                  : _pay,
               child: Text(
                 processing
                     ? 'Preparing payment…'
@@ -173,7 +173,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     );
   }
 
-  Future<void> _pay(BuildContext context) async {
+  Future<void> _pay() async {
     final approved = await showDialog<bool>(
       context: context,
       builder: (dialog) => AlertDialog(
