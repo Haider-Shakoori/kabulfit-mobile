@@ -62,3 +62,25 @@ jobs:
           flutter build ios --release --no-codesign
           -t lib/main_production.dart
           --dart-define=API_BASE_URL=https://example.invalid/api/v1
+      - name: Package unsigned IPA for preflight only
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -d build/ios/iphoneos/Runner.app
+          mkdir -p "$RUNNER_TEMP/kabulfit-unsigned/Payload"
+          cp -R build/ios/iphoneos/Runner.app "$RUNNER_TEMP/kabulfit-unsigned/Payload/Runner.app"
+          (
+            cd "$RUNNER_TEMP/kabulfit-unsigned"
+            /usr/bin/zip -qry "$GITHUB_WORKSPACE/KabulFit-UNSIGNED.ipa" Payload
+          )
+          test -s KabulFit-UNSIGNED.ipa
+          shasum -a 256 KabulFit-UNSIGNED.ipa > SHA256SUMS.txt
+      - name: Upload unsigned IPA preflight archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: kabulfit-ios-unsigned-preflight
+          path: |
+            KabulFit-UNSIGNED.ipa
+            SHA256SUMS.txt
+          if-no-files-found: error
+          retention-days: 14
