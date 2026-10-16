@@ -101,10 +101,10 @@ jobs:
           if not re.fullmatch(r'[A-Za-z0-9-]+', profile):
               raise SystemExit('Invalid provisioning profile UUID')
           settings = (
-              f'PRODUCT_BUNDLE_IDENTIFIER = {bundle};\\n'
-              f'                DEVELOPMENT_TEAM = {team};\\n'
-              '                CODE_SIGN_STYLE = Manual;\\n'
-              f'                PROVISIONING_PROFILE_SPECIFIER = {profile};\\n'
+              f'PRODUCT_BUNDLE_IDENTIFIER = {bundle};\n'
+              f'                DEVELOPMENT_TEAM = {team};\n'
+              '                CODE_SIGN_STYLE = Manual;\n'
+              f'                PROVISIONING_PROFILE_SPECIFIER = {profile};\n'
               '                CODE_SIGN_IDENTITY = "Apple Distribution";'
           )
           text, count = re.subn(r'PRODUCT_BUNDLE_IDENTIFIER = [^;]*;', lambda _: settings, text)
