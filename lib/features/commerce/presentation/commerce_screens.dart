@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../auth/application/auth_controller.dart';
 import '../../../core/localization/app_localizations.dart';
+import '../../auth/application/auth_controller.dart';
 import '../application/commerce_providers.dart';
 
 class CartScreen extends ConsumerWidget {

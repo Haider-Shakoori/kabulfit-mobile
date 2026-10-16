@@ -3,12 +3,12 @@ import 'package:go_router/go_router.dart';
 
 import '../features/auth/presentation/login_screen.dart';
 import '../features/catalog/presentation/catalog_screen.dart';
-import '../features/commerce/presentation/commerce_screens.dart';
 import '../features/commerce/presentation/address_order_screens.dart';
 import '../features/commerce/presentation/checkout_screen.dart';
+import '../features/commerce/presentation/commerce_screens.dart';
+import '../features/home/presentation/home_screen.dart';
 import '../features/tailoring/presentation/measurement_screens.dart';
 import '../features/tailoring/presentation/tailor_product_screen.dart';
-import '../features/home/presentation/home_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(

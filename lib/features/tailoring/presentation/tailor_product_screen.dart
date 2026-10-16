@@ -104,7 +104,8 @@ class _TailorProductScreenState extends ConsumerState<TailorProductScreen> {
                         );
                       }
                       return DropdownButtonFormField<String>(
-                        value: suitable.any((p) => p['uuid'] == profileUuid)
+                        initialValue:
+                            suitable.any((p) => p['uuid'] == profileUuid)
                             ? profileUuid
                             : null,
                         decoration: const InputDecoration(
@@ -127,7 +128,7 @@ class _TailorProductScreenState extends ConsumerState<TailorProductScreen> {
                   const SizedBox(height: 16),
                   if (variants.isNotEmpty)
                     DropdownButtonFormField<String>(
-                      value: variants.any((v) => v['sku'] == variantSku)
+                      initialValue: variants.any((v) => v['sku'] == variantSku)
                           ? variantSku
                           : null,
                       decoration: const InputDecoration(

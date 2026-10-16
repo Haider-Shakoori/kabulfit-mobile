@@ -36,7 +36,7 @@ class CommerceActions {
           data: {
             'product_slug': slug,
             'quantity': quantity,
-            if (variantSku != null) 'variant_sku': variantSku,
+            'variant_sku': ?variantSku,
           },
         );
     ref.invalidate(cartProvider);

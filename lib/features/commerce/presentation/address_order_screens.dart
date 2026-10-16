@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/localization/app_localizations.dart';
 import '../../auth/application/auth_controller.dart';
 import '../application/address_order_providers.dart';
-import '../../../core/localization/app_localizations.dart';
 
 class AddressesScreen extends ConsumerWidget {
   const AddressesScreen({super.key});
@@ -86,10 +86,11 @@ class AddressesScreen extends ConsumerWidget {
                                   .read(addressActionsProvider)
                                   .remove(address['uuid'].toString());
                             } catch (error) {
-                              if (context.mounted)
+                              if (context.mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(content: Text(error.toString())),
                                 );
+                              }
                             }
                           },
                         ),
@@ -163,10 +164,11 @@ class _NewAddressScreenState extends ConsumerState<NewAddressScreen> {
                           );
                       if (context.mounted) context.pop();
                     } catch (error) {
-                      if (context.mounted)
+                      if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text(error.toString())),
                         );
+                      }
                     } finally {
                       if (mounted) setState(() => busy = false);
                     }

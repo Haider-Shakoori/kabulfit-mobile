@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/localization/app_localizations.dart';
 import '../../auth/application/auth_controller.dart';
 import '../application/address_order_providers.dart';
 import '../application/checkout_providers.dart';
 import '../application/commerce_providers.dart';
 import '../application/stripe_payment_gateway.dart';
-import '../../../core/localization/app_localizations.dart';
 
 /// Checkout creates a pending order. Only the backend webhook confirms payment.
 class CheckoutScreen extends ConsumerStatefulWidget {
@@ -72,7 +72,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                     child: const Text('Add a shipping address'),
                   )
                 : DropdownButtonFormField<String>(
-                    value: items.any((e) => e['uuid'] == addressUuid)
+                    initialValue: items.any((e) => e['uuid'] == addressUuid)
                         ? addressUuid
                         : null,
                     decoration: const InputDecoration(labelText: 'Ship to'),
@@ -103,7 +103,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             data: (items) => items.isEmpty
                 ? const Text('No shipping methods available for this cart.')
                 : DropdownButtonFormField<String>(
-                    value: items.any((e) => e['code'] == shippingCode)
+                    initialValue: items.any((e) => e['code'] == shippingCode)
                         ? shippingCode
                         : null,
                     decoration: const InputDecoration(labelText: 'Shipping'),

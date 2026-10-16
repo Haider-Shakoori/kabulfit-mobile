@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/localization/app_localizations.dart';
 import '../../auth/application/auth_controller.dart';
 import '../application/measurement_providers.dart';
-import '../../../core/localization/app_localizations.dart';
 
 class MeasurementProfilesScreen extends ConsumerWidget {
   const MeasurementProfilesScreen({super.key});
@@ -93,10 +93,11 @@ class MeasurementProfilesScreen extends ConsumerWidget {
                                     .read(measurementActionsProvider)
                                     .deleteProfile(uuid);
                               } catch (error) {
-                                if (context.mounted)
+                                if (context.mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(content: Text(error.toString())),
                                   );
+                                }
                               }
                             }
                           },
@@ -192,7 +193,7 @@ class _NewMeasurementProfileScreenState
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
-              value: garmentType,
+              initialValue: garmentType,
               decoration: InputDecoration(
                 labelText: AppLocalizations.of(context).text('garmentType'),
               ),
@@ -238,8 +239,9 @@ class _NewMeasurementProfileScreenState
                         ),
                         validator: (raw) {
                           if ((raw == null || raw.trim().isEmpty) &&
-                              item['required'] != true)
+                              item['required'] != true) {
                             return null;
+                          }
                           final number = double.tryParse(raw?.trim() ?? '');
                           final min = (item['min'] as num?)?.toDouble() ?? 0;
                           final max =
@@ -283,10 +285,11 @@ class _NewMeasurementProfileScreenState
                             );
                         if (context.mounted) context.pop();
                       } catch (error) {
-                        if (context.mounted)
+                        if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content: Text(error.toString())),
                           );
+                        }
                       } finally {
                         if (mounted) setState(() => saving = false);
                       }

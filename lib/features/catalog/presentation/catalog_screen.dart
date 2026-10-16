@@ -20,6 +20,21 @@ final catalogProvider = FutureProvider<List<KabulProduct>>((ref) async {
 });
 
 class KabulProduct {
+  factory KabulProduct.fromJson(Map<String, dynamic> json) {
+    final price = json['price'];
+    final media = json['primary_media'];
+    final stock = json['stock'];
+    final category = json['category'];
+    return KabulProduct(
+      slug: json['slug']?.toString() ?? '',
+      name: json['name']?.toString() ?? '',
+      price: price is Map ? price['formatted']?.toString() ?? '' : '',
+      imageUrl: media is Map ? media['url']?.toString() : null,
+      category: category is Map ? category['name']?.toString() ?? '' : '',
+      inStock: stock is Map && stock['in_stock'] == true,
+      description: json['short_description']?.toString() ?? '',
+    );
+  }
   const KabulProduct({
     required this.slug,
     required this.name,
@@ -37,22 +52,6 @@ class KabulProduct {
   final String category;
   final bool inStock;
   final String description;
-
-  factory KabulProduct.fromJson(Map<String, dynamic> json) {
-    final price = json['price'];
-    final media = json['primary_media'];
-    final stock = json['stock'];
-    final category = json['category'];
-    return KabulProduct(
-      slug: json['slug']?.toString() ?? '',
-      name: json['name']?.toString() ?? '',
-      price: price is Map ? price['formatted']?.toString() ?? '' : '',
-      imageUrl: media is Map ? media['url']?.toString() : null,
-      category: category is Map ? category['name']?.toString() ?? '' : '',
-      inStock: stock is Map && stock['in_stock'] == true,
-      description: json['short_description']?.toString() ?? '',
-    );
-  }
 }
 
 class CatalogScreen extends ConsumerStatefulWidget {
@@ -225,8 +224,9 @@ final productProvider = FutureProvider.family<Map<String, dynamic>, String>((
       .watch(apiClientProvider)
       .get('/products/${Uri.encodeComponent(slug)}');
   final data = response['data'];
-  if (data is! Map<String, dynamic>)
+  if (data is! Map<String, dynamic>) {
     throw const FormatException('Invalid product response');
+  }
   return data;
 });
 
@@ -343,7 +343,7 @@ class _ProductActionsState extends ConsumerState<_ProductActions> {
       children: [
         if (variants.isNotEmpty)
           DropdownButtonFormField<String>(
-            value: selectedVariant,
+            initialValue: selectedVariant,
             decoration: const InputDecoration(labelText: 'Choose size / color'),
             items: available.map((variant) {
               final color = variant['color'];

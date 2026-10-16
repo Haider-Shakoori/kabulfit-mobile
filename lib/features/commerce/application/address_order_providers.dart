@@ -24,8 +24,9 @@ final orderTrackingProvider =
           .watch(apiClientProvider)
           .get('/orders/${Uri.encodeComponent(uuid)}/tracking');
       final data = result['data'];
-      if (data is! Map<String, dynamic>)
+      if (data is! Map<String, dynamic>) {
         throw const FormatException('Invalid tracking response');
+      }
       return data;
     });
 

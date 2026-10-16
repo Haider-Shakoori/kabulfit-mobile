@@ -1,16 +1,17 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/config/providers.dart';
-import 'commerce_providers.dart';
 import 'address_order_providers.dart';
+import 'commerce_providers.dart';
 
 final shippingMethodsProvider = FutureProvider<List<Map<String, dynamic>>>((
   ref,
 ) async {
   final response = await ref.watch(apiClientProvider).get('/shipping-methods');
   final data = response['data'];
-  if (data is! List)
+  if (data is! List) {
     throw const FormatException('Invalid shipping methods response');
+  }
   return data.whereType<Map<String, dynamic>>().toList(growable: false);
 });
 

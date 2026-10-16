@@ -21,14 +21,16 @@ final measurementDefinitionsProvider =
       ref,
       garmentType,
     ) async {
-      if (!garmentTypes.contains(garmentType))
+      if (!garmentTypes.contains(garmentType)) {
         throw ArgumentError.value(garmentType);
+      }
       final response = await ref
           .watch(apiClientProvider)
           .get('/measurements/definitions?garment_type=$garmentType&unit=cm');
       final data = response['data'];
-      if (data is! List)
+      if (data is! List) {
         throw const FormatException('Invalid definitions response');
+      }
       return data.whereType<Map<String, dynamic>>().toList();
     });
 
@@ -52,8 +54,9 @@ class MeasurementActions {
     bool isDefault = false,
     String? profileUuid,
   }) async {
-    if (!garmentTypes.contains(garmentType))
+    if (!garmentTypes.contains(garmentType)) {
       throw ArgumentError.value(garmentType);
+    }
     final payload = <String, dynamic>{
       'name': name,
       'garment_type': garmentType,
@@ -96,7 +99,7 @@ class MeasurementActions {
           data: {
             'product_slug': productSlug,
             'measurement_profile_uuid': profileUuid,
-            if (variantSku != null) 'variant_sku': variantSku,
+            'variant_sku': ?variantSku,
             if (notes != null && notes.isNotEmpty) 'notes': notes,
           },
         );
