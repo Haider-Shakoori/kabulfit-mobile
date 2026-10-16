@@ -5,8 +5,9 @@ import 'package:flutter_stripe/flutter_stripe.dart';
 class StripePaymentGateway {
   const StripePaymentGateway();
 
-  static const publishableKey =
-      String.fromEnvironment('STRIPE_PUBLISHABLE_KEY');
+  static const publishableKey = String.fromEnvironment(
+    'STRIPE_PUBLISHABLE_KEY',
+  );
 
   static bool get isConfigured =>
       publishableKey.startsWith('pk_test_') ||
@@ -24,8 +25,7 @@ class StripePaymentGateway {
     if (!isConfigured) {
       throw StateError('Stripe publishable key is not configured.');
     }
-    if (!clientSecret.startsWith('pi_') ||
-        !clientSecret.contains('_secret_')) {
+    if (!clientSecret.startsWith('pi_') || !clientSecret.contains('_secret_')) {
       throw const FormatException('Invalid Stripe PaymentIntent client secret');
     }
     await Stripe.instance.initPaymentSheet(

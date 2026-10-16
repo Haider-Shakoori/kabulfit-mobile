@@ -11,7 +11,9 @@ final cartProvider = FutureProvider<Map<String, dynamic>>((ref) async {
   return data;
 });
 
-final wishlistProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
+final wishlistProvider = FutureProvider<List<Map<String, dynamic>>>((
+  ref,
+) async {
   final result = await ref.watch(apiClientProvider).get('/wishlist');
   final data = result['data'];
   if (data is! List) throw const FormatException('Invalid wishlist payload');
@@ -22,12 +24,21 @@ class CommerceActions {
   const CommerceActions(this.ref);
   final Ref ref;
 
-  Future<void> addToCart(String slug, {String? variantSku, int quantity = 1}) async {
-    await ref.read(apiClientProvider).post('/cart/items', data: {
-      'product_slug': slug,
-      'quantity': quantity,
-      if (variantSku != null) 'variant_sku': variantSku,
-    });
+  Future<void> addToCart(
+    String slug, {
+    String? variantSku,
+    int quantity = 1,
+  }) async {
+    await ref
+        .read(apiClientProvider)
+        .post(
+          '/cart/items',
+          data: {
+            'product_slug': slug,
+            'quantity': quantity,
+            if (variantSku != null) 'variant_sku': variantSku,
+          },
+        );
     ref.invalidate(cartProvider);
   }
 
@@ -35,24 +46,30 @@ class CommerceActions {
     if (quantity < 0 || quantity > 99) {
       throw RangeError.range(quantity, 0, 99, 'quantity');
     }
-    await ref.read(apiClientProvider).put(
-      '/cart/items/${Uri.encodeComponent(itemUuid)}',
-      data: {'quantity': quantity},
-    );
+    await ref
+        .read(apiClientProvider)
+        .put(
+          '/cart/items/${Uri.encodeComponent(itemUuid)}',
+          data: {'quantity': quantity},
+        );
     ref.invalidate(cartProvider);
   }
 
   Future<void> removeItem(String itemUuid) async {
-    await ref.read(apiClientProvider).delete(
-      '/cart/items/${Uri.encodeComponent(itemUuid)}',
-    );
+    await ref
+        .read(apiClientProvider)
+        .delete('/cart/items/${Uri.encodeComponent(itemUuid)}');
     ref.invalidate(cartProvider);
   }
 
   Future<void> addToWishlist(String slug) async {
-    await ref.read(apiClientProvider).post('/wishlist', data: {'product_slug': slug});
+    await ref
+        .read(apiClientProvider)
+        .post('/wishlist', data: {'product_slug': slug});
     ref.invalidate(wishlistProvider);
   }
 }
 
-final commerceActionsProvider = Provider<CommerceActions>((ref) => CommerceActions(ref));
+final commerceActionsProvider = Provider<CommerceActions>(
+  (ref) => CommerceActions(ref),
+);

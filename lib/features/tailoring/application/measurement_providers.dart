@@ -1,27 +1,40 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../../core/config/providers.dart';
 import '../../commerce/application/commerce_providers.dart';
 
 const garmentTypes = ['perahan_tunban', 'dress', 'waistcoat'];
 
-final measurementProfilesProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
-  final response = await ref.watch(apiClientProvider).get('/measurement-profiles');
+final measurementProfilesProvider = FutureProvider<List<Map<String, dynamic>>>((
+  ref,
+) async {
+  final response = await ref
+      .watch(apiClientProvider)
+      .get('/measurement-profiles');
   final data = response['data'];
   if (data is! List) throw const FormatException('Invalid profiles response');
   return data.whereType<Map<String, dynamic>>().toList();
 });
 
 final measurementDefinitionsProvider =
-    FutureProvider.family<List<Map<String, dynamic>>, String>((ref, garmentType) async {
-  if (!garmentTypes.contains(garmentType)) throw ArgumentError.value(garmentType);
-  final response = await ref.watch(apiClientProvider)
-      .get('/measurements/definitions?garment_type=$garmentType&unit=cm');
-  final data = response['data'];
-  if (data is! List) throw const FormatException('Invalid definitions response');
-  return data.whereType<Map<String, dynamic>>().toList();
-});
+    FutureProvider.family<List<Map<String, dynamic>>, String>((
+      ref,
+      garmentType,
+    ) async {
+      if (!garmentTypes.contains(garmentType))
+        throw ArgumentError.value(garmentType);
+      final response = await ref
+          .watch(apiClientProvider)
+          .get('/measurements/definitions?garment_type=$garmentType&unit=cm');
+      final data = response['data'];
+      if (data is! List)
+        throw const FormatException('Invalid definitions response');
+      return data.whereType<Map<String, dynamic>>().toList();
+    });
 
-final tailoringRequestsProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
+final tailoringRequestsProvider = FutureProvider<List<Map<String, dynamic>>>((
+  ref,
+) async {
   final response = await ref.watch(apiClientProvider).get('/tailoring');
   final data = response['data'];
   if (data is! List) throw const FormatException('Invalid tailoring response');
@@ -39,7 +52,8 @@ class MeasurementActions {
     bool isDefault = false,
     String? profileUuid,
   }) async {
-    if (!garmentTypes.contains(garmentType)) throw ArgumentError.value(garmentType);
+    if (!garmentTypes.contains(garmentType))
+      throw ArgumentError.value(garmentType);
     final payload = <String, dynamic>{
       'name': name,
       'garment_type': garmentType,
@@ -48,15 +62,24 @@ class MeasurementActions {
       'measurements': measurements,
     };
     if (profileUuid == null) {
-      await ref.read(apiClientProvider).post('/measurement-profiles', data: payload);
+      await ref
+          .read(apiClientProvider)
+          .post('/measurement-profiles', data: payload);
     } else {
-      await ref.read(apiClientProvider).put('/measurement-profiles/${Uri.encodeComponent(profileUuid)}', data: payload);
+      await ref
+          .read(apiClientProvider)
+          .put(
+            '/measurement-profiles/${Uri.encodeComponent(profileUuid)}',
+            data: payload,
+          );
     }
     ref.invalidate(measurementProfilesProvider);
   }
 
   Future<void> deleteProfile(String uuid) async {
-    await ref.read(apiClientProvider).delete('/measurement-profiles/${Uri.encodeComponent(uuid)}');
+    await ref
+        .read(apiClientProvider)
+        .delete('/measurement-profiles/${Uri.encodeComponent(uuid)}');
     ref.invalidate(measurementProfilesProvider);
   }
 
@@ -66,15 +89,22 @@ class MeasurementActions {
     String? variantSku,
     String? notes,
   }) async {
-    await ref.read(apiClientProvider).post('/tailoring', data: {
-      'product_slug': productSlug,
-      'measurement_profile_uuid': profileUuid,
-      if (variantSku != null) 'variant_sku': variantSku,
-      if (notes != null && notes.isNotEmpty) 'notes': notes,
-    });
+    await ref
+        .read(apiClientProvider)
+        .post(
+          '/tailoring',
+          data: {
+            'product_slug': productSlug,
+            'measurement_profile_uuid': profileUuid,
+            if (variantSku != null) 'variant_sku': variantSku,
+            if (notes != null && notes.isNotEmpty) 'notes': notes,
+          },
+        );
     ref.invalidate(tailoringRequestsProvider);
     ref.invalidate(cartProvider);
   }
 }
-final measurementActionsProvider =
-    Provider<MeasurementActions>((ref) => MeasurementActions(ref));
+
+final measurementActionsProvider = Provider<MeasurementActions>(
+  (ref) => MeasurementActions(ref),
+);

@@ -110,9 +110,17 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
                 ),
               ),
               data: (products) {
-                final visible = products.where((product) =>
-                    product.name.toLowerCase().contains(query.toLowerCase()) ||
-                    product.category.toLowerCase().contains(query.toLowerCase())).toList();
+                final visible = products
+                    .where(
+                      (product) =>
+                          product.name.toLowerCase().contains(
+                            query.toLowerCase(),
+                          ) ||
+                          product.category.toLowerCase().contains(
+                            query.toLowerCase(),
+                          ),
+                    )
+                    .toList();
                 if (visible.isEmpty) {
                   return SliverFillRemaining(
                     child: Center(child: Text(strings.text('noProducts'))),
@@ -136,7 +144,9 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
                           return Card(
                             clipBehavior: Clip.antiAlias,
                             child: InkWell(
-                              onTap: () => context.push('/products/${Uri.encodeComponent(product.slug)}'),
+                              onTap: () => context.push(
+                                '/products/${Uri.encodeComponent(product.slug)}',
+                              ),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -144,30 +154,48 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
                                     child: SizedBox(
                                       width: double.infinity,
                                       child: product.imageUrl == null
-                                          ? const Icon(Icons.checkroom, size: 48)
+                                          ? const Icon(
+                                              Icons.checkroom,
+                                              size: 48,
+                                            )
                                           : Image.network(
                                               product.imageUrl!,
                                               fit: BoxFit.cover,
                                               errorBuilder: (_, _, _) =>
-                                                  const Icon(Icons.broken_image_outlined),
+                                                  const Icon(
+                                                    Icons.broken_image_outlined,
+                                                  ),
                                             ),
                                     ),
                                   ),
                                   Padding(
                                     padding: const EdgeInsets.all(10),
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
-                                        Text(product.category,
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: Theme.of(context).textTheme.labelSmall),
-                                        Text(product.name,
-                                            maxLines: 2,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: Theme.of(context).textTheme.titleSmall),
-                                        Text(product.price,
-                                            style: Theme.of(context).textTheme.labelLarge),
+                                        Text(
+                                          product.category,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .labelSmall,
+                                        ),
+                                        Text(
+                                          product.name,
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .titleSmall,
+                                        ),
+                                        Text(
+                                          product.price,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .labelLarge,
+                                        ),
                                       ],
                                     ),
                                   ),
@@ -189,10 +217,16 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
   }
 }
 
-final productProvider = FutureProvider.family<Map<String, dynamic>, String>((ref, slug) async {
-  final response = await ref.watch(apiClientProvider).get('/products/${Uri.encodeComponent(slug)}');
+final productProvider = FutureProvider.family<Map<String, dynamic>, String>((
+  ref,
+  slug,
+) async {
+  final response = await ref
+      .watch(apiClientProvider)
+      .get('/products/${Uri.encodeComponent(slug)}');
   final data = response['data'];
-  if (data is! Map<String, dynamic>) throw const FormatException('Invalid product response');
+  if (data is! Map<String, dynamic>)
+    throw const FormatException('Invalid product response');
   return data;
 });
 
@@ -207,16 +241,21 @@ class ProductScreen extends ConsumerWidget {
       appBar: AppBar(title: const Text('KabulFit')),
       body: result.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, _) => Center(child: TextButton(
-          onPressed: () => ref.invalidate(productProvider(slug)),
-          child: const Text('Retry loading product'),
-        )),
+        error: (_, _) => Center(
+          child: TextButton(
+            onPressed: () => ref.invalidate(productProvider(slug)),
+            child: const Text('Retry loading product'),
+          ),
+        ),
         data: (data) {
           final images = data['media'];
           final primary = data['primary_media'];
-          final imageUrl = images is List && images.isNotEmpty && images.first is Map
+          final imageUrl =
+              images is List && images.isNotEmpty && images.first is Map
               ? (images.first as Map)['url']?.toString()
-              : primary is Map ? primary['url']?.toString() : null;
+              : primary is Map
+              ? primary['url']?.toString()
+              : null;
           final price = data['price'];
           return ListView(
             padding: const EdgeInsets.all(20),
@@ -225,22 +264,32 @@ class ProductScreen extends ConsumerWidget {
                 aspectRatio: 4 / 5,
                 child: imageUrl == null
                     ? const Icon(Icons.checkroom, size: 80)
-                    : Image.network(imageUrl, fit: BoxFit.cover,
-                        errorBuilder: (_, _, _) => const Icon(Icons.broken_image_outlined)),
+                    : Image.network(
+                        imageUrl,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, _, _) =>
+                            const Icon(Icons.broken_image_outlined),
+                      ),
               ),
               const SizedBox(height: 24),
-              Text(data['name']?.toString() ?? '',
-                  style: Theme.of(context).textTheme.headlineMedium),
+              Text(
+                data['name']?.toString() ?? '',
+                style: Theme.of(context).textTheme.headlineMedium,
+              ),
               const SizedBox(height: 8),
-              Text(price is Map ? price['formatted']?.toString() ?? '' : '',
-                  style: Theme.of(context).textTheme.titleLarge),
+              Text(
+                price is Map ? price['formatted']?.toString() ?? '' : '',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
               const SizedBox(height: 16),
               Text(data['description']?.toString() ?? ''),
               const SizedBox(height: 24),
               if (data['tailoring_enabled'] == true) ...[
                 const Chip(label: Text('Custom tailoring available')),
                 OutlinedButton.icon(
-                  onPressed: () => context.push('/products/${Uri.encodeComponent(slug)}/tailor'),
+                  onPressed: () => context.push(
+                    '/products/${Uri.encodeComponent(slug)}/tailor',
+                  ),
                   icon: const Icon(Icons.straighten),
                   label: Text(AppLocalizations.of(context).text('customize')),
                 ),
@@ -254,7 +303,6 @@ class ProductScreen extends ConsumerWidget {
     );
   }
 }
-
 
 class _ProductActions extends ConsumerStatefulWidget {
   const _ProductActions({required this.slug, required this.product});
@@ -272,7 +320,8 @@ class _ProductActionsState extends ConsumerState<_ProductActions> {
 
   @override
   Widget build(BuildContext context) {
-    final variants = (widget.product['variants'] as List?)
+    final variants =
+        (widget.product['variants'] as List?)
             ?.whereType<Map<String, dynamic>>()
             .toList() ??
         [];
@@ -307,22 +356,25 @@ class _ProductActionsState extends ConsumerState<_ProductActions> {
                 child: Text(label.isEmpty ? variant['sku'].toString() : label),
               );
             }).toList(),
-            onChanged: busy ? null : (value) => setState(() => selectedVariant = value),
+            onChanged: busy
+                ? null
+                : (value) => setState(() => selectedVariant = value),
           ),
         const SizedBox(height: 12),
         FilledButton.icon(
-          onPressed: busy ||
+          onPressed:
+              busy ||
                   (variants.isNotEmpty && selectedVariant == null) ||
-                  (variants.isEmpty && widget.product['stock'] is Map &&
+                  (variants.isEmpty &&
+                      widget.product['stock'] is Map &&
                       (widget.product['stock'] as Map)['in_stock'] != true)
               ? null
               : () async {
                   setState(() => busy = true);
                   try {
-                    await ref.read(commerceActionsProvider).addToCart(
-                      widget.slug,
-                      variantSku: selectedVariant,
-                    );
+                    await ref
+                        .read(commerceActionsProvider)
+                        .addToCart(widget.slug, variantSku: selectedVariant);
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('Added to cart')),
@@ -330,16 +382,18 @@ class _ProductActionsState extends ConsumerState<_ProductActions> {
                     }
                   } catch (error) {
                     if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(error.toString())),
-                      );
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(SnackBar(content: Text(error.toString())));
                     }
                   } finally {
                     if (mounted) setState(() => busy = false);
                   }
                 },
           icon: const Icon(Icons.shopping_bag_outlined),
-          label: Text(busy ? 'Adding…' : AppLocalizations.of(context).text('addToCart')),
+          label: Text(
+            busy ? 'Adding…' : AppLocalizations.of(context).text('addToCart'),
+          ),
         ),
         TextButton.icon(
           onPressed: busy
@@ -347,7 +401,9 @@ class _ProductActionsState extends ConsumerState<_ProductActions> {
               : () async {
                   setState(() => busy = true);
                   try {
-                    await ref.read(commerceActionsProvider).addToWishlist(widget.slug);
+                    await ref
+                        .read(commerceActionsProvider)
+                        .addToWishlist(widget.slug);
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('Added to wishlist')),
@@ -355,9 +411,9 @@ class _ProductActionsState extends ConsumerState<_ProductActions> {
                     }
                   } catch (error) {
                     if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(error.toString())),
-                      );
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(SnackBar(content: Text(error.toString())));
                     }
                   } finally {
                     if (mounted) setState(() => busy = false);

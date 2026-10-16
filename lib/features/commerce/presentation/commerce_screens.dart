@@ -65,7 +65,9 @@ class CartScreen extends ConsumerWidget {
                     Card(
                       child: ListTile(
                         title: Text(item['name']?.toString() ?? ''),
-                        subtitle: Text('Qty: ${item['quantity']}  ·  ${item['sku']}'),
+                        subtitle: Text(
+                          'Qty: ${item['quantity']}  ·  ${item['sku']}',
+                        ),
                         trailing: SizedBox(
                           width: 144,
                           child: Row(
@@ -73,41 +75,69 @@ class CartScreen extends ConsumerWidget {
                             children: [
                               IconButton(
                                 visualDensity: VisualDensity.compact,
-                                constraints: const BoxConstraints(minWidth: 30, minHeight: 36),
+                                constraints: const BoxConstraints(
+                                  minWidth: 30,
+                                  minHeight: 36,
+                                ),
                                 tooltip: 'Decrease quantity',
-                                onPressed: (item['quantity'] is num &&
+                                onPressed:
+                                    (item['quantity'] is num &&
                                         (item['quantity'] as num) > 1)
-                                    ? () => _mutate(context, ref, () =>
-                                        ref.read(commerceActionsProvider).changeQuantity(
-                                          item['uuid'].toString(),
-                                          (item['quantity'] as num).toInt() - 1,
-                                        ))
+                                    ? () => _mutate(
+                                        context,
+                                        ref,
+                                        () => ref
+                                            .read(commerceActionsProvider)
+                                            .changeQuantity(
+                                              item['uuid'].toString(),
+                                              (item['quantity'] as num)
+                                                      .toInt() -
+                                                  1,
+                                            ),
+                                      )
                                     : null,
                                 icon: const Icon(Icons.remove_circle_outline),
                               ),
                               Text(item['quantity']?.toString() ?? '0'),
                               IconButton(
                                 visualDensity: VisualDensity.compact,
-                                constraints: const BoxConstraints(minWidth: 30, minHeight: 36),
+                                constraints: const BoxConstraints(
+                                  minWidth: 30,
+                                  minHeight: 36,
+                                ),
                                 tooltip: 'Increase quantity',
-                                onPressed: (item['quantity'] is num &&
+                                onPressed:
+                                    (item['quantity'] is num &&
                                         (item['quantity'] as num) < 99)
-                                    ? () => _mutate(context, ref, () =>
-                                        ref.read(commerceActionsProvider).changeQuantity(
-                                          item['uuid'].toString(),
-                                          (item['quantity'] as num).toInt() + 1,
-                                        ))
+                                    ? () => _mutate(
+                                        context,
+                                        ref,
+                                        () => ref
+                                            .read(commerceActionsProvider)
+                                            .changeQuantity(
+                                              item['uuid'].toString(),
+                                              (item['quantity'] as num)
+                                                      .toInt() +
+                                                  1,
+                                            ),
+                                      )
                                     : null,
                                 icon: const Icon(Icons.add_circle_outline),
                               ),
                               IconButton(
                                 visualDensity: VisualDensity.compact,
-                                constraints: const BoxConstraints(minWidth: 30, minHeight: 36),
+                                constraints: const BoxConstraints(
+                                  minWidth: 30,
+                                  minHeight: 36,
+                                ),
                                 tooltip: 'Remove item',
-                                onPressed: () => _mutate(context, ref, () =>
-                                    ref.read(commerceActionsProvider).removeItem(
-                                      item['uuid'].toString(),
-                                    )),
+                                onPressed: () => _mutate(
+                                  context,
+                                  ref,
+                                  () => ref
+                                      .read(commerceActionsProvider)
+                                      .removeItem(item['uuid'].toString()),
+                                ),
                                 icon: const Icon(Icons.delete_outline),
                               ),
                             ],
@@ -116,10 +146,14 @@ class CartScreen extends ConsumerWidget {
                       ),
                     ),
                 const SizedBox(height: 16),
-                Text('Subtotal: $subtotalText',
-                    style: Theme.of(context).textTheme.titleLarge),
+                Text(
+                  'Subtotal: $subtotalText',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
                 const SizedBox(height: 8),
-                const Text('Shipping, discounts, and final charges are calculated by KabulFit at checkout.'),
+                const Text(
+                  'Shipping, discounts, and final charges are calculated by KabulFit at checkout.',
+                ),
                 const SizedBox(height: 16),
                 FilledButton.icon(
                   onPressed: () => context.push('/checkout'),
@@ -143,7 +177,9 @@ class WishlistScreen extends ConsumerWidget {
     final session = ref.watch(authControllerProvider).value;
     if (session == null) {
       return Scaffold(
-        appBar: AppBar(title: Text(AppLocalizations.of(context).text('wishlist'))),
+        appBar: AppBar(
+          title: Text(AppLocalizations.of(context).text('wishlist')),
+        ),
         body: Center(
           child: FilledButton(
             onPressed: () => context.push('/login'),
@@ -153,33 +189,43 @@ class WishlistScreen extends ConsumerWidget {
       );
     }
     return Scaffold(
-      appBar: AppBar(title: Text(AppLocalizations.of(context).text('wishlist'))),
-      body: ref.watch(wishlistProvider).when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(
-          child: TextButton(
-            onPressed: () => ref.invalidate(wishlistProvider),
-            child: Text('Unable to load wishlist. Try again: $error'),
-          ),
-        ),
-        data: (items) => items.isEmpty
-            ? Center(child: Text(AppLocalizations.of(context).text('emptyWishlist')))
-            : ListView.builder(
-                itemCount: items.length,
-                itemBuilder: (context, index) {
-                  final item = items[index];
-                  final slug = item['slug']?.toString() ?? '';
-                  return ListTile(
-                    title: Text(item['name']?.toString() ?? ''),
-                    subtitle: Text(item['sku']?.toString() ?? ''),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: slug.isEmpty
-                        ? null
-                        : () => context.push('/products/${Uri.encodeComponent(slug)}'),
-                  );
-                },
-              ),
+      appBar: AppBar(
+        title: Text(AppLocalizations.of(context).text('wishlist')),
       ),
+      body: ref
+          .watch(wishlistProvider)
+          .when(
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (error, _) => Center(
+              child: TextButton(
+                onPressed: () => ref.invalidate(wishlistProvider),
+                child: Text('Unable to load wishlist. Try again: $error'),
+              ),
+            ),
+            data: (items) => items.isEmpty
+                ? Center(
+                    child: Text(
+                      AppLocalizations.of(context).text('emptyWishlist'),
+                    ),
+                  )
+                : ListView.builder(
+                    itemCount: items.length,
+                    itemBuilder: (context, index) {
+                      final item = items[index];
+                      final slug = item['slug']?.toString() ?? '';
+                      return ListTile(
+                        title: Text(item['name']?.toString() ?? ''),
+                        subtitle: Text(item['sku']?.toString() ?? ''),
+                        trailing: const Icon(Icons.chevron_right),
+                        onTap: slug.isEmpty
+                            ? null
+                            : () => context.push(
+                                '/products/${Uri.encodeComponent(slug)}',
+                              ),
+                      );
+                    },
+                  ),
+          ),
     );
   }
 }
@@ -193,9 +239,8 @@ Future<void> _mutate(
     await request();
   } catch (error) {
     if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error.toString())),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(error.toString())));
     }
   }
 }

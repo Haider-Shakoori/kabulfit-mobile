@@ -22,7 +22,8 @@ class HomeScreen extends ConsumerWidget {
           PopupMenuButton<String>(
             tooltip: strings.text('language'),
             icon: const Icon(Icons.language),
-            onSelected: (language) => ref.read(appLocaleProvider.notifier).change(language),
+            onSelected: (language) =>
+                ref.read(appLocaleProvider.notifier).change(language),
             itemBuilder: (_) => const [
               PopupMenuItem(value: 'en', child: Text('English')),
               PopupMenuItem(value: 'fa', child: Text('دری')),
@@ -34,11 +35,26 @@ class HomeScreen extends ConsumerWidget {
             icon: const Icon(Icons.dashboard_outlined),
             onSelected: (route) => context.push(route),
             itemBuilder: (_) => [
-              PopupMenuItem(value: '/wishlist', child: Text(strings.text('wishlist'))),
-              PopupMenuItem(value: '/orders', child: Text(strings.text('orders'))),
-              PopupMenuItem(value: '/addresses', child: Text(strings.text('addresses'))),
-              PopupMenuItem(value: '/measurements', child: Text(strings.text('measurements'))),
-              PopupMenuItem(value: '/tailoring', child: Text(strings.text('tailoring'))),
+              PopupMenuItem(
+                value: '/wishlist',
+                child: Text(strings.text('wishlist')),
+              ),
+              PopupMenuItem(
+                value: '/orders',
+                child: Text(strings.text('orders')),
+              ),
+              PopupMenuItem(
+                value: '/addresses',
+                child: Text(strings.text('addresses')),
+              ),
+              PopupMenuItem(
+                value: '/measurements',
+                child: Text(strings.text('measurements')),
+              ),
+              PopupMenuItem(
+                value: '/tailoring',
+                child: Text(strings.text('tailoring')),
+              ),
             ],
           ),
           if (session == null)
@@ -109,54 +125,65 @@ class HomeScreen extends ConsumerWidget {
   }
 }
 
-
 class _FeaturedPreview extends ConsumerWidget {
   const _FeaturedPreview();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return ref.watch(catalogProvider).when(
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (_, _) => TextButton(
-        onPressed: () => ref.invalidate(catalogProvider),
-        child: Text(AppLocalizations.of(context).text('retry')),
-      ),
-      data: (products) => products.isEmpty
-          ? const SizedBox.shrink()
-          : ListView.separated(
-              scrollDirection: Axis.horizontal,
-              itemCount: products.length > 6 ? 6 : products.length,
-              separatorBuilder: (_, _) => const SizedBox(width: 12),
-              itemBuilder: (context, index) {
-                final product = products[index];
-                return SizedBox(
-                  width: 180,
-                  child: Card(
-                    clipBehavior: Clip.antiAlias,
-                    child: InkWell(
-                      onTap: () => context.push('/products/${Uri.encodeComponent(product.slug)}'),
-                      child: Column(
-                        children: [
-                          Expanded(
-                            child: SizedBox.expand(
-                              child: product.imageUrl == null
-                                  ? const Icon(Icons.checkroom)
-                                  : Image.network(product.imageUrl!, fit: BoxFit.cover,
-                                      errorBuilder: (_, _, _) => const Icon(Icons.broken_image_outlined)),
-                            ),
+    return ref
+        .watch(catalogProvider)
+        .when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (_, _) => TextButton(
+            onPressed: () => ref.invalidate(catalogProvider),
+            child: Text(AppLocalizations.of(context).text('retry')),
+          ),
+          data: (products) => products.isEmpty
+              ? const SizedBox.shrink()
+              : ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: products.length > 6 ? 6 : products.length,
+                  separatorBuilder: (_, _) => const SizedBox(width: 12),
+                  itemBuilder: (context, index) {
+                    final product = products[index];
+                    return SizedBox(
+                      width: 180,
+                      child: Card(
+                        clipBehavior: Clip.antiAlias,
+                        child: InkWell(
+                          onTap: () => context.push(
+                            '/products/${Uri.encodeComponent(product.slug)}',
                           ),
-                          Padding(
-                            padding: const EdgeInsets.all(12),
-                            child: Text(product.name, maxLines: 2,
-                                overflow: TextOverflow.ellipsis),
+                          child: Column(
+                            children: [
+                              Expanded(
+                                child: SizedBox.expand(
+                                  child: product.imageUrl == null
+                                      ? const Icon(Icons.checkroom)
+                                      : Image.network(
+                                          product.imageUrl!,
+                                          fit: BoxFit.cover,
+                                          errorBuilder: (_, _, _) => const Icon(
+                                            Icons.broken_image_outlined,
+                                          ),
+                                        ),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(12),
+                                child: Text(
+                                  product.name,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
-                    ),
-                  ),
-                );
-              },
-            ),
-    );
+                    );
+                  },
+                ),
+        );
   }
 }

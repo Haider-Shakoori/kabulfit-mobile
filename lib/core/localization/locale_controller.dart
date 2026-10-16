@@ -14,7 +14,8 @@ class AppLocaleController extends AsyncNotifier<Locale> {
     final prefs = await SharedPreferences.getInstance();
     final language = prefs.getString(_key);
     if (const {'en', 'fa', 'ps'}.contains(language)) return Locale(language!);
-    final system = WidgetsBinding.instance.platformDispatcher.locale.languageCode;
+    final system =
+        WidgetsBinding.instance.platformDispatcher.locale.languageCode;
     return Locale(const {'en', 'fa', 'ps'}.contains(system) ? system : 'en');
   }
 

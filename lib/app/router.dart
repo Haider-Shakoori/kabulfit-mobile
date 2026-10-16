@@ -17,20 +17,48 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/shop', builder: (_, _) => const CatalogScreen()),
       GoRoute(
         path: '/products/:slug',
-        builder: (_, state) => ProductScreen(slug: state.pathParameters['slug']!),
+        builder: (_, state) =>
+            ProductScreen(slug: state.pathParameters['slug']!),
       ),
-      GoRoute(path: '/measurements', builder: (_, _) => const MeasurementProfilesScreen()),
-      GoRoute(path: '/measurements/new', builder: (_, _) => const NewMeasurementProfileScreen()),
-      GoRoute(path: '/measurements/edit', builder: (_, state) => NewMeasurementProfileScreen(existing: state.extra is Map<String, dynamic> ? state.extra as Map<String, dynamic> : null)),
-      GoRoute(path: '/products/:slug/tailor', builder: (_, state) => TailorProductScreen(slug: state.pathParameters['slug']!)),
-      GoRoute(path: '/tailoring', builder: (_, _) => const TailoringRequestsScreen()),
+      GoRoute(
+        path: '/measurements',
+        builder: (_, _) => const MeasurementProfilesScreen(),
+      ),
+      GoRoute(
+        path: '/measurements/new',
+        builder: (_, _) => const NewMeasurementProfileScreen(),
+      ),
+      GoRoute(
+        path: '/measurements/edit',
+        builder: (_, state) => NewMeasurementProfileScreen(
+          existing: state.extra is Map<String, dynamic>
+              ? state.extra as Map<String, dynamic>
+              : null,
+        ),
+      ),
+      GoRoute(
+        path: '/products/:slug/tailor',
+        builder: (_, state) =>
+            TailorProductScreen(slug: state.pathParameters['slug']!),
+      ),
+      GoRoute(
+        path: '/tailoring',
+        builder: (_, _) => const TailoringRequestsScreen(),
+      ),
       GoRoute(path: '/checkout', builder: (_, _) => const CheckoutScreen()),
       GoRoute(path: '/cart', builder: (_, _) => const CartScreen()),
       GoRoute(path: '/wishlist', builder: (_, _) => const WishlistScreen()),
       GoRoute(path: '/addresses', builder: (_, _) => const AddressesScreen()),
-      GoRoute(path: '/addresses/new', builder: (_, _) => const NewAddressScreen()),
+      GoRoute(
+        path: '/addresses/new',
+        builder: (_, _) => const NewAddressScreen(),
+      ),
       GoRoute(path: '/orders', builder: (_, _) => const OrdersScreen()),
-      GoRoute(path: '/orders/:uuid/tracking', builder: (_, state) => TrackingScreen(uuid: state.pathParameters['uuid']!)),
+      GoRoute(
+        path: '/orders/:uuid/tracking',
+        builder: (_, state) =>
+            TrackingScreen(uuid: state.pathParameters['uuid']!),
+      ),
       GoRoute(path: '/login', builder: (_, _) => const LoginScreen()),
     ],
   );

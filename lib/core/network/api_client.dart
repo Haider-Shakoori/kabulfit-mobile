@@ -81,7 +81,9 @@ class ApiClient {
   }
 
   Future<String> _supportedLocale() async {
-    final locale = (await SharedPreferences.getInstance()).getString('kabulfit.locale') ?? 'en';
+    final locale =
+        (await SharedPreferences.getInstance()).getString('kabulfit.locale') ??
+        'en';
     return const {'en', 'fa', 'ps'}.contains(locale) ? locale : 'en';
   }
 
