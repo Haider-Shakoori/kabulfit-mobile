@@ -16,7 +16,11 @@ void main() {
     for (final locale in AppLocalizations.supportedLocales) {
       final strings = AppLocalizations(locale);
       for (final key in ['checkout', 'shippingMethod', 'deliveryAddress']) {
-        expect(strings.text(key), isNot(key), reason: '${locale.languageCode}: $key');
+        expect(
+          strings.text(key),
+          isNot(key),
+          reason: '${locale.languageCode}: $key',
+        );
       }
     }
   });
