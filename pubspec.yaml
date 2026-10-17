@@ -31,3 +31,6 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/brand/kabulfit-original-logo.png
+    - assets/brand/kabulfit-original-logo-white.png
