@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../catalog/presentation/catalog_screen.dart';
+import 'measurement_figure.dart';
 
 /// Step-by-step measurement education inspired by the approved visual guide.
 /// Shows honest written directions until KabulFit has verified tutorial videos.
@@ -167,6 +168,43 @@ class MeasurementGuideScreen extends ConsumerWidget {
                           ),
                         ),
                       ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 17),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(18, 16, 18, 15),
+                child: Column(
+                  children: [
+                    Text(
+                      _copy(
+                        locale,
+                        'WHERE TO MEASURE',
+                        'محل اندازه‌گیری',
+                        'د اندازه اخیستلو ځای',
+                      ),
+                      style: const TextStyle(
+                        fontSize: 11,
+                        letterSpacing: 1.4,
+                        color: BrandColors.burgundy,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    const MeasurementFigure(height: 230),
+                    const SizedBox(height: 5),
+                    Text(
+                      _copy(
+                        locale,
+                        'Illustrated guide — use the steps below for exact tape placement.',
+                        'رهنمای تصویری — برای محل دقیق متر، مراحل زیر را دنبال کنید.',
+                        'انځوریز لارښود — د متر سم ځای لپاره لاندې ګامونه تعقیب کړئ.',
+                      ),
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodySmall,
                     ),
                   ],
                 ),
