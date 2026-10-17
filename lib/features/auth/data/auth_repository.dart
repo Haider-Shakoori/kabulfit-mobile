@@ -71,10 +71,11 @@ class AuthRepository {
     final token = data['token'];
     final account = data['user'];
 
-    if (token is! String ||
-        token.isEmpty ||
-        account is! Map<String, dynamic>) {
-      throw const FormatException('Invalid authentication response from KabulFit.');
+    if (token is! String || token.isEmpty) {
+      throw const FormatException('Invalid authentication response.');
+    }
+    if (account is! Map<String, dynamic>) {
+      throw const FormatException('Invalid authentication response.');
     }
 
     final session = AuthSession.fromAccount(account);
