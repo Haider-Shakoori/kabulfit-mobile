@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/localization/locale_controller.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/kabulfit_bottom_navigation.dart';
 import '../../auth/application/auth_controller.dart';
 import '../../catalog/presentation/catalog_screen.dart';
 
@@ -121,12 +122,42 @@ class HomeScreen extends ConsumerWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 14),
+            const SizedBox(height: 12),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: InkWell(
+                onTap: () => context.go('/shop'),
+                borderRadius: BorderRadius.circular(20),
+                child: Container(
+                  height: 46,
+                  padding: const EdgeInsets.symmetric(horizontal: 14),
+                  decoration: BoxDecoration(
+                    color: BrandColors.cream,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.search_rounded,
+                        color: BrandColors.mutedInk,
+                        size: 21,
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        strings.text('searchProducts'),
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 13),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: catalog.when(
                 loading: () => const SizedBox(
-                  height: 370,
+                  height: 238,
                   child: Center(child: CircularProgressIndicator()),
                 ),
                 error: (_, _) => SizedBox(
@@ -182,29 +213,65 @@ class HomeScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 14),
             categories.when(
-              loading: () => const SizedBox(height: 54),
+              loading: () => const SizedBox(height: 120),
               error: (_, _) => const SizedBox.shrink(),
               data: (items) => items.isEmpty
                   ? const SizedBox.shrink()
                   : SizedBox(
-                      height: 54,
+                      height: 118,
                       child: ListView.separated(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         scrollDirection: Axis.horizontal,
                         itemCount: items.length,
-                        separatorBuilder: (_, _) => const SizedBox(width: 10),
+                        separatorBuilder: (_, _) => const SizedBox(width: 14),
                         itemBuilder: (context, index) {
                           final category = items[index];
                           final name = category['name']?.toString() ?? '';
-                          return ActionChip(
-                            avatar: const Icon(
-                              Icons.auto_awesome_outlined,
-                              size: 16,
-                              color: BrandColors.gold,
+                          final slug = category['slug']?.toString() ?? '';
+                          final photos = catalog.value ?? const <KabulProduct>[];
+                          KabulProduct? sample;
+                          for (final product in photos) {
+                            if (product.categorySlug == slug &&
+                                product.imageUrl != null) {
+                              sample = product;
+                              break;
+                            }
+                          }
+                          return SizedBox(
+                            width: 75,
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(13),
+                              onTap: () => context.go('/shop'),
+                              child: Column(
+                                children: [
+                                  CircleAvatar(
+                                    radius: 35,
+                                    backgroundColor: BrandColors.champagne,
+                                    backgroundImage: sample?.imageUrl == null
+                                        ? null
+                                        : NetworkImage(sample!.imageUrl!),
+                                    child: sample?.imageUrl == null
+                                        ? const Icon(
+                                            Icons.checkroom_outlined,
+                                            color: BrandColors.burgundy,
+                                          )
+                                        : null,
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    name,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      color: BrandColors.ink,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                            label: Text(name),
-                            backgroundColor: BrandColors.cream,
-                            onPressed: () => context.go('/shop'),
                           );
                         },
                       ),
@@ -302,38 +369,7 @@ class HomeScreen extends ConsumerWidget {
           ],
         ),
       ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: 0,
-        onDestinationSelected: (index) {
-          switch (index) {
-            case 1:
-              context.go('/shop');
-            case 2:
-              context.push('/wishlist');
-            case 3:
-              context.go('/cart');
-          }
-        },
-        destinations: [
-          NavigationDestination(
-            icon: const Icon(Icons.home_outlined),
-            selectedIcon: const Icon(Icons.home_rounded),
-            label: strings.text('home'),
-          ),
-          NavigationDestination(
-            icon: const Icon(Icons.grid_view_outlined),
-            label: strings.text('shop'),
-          ),
-          NavigationDestination(
-            icon: const Icon(Icons.favorite_border_rounded),
-            label: strings.text('wishlist'),
-          ),
-          NavigationDestination(
-            icon: const Icon(Icons.shopping_bag_outlined),
-            label: strings.text('cart'),
-          ),
-        ],
-      ),
+      bottomNavigationBar: const KabulFitBottomNavigation(selectedIndex: 0),
     );
   }
 }
@@ -357,7 +393,7 @@ class _EditorialHero extends StatelessWidget {
     return ClipRRect(
       borderRadius: BorderRadius.circular(25),
       child: SizedBox(
-        height: 370,
+        height: 238,
         child: Stack(
           fit: StackFit.expand,
           children: [
@@ -387,7 +423,7 @@ class _EditorialHero extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.all(25),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
@@ -405,7 +441,7 @@ class _EditorialHero extends StatelessWidget {
                     style: const TextStyle(
                       fontFamily: 'serif',
                       color: Colors.white,
-                      fontSize: 36,
+                      fontSize: 26,
                       height: 1.08,
                       fontWeight: FontWeight.w600,
                     ),
@@ -419,9 +455,9 @@ class _EditorialHero extends StatelessWidget {
                       height: 1.4,
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 12),
                   SizedBox(
-                    width: 205,
+                    width: 145,
                     child: FilledButton.icon(
                       style: FilledButton.styleFrom(
                         backgroundColor: BrandColors.warmWhite,
