@@ -71,7 +71,11 @@ class _MeasurementGuideScreenState
               .toString();
         }
       }
-      setState(() => unit = draft['unit'] == 'in' ? 'in' : 'cm');
+      setState(() {
+        unit = draft['unit'] == 'in' ? 'in' : 'cm';
+        isMale = draft['is_male'] != false;
+        enteringValues = draft['entering'] == true;
+      });
     } catch (_) {
       // Ignore corrupt local draft; never send a partially decoded profile.
     }
@@ -84,6 +88,8 @@ class _MeasurementGuideScreenState
       jsonEncode({
         'name': _name.text,
         'unit': unit,
+        'is_male': isMale,
+        'entering': true,
         'measurements': _values.map((key, value) => MapEntry(key, value.text)),
       }),
     );
@@ -205,14 +211,14 @@ class _MeasurementGuideScreenState
               FilledButton(
                 onPressed: () {
                   Navigator.pop(sheet);
-                  context.push('/register');
+                  context.push('/register?next=%2Fmeasurement-guide');
                 },
                 child: Text(AppLocalizations.of(context).text('createAccount')),
               ),
               TextButton(
                 onPressed: () {
                   Navigator.pop(sheet);
-                  context.push('/login');
+                  context.push('/login?next=%2Fmeasurement-guide');
                 },
                 child: Text(AppLocalizations.of(context).text('signIn')),
               ),
