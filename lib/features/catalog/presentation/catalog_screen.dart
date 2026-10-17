@@ -401,9 +401,9 @@ class _ProductActionsState extends ConsumerState<_ProductActions> {
             .toList() ??
         [];
     final originalSizes =
-        (widget.product['size_options'] as List?)
-            ?.whereType<String>()
-            .toList(growable: false) ??
+        (widget.product['size_options'] as List?)?.whereType<String>().toList(
+          growable: false,
+        ) ??
         const <String>[];
     final requiresOriginalSize = variants.isEmpty && originalSizes.isNotEmpty;
     final available = variants.where((variant) {
@@ -445,15 +445,12 @@ class _ProductActionsState extends ConsumerState<_ProductActions> {
           DropdownButtonFormField<String>(
             initialValue: selectedSize,
             decoration: InputDecoration(
-              labelText: AppLocalizations.of(context).text('selectOriginalSize'),
+              labelText: AppLocalizations.of(
+                context,
+              ).text('selectOriginalSize'),
             ),
             items: originalSizes
-                .map(
-                  (size) => DropdownMenuItem(
-                    value: size,
-                    child: Text(size),
-                  ),
-                )
+                .map((size) => DropdownMenuItem(value: size, child: Text(size)))
                 .toList(),
             onChanged: busy
                 ? null

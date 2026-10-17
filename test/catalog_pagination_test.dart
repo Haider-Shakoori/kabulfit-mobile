@@ -12,11 +12,7 @@ void main() {
       'data': [
         for (final sku in skus) {'sku': sku, 'slug': sku.toLowerCase()},
       ],
-      'meta': {
-        'current_page': current,
-        'last_page': last,
-        'total': total,
-      },
+      'meta': {'current_page': current, 'last_page': last, 'total': total},
     };
   }
 
@@ -52,9 +48,8 @@ void main() {
   test('rejects duplicated products across pages', () async {
     await expectLater(
       loadAllCatalogPages(
-        (number) async => number == 1
-            ? page(1, 2, 2, ['A'])
-            : page(2, 2, 2, ['A']),
+        (number) async =>
+            number == 1 ? page(1, 2, 2, ['A']) : page(2, 2, 2, ['A']),
       ),
       throwsFormatException,
     );
@@ -63,9 +58,8 @@ void main() {
   test('rejects incomplete or inconsistent catalog responses', () async {
     await expectLater(
       loadAllCatalogPages(
-        (number) async => number == 1
-            ? page(1, 2, 3, ['A'])
-            : page(2, 2, 2, ['B']),
+        (number) async =>
+            number == 1 ? page(1, 2, 3, ['A']) : page(2, 2, 2, ['B']),
       ),
       throwsFormatException,
     );
