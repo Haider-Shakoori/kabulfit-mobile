@@ -14,30 +14,18 @@ class KabulFitBrandLogo extends StatelessWidget {
   final double height;
   final bool white;
 
-  static const _darkLogo =
-      'https://kabulfit.businessos.af/images/kabulfit-base44/source/4ce74c49d_KabulFit_logo_shopify_header.png';
-  static const _whiteLogo =
-      'https://kabulfit.businessos.af/images/kabulfit-base44/source/b6d3c7505_KabulFit_logo_white.png';
-
   @override
   Widget build(BuildContext context) => Semantics(
     label: 'KabulFit',
     image: true,
-    child: Image.network(
-      white ? _whiteLogo : _darkLogo,
+    child: Image.asset(
+      white
+          ? 'assets/brand/kabulfit-original-logo-white.png'
+          : 'assets/brand/kabulfit-original-logo.png',
       width: width,
       height: height,
       fit: BoxFit.contain,
-      errorBuilder: (_, _, _) => Text(
-        'KabulFit',
-        textAlign: TextAlign.center,
-        style: TextStyle(
-          fontFamily: 'serif',
-          color: white ? Colors.white : const Color(0xFF74263D),
-          fontSize: 24,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
+      semanticLabel: 'KabulFit',
     ),
   );
 }
