@@ -111,9 +111,7 @@ ThemeData buildTheme() {
           fontWeight: FontWeight.w700,
           letterSpacing: .4,
         ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       ),
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
@@ -121,9 +119,7 @@ ThemeData buildTheme() {
         minimumSize: const Size.fromHeight(52),
         foregroundColor: BrandColors.burgundy,
         side: const BorderSide(color: BrandColors.champagne),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       ),
     ),
     navigationBarTheme: NavigationBarThemeData(
@@ -149,3 +145,5 @@ ThemeData buildTheme() {
     ),
   );
 }
+
+[executed on device: businessos-dev-vps (9b1cdbf1-1a02-4fe8-9e81-8871c3eca22c)]
