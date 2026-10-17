@@ -32,3 +32,6 @@ ios/Runner/GeneratedPluginRegistrant.*
 .env.*
 !.env.example
 *.json.secret
+
+# Generated from the original favicon by tool/prepare_app_icon.dart
+assets/brand/kabulfit-icon-square.png

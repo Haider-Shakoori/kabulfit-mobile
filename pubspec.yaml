@@ -7,7 +7,7 @@ environment:
   sdk: ">=3.11.0 <4.0.0"
 
 dependencies:
-  connectivity_plus: ^7.0.0
+  connectivity_plus: '>=7.0.0 <7.3.0'
   dio: ^5.9.0
   flutter:
     sdk: flutter
@@ -27,6 +27,8 @@ dev_dependencies:
   flutter_lints: ^6.0.0
   flutter_test:
     sdk: flutter
+  flutter_launcher_icons: ^0.14.4
+  image: ^4.5.4
   mocktail: ^1.0.4
 
 flutter:
@@ -34,3 +36,14 @@ flutter:
   assets:
     - assets/brand/kabulfit-original-logo.png
     - assets/brand/kabulfit-original-logo-white.png
+
+# The square master image is created from the original KabulFit favicon
+# before each native build: dart run tool/prepare_app_icon.dart
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: assets/brand/kabulfit-icon-square.png
+  adaptive_icon_background: "#FFFCF8"
+  adaptive_icon_foreground: assets/brand/kabulfit-app-symbol.png
+  remove_alpha_ios: true
+  background_color_ios: "#FFFCF8"
