@@ -245,7 +245,9 @@ class HomeScreen extends ConsumerWidget {
                             width: 75,
                             child: InkWell(
                               borderRadius: BorderRadius.circular(13),
-                              onTap: () => context.go('/shop?category=${Uri.encodeQueryComponent(slug)}'),
+                              onTap: () => context.go(
+                                '/shop?category=${Uri.encodeQueryComponent(slug)}',
+                              ),
                               child: Column(
                                 children: [
                                   CircleAvatar(
@@ -678,16 +680,16 @@ class _LuxuryDrawer extends ConsumerWidget {
                 onTap: () => Navigator.of(context).pop(),
               ),
             ),
-            destination(Icons.shopping_bag_outlined, strings.text('shop'), '/shop'),
             destination(
-              Icons.menu_book_outlined,
-              switch (locale) {
-                'fa' => 'رهنمای اندازه‌گیری',
-                'ps' => 'د اندازې لارښود',
-                _ => 'Measurement guide',
-              },
-              '/measurement-guide',
+              Icons.shopping_bag_outlined,
+              strings.text('shop'),
+              '/shop',
             ),
+            destination(Icons.menu_book_outlined, switch (locale) {
+              'fa' => 'رهنمای اندازه‌گیری',
+              'ps' => 'د اندازې لارښود',
+              _ => 'Measurement guide',
+            }, '/measurement-guide'),
             destination(
               Icons.straighten_outlined,
               strings.text('myMeasurements'),
@@ -698,8 +700,16 @@ class _LuxuryDrawer extends ConsumerWidget {
               strings.text('wishlist'),
               '/wishlist',
             ),
-            destination(Icons.receipt_long_outlined, strings.text('myOrders'), '/orders'),
-            destination(Icons.person_outline_rounded, strings.text('account'), '/account'),
+            destination(
+              Icons.receipt_long_outlined,
+              strings.text('myOrders'),
+              '/orders',
+            ),
+            destination(
+              Icons.person_outline_rounded,
+              strings.text('account'),
+              '/account',
+            ),
             const Divider(height: 28),
             ExpansionTile(
               leading: const Icon(

@@ -22,7 +22,10 @@ class MeasurementGuideScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final locale = Localizations.localeOf(context).languageCode;
     final products = ref.watch(catalogProvider).value ?? const <KabulProduct>[];
-    final photo = products.where((p) => p.imageUrl != null).firstOrNull?.imageUrl;
+    final photo = products
+        .where((p) => p.imageUrl != null)
+        .firstOrNull
+        ?.imageUrl;
     final sections = [
       (
         icon: Icons.face_outlined,
@@ -99,7 +102,14 @@ class MeasurementGuideScreen extends ConsumerWidget {
       length: 3,
       child: Scaffold(
         appBar: AppBar(
-          title: Text(_copy(locale, 'Measurement guide', 'رهنمای اندازه‌گیری', 'د اندازې لارښود')),
+          title: Text(
+            _copy(
+              locale,
+              'Measurement guide',
+              'رهنمای اندازه‌گیری',
+              'د اندازې لارښود',
+            ),
+          ),
           bottom: TabBar(
             indicatorColor: BrandColors.burgundy,
             labelColor: BrandColors.burgundy,
@@ -126,17 +136,13 @@ class MeasurementGuideScreen extends ConsumerWidget {
                       Image.network(
                         photo,
                         fit: BoxFit.cover,
-                        errorBuilder: (_, _, _) => const ColoredBox(
-                          color: BrandColors.deepBurgundy,
-                        ),
+                        errorBuilder: (_, _, _) =>
+                            const ColoredBox(color: BrandColors.deepBurgundy),
                       ),
                     const DecoratedBox(
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
-                          colors: [
-                            Color(0xF04B1528),
-                            Color(0x554B1528),
-                          ],
+                          colors: [Color(0xF04B1528), Color(0x554B1528)],
                           begin: Alignment.centerLeft,
                           end: Alignment.centerRight,
                         ),
@@ -190,12 +196,20 @@ class MeasurementGuideScreen extends ConsumerWidget {
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   subtitle: Text(
-                    _copy(locale, 'View instructions', 'مشاهده رهنما', 'لارښوونې وګورئ'),
+                    _copy(
+                      locale,
+                      'View instructions',
+                      'مشاهده رهنما',
+                      'لارښوونې وګورئ',
+                    ),
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                   childrenPadding: const EdgeInsets.fromLTRB(19, 0, 19, 18),
                   children: [
-                    Text(step.detail, style: Theme.of(context).textTheme.bodyMedium),
+                    Text(
+                      step.detail,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
                   ],
                 ),
               ),

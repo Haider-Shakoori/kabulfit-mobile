@@ -41,9 +41,7 @@ class _KabulFitLaunchScreenState extends State<KabulFitLaunchScreen> {
   @override
   Widget build(BuildContext context) {
     if (completed == null) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
     return completed!
         ? const HomeScreen()
@@ -122,9 +120,8 @@ class _LuxuryOnboardingState extends ConsumerState<_LuxuryOnboarding> {
                   Image.network(
                     photos[index % photos.length],
                     fit: BoxFit.cover,
-                    errorBuilder: (_, _, _) => const ColoredBox(
-                      color: BrandColors.deepBurgundy,
-                    ),
+                    errorBuilder: (_, _, _) =>
+                        const ColoredBox(color: BrandColors.deepBurgundy),
                   )
                 else
                   const ColoredBox(color: BrandColors.deepBurgundy),
@@ -220,7 +217,12 @@ class _LuxuryOnboardingState extends ConsumerState<_LuxuryOnboarding> {
                             ),
                       label: Text(
                         currentPage == headlines.length - 1
-                            ? _copy(locale, 'Get started', 'شروع کنید', 'پیل کړئ')
+                            ? _copy(
+                                locale,
+                                'Get started',
+                                'شروع کنید',
+                                'پیل کړئ',
+                              )
                             : _copy(locale, 'Continue', 'ادامه', 'دوام'),
                       ),
                       icon: const Icon(Icons.arrow_forward_rounded),

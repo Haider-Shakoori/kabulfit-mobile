@@ -17,13 +17,21 @@ final routerProvider = Provider<GoRouter>((ref) {
     routes: [
       GoRoute(path: '/', builder: (_, _) => const KabulFitLaunchScreen()),
       GoRoute(path: '/account', builder: (_, _) => const AccountScreen()),
-      GoRoute(path: '/shop', builder: (_, state) => CatalogScreen(initialCategory: state.uri.queryParameters['category'])),
+      GoRoute(
+        path: '/shop',
+        builder: (_, state) => CatalogScreen(
+          initialCategory: state.uri.queryParameters['category'],
+        ),
+      ),
       GoRoute(
         path: '/products/:slug',
         builder: (_, state) =>
             ProductScreen(slug: state.pathParameters['slug']!),
       ),
-      GoRoute(path: '/measurement-guide', builder: (_, _) => const MeasurementGuideScreen()),
+      GoRoute(
+        path: '/measurement-guide',
+        builder: (_, _) => const MeasurementGuideScreen(),
+      ),
       GoRoute(
         path: '/measurements',
         builder: (_, _) => const MeasurementProfilesScreen(),
