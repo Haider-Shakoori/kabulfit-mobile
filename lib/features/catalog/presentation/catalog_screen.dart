@@ -85,7 +85,9 @@ class KabulProduct {
 }
 
 class CatalogScreen extends ConsumerStatefulWidget {
-  const CatalogScreen({super.key});
+  const CatalogScreen({this.initialCategory, super.key});
+
+  final String? initialCategory;
 
   @override
   ConsumerState<CatalogScreen> createState() => _CatalogScreenState();
@@ -94,6 +96,12 @@ class CatalogScreen extends ConsumerStatefulWidget {
 class _CatalogScreenState extends ConsumerState<CatalogScreen> {
   String query = '';
   String? selectedCategory;
+
+  @override
+  void initState() {
+    super.initState();
+    selectedCategory = widget.initialCategory;
+  }
 
   @override
   Widget build(BuildContext context) {
