@@ -281,7 +281,9 @@ class OrdersScreen extends ConsumerWidget {
                                     Expanded(
                                       child: Text(
                                         "${AppLocalizations.of(context).text('orderLabel')} $number",
-                                        style: Theme.of(context).textTheme.titleMedium,
+                                        style: Theme.of(
+                                          context,
+                                        ).textTheme.titleMedium,
                                       ),
                                     ),
                                     const Icon(
@@ -325,7 +327,7 @@ class OrdersScreen extends ConsumerWidget {
                         ),
                       );
                     },
-                  )
+                  ),
           ),
     );
   }
