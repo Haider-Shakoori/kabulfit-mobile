@@ -4,6 +4,9 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/config/providers.dart';
 import '../../../core/localization/app_localizations.dart';
+import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/kabulfit_bottom_navigation.dart';
+import '../../../core/widgets/kabulfit_brand_logo.dart';
 import '../../auth/application/auth_controller.dart';
 import '../../commerce/application/commerce_providers.dart';
 import '../application/catalog_pagination.dart';
@@ -83,7 +86,9 @@ class KabulProduct {
 }
 
 class CatalogScreen extends ConsumerStatefulWidget {
-  const CatalogScreen({super.key});
+  const CatalogScreen({this.initialCategory, super.key});
+
+  final String? initialCategory;
 
   @override
   ConsumerState<CatalogScreen> createState() => _CatalogScreenState();
@@ -92,6 +97,12 @@ class CatalogScreen extends ConsumerStatefulWidget {
 class _CatalogScreenState extends ConsumerState<CatalogScreen> {
   String query = '';
   String? selectedCategory;
+
+  @override
+  void initState() {
+    super.initState();
+    selectedCategory = widget.initialCategory;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -105,7 +116,18 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
     final result = ref.watch(catalogProvider);
     final categories = ref.watch(categoriesProvider);
     return Scaffold(
-      appBar: AppBar(title: Text(shop)),
+      appBar: AppBar(
+        title: Text(shop),
+        actions: [
+          IconButton(
+            tooltip: strings.text('cart'),
+            icon: const Icon(Icons.shopping_bag_outlined),
+            onPressed: () => context.go('/cart'),
+          ),
+          const SizedBox(width: 8),
+        ],
+      ),
+      bottomNavigationBar: const KabulFitBottomNavigation(selectedIndex: 1),
       body: RefreshIndicator(
         onRefresh: () => ref.refresh(catalogProvider.future),
         child: CustomScrollView(
@@ -114,7 +136,12 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: SearchBar(
-                  leading: const Icon(Icons.search),
+                  elevation: WidgetStateProperty.all(0),
+                  backgroundColor: WidgetStateProperty.all(BrandColors.cream),
+                  leading: const Icon(
+                    Icons.search,
+                    color: BrandColors.burgundy,
+                  ),
                   hintText: strings.text('searchProducts'),
                   onChanged: (value) => setState(() => query = value),
                 ),
@@ -133,7 +160,11 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
                           scrollDirection: Axis.horizontal,
                           children: [
                             ChoiceChip(
-                              label: const Text('All'),
+                              label: Text(switch (locale) {
+                                'fa' => 'همه',
+                                'ps' => 'ټول',
+                                _ => 'All',
+                              }),
                               selected: selectedCategory == null,
                               onSelected: (_) =>
                                   setState(() => selectedCategory = null),
@@ -207,7 +238,6 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
                         itemBuilder: (context, index) {
                           final product = visible[index];
                           return Card(
-                            clipBehavior: Clip.antiAlias,
                             child: InkWell(
                               onTap: () => context.push(
                                 '/products/${Uri.encodeComponent(product.slug)}',
@@ -216,37 +246,70 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Expanded(
-                                    child: SizedBox(
-                                      width: double.infinity,
-                                      child: product.imageUrl == null
-                                          ? const Icon(
-                                              Icons.checkroom,
-                                              size: 48,
-                                            )
-                                          : Image.network(
-                                              product.imageUrl!,
-                                              fit: BoxFit.cover,
-                                              errorBuilder: (_, _, _) =>
-                                                  const Icon(
-                                                    Icons.broken_image_outlined,
-                                                  ),
+                                    child: Stack(
+                                      fit: StackFit.expand,
+                                      children: [
+                                        product.imageUrl == null
+                                            ? const ColoredBox(
+                                                color: BrandColors.cream,
+                                                child: Icon(
+                                                  Icons.checkroom_outlined,
+                                                ),
+                                              )
+                                            : Image.network(
+                                                product.imageUrl!,
+                                                fit: BoxFit.cover,
+                                                errorBuilder: (_, _, _) =>
+                                                    const ColoredBox(
+                                                      color: BrandColors.cream,
+                                                      child: Icon(
+                                                        Icons
+                                                            .image_not_supported_outlined,
+                                                      ),
+                                                    ),
+                                              ),
+                                        if (!product.inStock)
+                                          Align(
+                                            alignment: Alignment.topLeft,
+                                            child: Padding(
+                                              padding: const EdgeInsets.all(10),
+                                              child: Chip(
+                                                label: Text(switch (locale) {
+                                                  'fa' => 'ناموجود',
+                                                  'ps' => 'نشته',
+                                                  _ => 'Sold out',
+                                                }),
+                                                visualDensity:
+                                                    VisualDensity.compact,
+                                              ),
                                             ),
+                                          ),
+                                      ],
                                     ),
                                   ),
                                   Padding(
-                                    padding: const EdgeInsets.all(10),
+                                    padding: const EdgeInsets.fromLTRB(
+                                      11,
+                                      11,
+                                      11,
+                                      14,
+                                    ),
                                     child: Column(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          product.category,
+                                          product.category.toUpperCase(),
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
-                                          style: Theme.of(
-                                            context,
-                                          ).textTheme.labelSmall,
+                                          style: const TextStyle(
+                                            fontSize: 9,
+                                            letterSpacing: .8,
+                                            fontWeight: FontWeight.w700,
+                                            color: BrandColors.gold,
+                                          ),
                                         ),
+                                        const SizedBox(height: 6),
                                         Text(
                                           product.name,
                                           maxLines: 2,
@@ -255,11 +318,14 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
                                             context,
                                           ).textTheme.titleSmall,
                                         ),
+                                        const SizedBox(height: 7),
                                         Text(
                                           product.price,
-                                          style: Theme.of(
-                                            context,
-                                          ).textTheme.labelLarge,
+                                          style: const TextStyle(
+                                            color: BrandColors.burgundy,
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w700,
+                                          ),
                                         ),
                                       ],
                                     ),
@@ -300,15 +366,39 @@ final productProvider = FutureProvider.family<Map<String, dynamic>, String>((
   return data;
 });
 
-class ProductScreen extends ConsumerWidget {
+class ProductScreen extends ConsumerStatefulWidget {
   const ProductScreen({required this.slug, super.key});
   final String slug;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ProductScreen> createState() => _ProductScreenState();
+}
+
+class _ProductScreenState extends ConsumerState<ProductScreen> {
+  final PageController _photos = PageController();
+  int _selectedPhoto = 0;
+
+  @override
+  void didUpdateWidget(covariant ProductScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.slug != widget.slug) {
+      _selectedPhoto = 0;
+      if (_photos.hasClients) _photos.jumpToPage(0);
+    }
+  }
+
+  @override
+  void dispose() {
+    _photos.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final slug = widget.slug;
     final result = ref.watch(productProvider(slug));
     return Scaffold(
-      appBar: AppBar(title: const Text('KabulFit')),
+      appBar: AppBar(title: const KabulFitBrandLogo(width: 150, height: 48)),
       body: result.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, _) => Center(
@@ -327,45 +417,202 @@ class ProductScreen extends ConsumerWidget {
               ? primary['url']?.toString()
               : null;
           final price = data['price'];
+          final gallery = images is List
+              ? images
+                    .whereType<Map>()
+                    .map((entry) => entry['url']?.toString())
+                    .whereType<String>()
+                    .where((url) => url.isNotEmpty)
+                    .toList(growable: false)
+              : <String>[];
+          final photoUrls = gallery.isNotEmpty
+              ? gallery
+              : imageUrl == null
+              ? <String>[]
+              : <String>[imageUrl];
+          final originalSizes =
+              (data['size_options'] as List?)?.whereType<String>().toList() ??
+              const <String>[];
+          final stock = data['stock'];
+          final inStock = stock is Map && stock['in_stock'] == true;
+          final currency = price is Map ? price['currency']?.toString() : null;
+          final minor = price is Map ? price['minor'] : null;
+          final displayedPrice = currency == 'USD' && minor is num
+              ? '\$${(minor / 100).toStringAsFixed(2)}'
+              : '—';
           return ListView(
-            padding: const EdgeInsets.all(20),
-
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 34),
             children: [
-              AspectRatio(
-                aspectRatio: 4 / 5,
-                child: imageUrl == null
-                    ? const Icon(Icons.checkroom, size: 80)
-                    : Image.network(
-                        imageUrl,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, _, _) =>
-                            const Icon(Icons.broken_image_outlined),
-                      ),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(24),
+                child: AspectRatio(
+                  aspectRatio: 4 / 4.4,
+                  child: photoUrls.isEmpty
+                      ? const ColoredBox(
+                          color: BrandColors.cream,
+                          child: Icon(Icons.checkroom_outlined, size: 72),
+                        )
+                      : PageView.builder(
+                          controller: _photos,
+                          onPageChanged: (index) {
+                            if (mounted) setState(() => _selectedPhoto = index);
+                          },
+                          itemCount: photoUrls.length,
+                          itemBuilder: (context, index) => Image.network(
+                            photoUrls[index],
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, _, _) => const ColoredBox(
+                              color: BrandColors.cream,
+                              child: Icon(Icons.broken_image_outlined),
+                            ),
+                          ),
+                        ),
+                ),
               ),
-              const SizedBox(height: 24),
+              if (photoUrls.length > 1) ...[
+                const SizedBox(height: 11),
+                SizedBox(
+                  height: 74,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: photoUrls.length,
+                    separatorBuilder: (_, _) => const SizedBox(width: 9),
+                    itemBuilder: (context, index) {
+                      final selected = _selectedPhoto == index;
+                      return Semantics(
+                        label: 'Photo ${index + 1} of ${photoUrls.length}',
+                        selected: selected,
+                        button: true,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(10),
+                          onTap: () => _photos.animateToPage(
+                            index,
+                            duration: const Duration(milliseconds: 250),
+                            curve: Curves.easeInOut,
+                          ),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            width: 64,
+                            padding: const EdgeInsets.all(3),
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: selected
+                                    ? BrandColors.burgundy
+                                    : BrandColors.champagne,
+                                width: selected ? 2.5 : 1,
+                              ),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.network(
+                                photoUrls[index],
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, _, _) => const ColoredBox(
+                                  color: BrandColors.cream,
+                                  child: Icon(
+                                    Icons.image_not_supported_outlined,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '${_selectedPhoto + 1} / ${photoUrls.length}',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ],
+              const SizedBox(height: 22),
+              Text(
+                data['category'] is Map
+                    ? ((data['category'] as Map)['name']?.toString() ?? '')
+                          .toUpperCase()
+                    : 'KABULFIT',
+                style: const TextStyle(
+                  fontSize: 10,
+                  letterSpacing: 1.8,
+                  fontWeight: FontWeight.w700,
+                  color: BrandColors.gold,
+                ),
+              ),
+              const SizedBox(height: 9),
               Text(
                 data['name']?.toString() ?? '',
                 style: Theme.of(context).textTheme.headlineMedium,
               ),
-              const SizedBox(height: 8),
-              Text(
-                price is Map ? price['formatted']?.toString() ?? '' : '',
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              const SizedBox(height: 16),
-              Text(data['description']?.toString() ?? ''),
-              const SizedBox(height: 24),
-              if (data['tailoring_enabled'] == true) ...[
-                const Chip(label: Text('Custom tailoring available')),
-                OutlinedButton.icon(
-                  onPressed: () => context.push(
-                    '/products/${Uri.encodeComponent(slug)}/tailor',
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      displayedPrice,
+                      style: const TextStyle(
+                        color: BrandColors.burgundy,
+                        fontSize: 23,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                   ),
-                  icon: const Icon(Icons.straighten),
-                  label: Text(AppLocalizations.of(context).text('customize')),
+                  if (!inStock) const Chip(label: Text('Sold out')),
+                ],
+              ),
+              const SizedBox(height: 15),
+              const Divider(),
+              if (originalSizes.isNotEmpty) ...[
+                const SizedBox(height: 9),
+                Text(
+                  'Available sizes: ${originalSizes.join(' · ')}',
+                  style: Theme.of(context).textTheme.bodySmall,
                 ),
               ],
-              const SizedBox(height: 12),
+              const SizedBox(height: 18),
+              Text(
+                data['description']?.toString() ?? '',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              const SizedBox(height: 20),
+              if (data['tailoring_enabled'] == true) ...[
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: BrandColors.cream,
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const Icon(
+                        Icons.straighten,
+                        size: 30,
+                        color: BrandColors.burgundy,
+                      ),
+                      const SizedBox(height: 6),
+                      const Text(
+                        'Custom tailoring available',
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 12),
+                      OutlinedButton.icon(
+                        onPressed: () => context.push(
+                          '/products/${Uri.encodeComponent(slug)}/tailor',
+                        ),
+                        icon: const Icon(Icons.straighten),
+                        label: Text(
+                          AppLocalizations.of(context).text('customize'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+              const SizedBox(height: 22),
               if (data['is_demo'] == true)
                 const Text('DEMO PREVIEW — not available to purchase')
               else
@@ -442,19 +689,31 @@ class _ProductActionsState extends ConsumerState<_ProductActions> {
                 : (value) => setState(() => selectedVariant = value),
           ),
         if (requiresOriginalSize)
-          DropdownButtonFormField<String>(
-            initialValue: selectedSize,
-            decoration: InputDecoration(
-              labelText: AppLocalizations.of(
-                context,
-              ).text('selectOriginalSize'),
-            ),
-            items: originalSizes
-                .map((size) => DropdownMenuItem(value: size, child: Text(size)))
-                .toList(),
-            onChanged: busy
-                ? null
-                : (value) => setState(() => selectedSize = value),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                AppLocalizations.of(context).text('selectOriginalSize'),
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 9,
+                runSpacing: 9,
+                children: [
+                  for (final size in originalSizes)
+                    ChoiceChip(
+                      label: Text(size),
+                      selected: selectedSize == size,
+                      onSelected: busy
+                          ? null
+                          : (selected) => setState(
+                              () => selectedSize = selected ? size : null,
+                            ),
+                    ),
+                ],
+              ),
+            ],
           ),
         const SizedBox(height: 12),
         FilledButton.icon(

@@ -21,6 +21,7 @@ dependencies:
   package_info_plus: ^9.0.0
   shared_preferences: ^2.5.4
   uuid: ^4.5.2
+  url_launcher: ^6.3.2
 
 dev_dependencies:
   flutter_lints: ^6.0.0
@@ -30,3 +31,6 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/brand/kabulfit-original-logo.png
+    - assets/brand/kabulfit-original-logo-white.png

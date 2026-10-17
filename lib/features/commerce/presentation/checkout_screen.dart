@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/localization/app_localizations.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../auth/application/auth_controller.dart';
 import '../application/address_order_providers.dart';
 import '../application/checkout_providers.dart';
@@ -20,6 +21,7 @@ class CheckoutScreen extends ConsumerStatefulWidget {
 class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   String? addressUuid;
   String? shippingCode;
+  int checkoutStep = 0;
   bool processing = false;
   String? pendingOrderUuid;
   final coupon = TextEditingController();
@@ -64,125 +66,341 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
-          Text(
-            AppLocalizations.of(context).text('deliveryAddress'),
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-          addresses.when(
-            loading: () => const LinearProgressIndicator(),
-            error: (error, _) => TextButton(
-              onPressed: () => ref.invalidate(addressesProvider),
-              child: Text('Could not load addresses. Retry: $error'),
+          Container(
+            padding: const EdgeInsets.all(21),
+            margin: const EdgeInsets.only(bottom: 25),
+            decoration: BoxDecoration(
+              color: BrandColors.cream,
+              borderRadius: BorderRadius.circular(22),
+              border: Border.all(color: BrandColors.champagne),
             ),
-            data: (items) => items.isEmpty
-                ? TextButton(
-                    onPressed: () => context.push('/addresses/new'),
-                    child: Text(
-                      AppLocalizations.of(context).text('checkoutAddAddress'),
+            child: Column(
+              children: [
+                const Icon(
+                  Icons.lock_outline_rounded,
+                  color: BrandColors.burgundy,
+                  size: 34,
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  AppLocalizations.of(context).text('checkout'),
+                  style: Theme.of(context).textTheme.headlineMedium,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  switch (Localizations.localeOf(context).languageCode) {
+                    'fa' => 'جزئیات سفارش خود را بررسی کنید',
+                    'ps' => 'د خپل فرمایش معلومات وګورئ',
+                    _ => 'Review your details before placing an order',
+                  },
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ],
+            ),
+          ),
+          Row(
+            children: [
+              for (var index = 0; index < 3; index++) ...[
+                if (index > 0)
+                  Expanded(
+                    child: Container(
+                      height: 2,
+                      color: checkoutStep >= index
+                          ? BrandColors.burgundy
+                          : BrandColors.champagne,
                     ),
-                  )
-                : DropdownButtonFormField<String>(
-                    initialValue: items.any((e) => e['uuid'] == addressUuid)
-                        ? addressUuid
-                        : null,
-                    decoration: InputDecoration(
-                      labelText: AppLocalizations.of(
-                        context,
-                      ).text('checkoutShipTo'),
-                    ),
-                    items: items
-                        .map(
-                          (item) => DropdownMenuItem(
-                            value: item['uuid']?.toString(),
-                            child: Text(
-                              '${item['recipient_name']} · ${item['city']}',
-                            ),
-                          ),
-                        )
-                        .toList(),
-                    onChanged: (v) => setState(() => addressUuid = v),
                   ),
-          ),
-          const SizedBox(height: 20),
-          Text(
-            AppLocalizations.of(context).text('shippingMethod'),
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-          methods.when(
-            loading: () => const LinearProgressIndicator(),
-            error: (error, _) => TextButton(
-              onPressed: () => ref.invalidate(shippingMethodsProvider),
-              child: Text('Could not load shipping. Retry: $error'),
-            ),
-            data: (items) => items.isEmpty
-                ? Text(AppLocalizations.of(context).text('checkoutNoShipping'))
-                : DropdownButtonFormField<String>(
-                    initialValue: items.any((e) => e['code'] == shippingCode)
-                        ? shippingCode
-                        : null,
-                    decoration: InputDecoration(
-                      labelText: AppLocalizations.of(
-                        context,
-                      ).text('checkoutShipping'),
+                Column(
+                  children: [
+                    CircleAvatar(
+                      radius: 17,
+                      backgroundColor: checkoutStep >= index
+                          ? BrandColors.burgundy
+                          : BrandColors.cream,
+                      child: Text(
+                        '${index + 1}',
+                        style: TextStyle(
+                          color: checkoutStep >= index
+                              ? Colors.white
+                              : BrandColors.mutedInk,
+                        ),
+                      ),
                     ),
-                    items: items
-                        .map(
-                          (item) => DropdownMenuItem(
-                            value: item['code']?.toString(),
-                            child: Text(item['name']?.toString() ?? ''),
-                          ),
-                        )
-                        .toList(),
-                    onChanged: (v) => setState(() => shippingCode = v),
-                  ),
+                    const SizedBox(height: 6),
+                    Text(switch (index) {
+                      0 => switch (Localizations.localeOf(
+                        context,
+                      ).languageCode) {
+                        'fa' => 'آدرس',
+                        'ps' => 'پته',
+                        _ => 'Shipping',
+                      },
+                      1 => switch (Localizations.localeOf(
+                        context,
+                      ).languageCode) {
+                        'fa' => 'ارسال',
+                        'ps' => 'لېږد',
+                        _ => 'Delivery',
+                      },
+                      _ => switch (Localizations.localeOf(
+                        context,
+                      ).languageCode) {
+                        'fa' => 'بازبینی',
+                        'ps' => 'بیاکتنه',
+                        _ => 'Review',
+                      },
+                    }, style: const TextStyle(fontSize: 11)),
+                  ],
+                ),
+              ],
+            ],
           ),
-          const SizedBox(height: 20),
-          TextField(
-            controller: coupon,
-            textCapitalization: TextCapitalization.characters,
-            decoration: InputDecoration(
-              labelText: AppLocalizations.of(context).text('coupon'),
-            ),
-          ),
-          const SizedBox(height: 20),
-          cart.when(
-            loading: () => const LinearProgressIndicator(),
-            error: (error, _) => Text('Cart unavailable: $error'),
-            data: (data) => Text(
-              "${AppLocalizations.of(context).text('checkoutSubtotal')}: ${_formattedSubtotal(data)}",
-            ),
-          ),
-          const SizedBox(height: 20),
-          Text(AppLocalizations.of(context).text('checkoutNotice')),
-          const SizedBox(height: 16),
-          if (pendingOrderUuid != null) ...[
+          const SizedBox(height: 26),
+          if (checkoutStep == 0) ...[
             Text(
-              "${AppLocalizations.of(context).text('checkoutPending')}: $pendingOrderUuid.",
+              AppLocalizations.of(context).text('deliveryAddress'),
+              style: Theme.of(context).textTheme.titleLarge,
             ),
-            TextButton(
-              onPressed: () => context.push('/orders'),
-              child: Text(AppLocalizations.of(context).text('checkoutReview')),
+            addresses.when(
+              loading: () => const LinearProgressIndicator(),
+              error: (error, _) => TextButton(
+                onPressed: () => ref.invalidate(addressesProvider),
+                child: Text('Could not load addresses. Retry: $error'),
+              ),
+              data: (items) => items.isEmpty
+                  ? TextButton(
+                      onPressed: () => context.push('/addresses/new'),
+                      child: Text(
+                        AppLocalizations.of(context).text('checkoutAddAddress'),
+                      ),
+                    )
+                  : DropdownButtonFormField<String>(
+                      initialValue: items.any((e) => e['uuid'] == addressUuid)
+                          ? addressUuid
+                          : null,
+                      decoration: InputDecoration(
+                        labelText: AppLocalizations.of(
+                          context,
+                        ).text('checkoutShipTo'),
+                      ),
+                      items: items
+                          .map(
+                            (item) => DropdownMenuItem(
+                              value: item['uuid']?.toString(),
+                              child: Text(
+                                '${item['recipient_name']} · ${item['city']}',
+                              ),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (v) => setState(() => addressUuid = v),
+                    ),
             ),
-          ] else
-            FilledButton(
-              onPressed:
-                  processing ||
-                      !StripePaymentGateway.isConfigured ||
-                      addressUuid == null ||
-                      shippingCode == null ||
-                      !cart.hasValue ||
-                      cart.value?['currency'] != 'USD' ||
-                      ((cart.value?['items'] as List?)?.isEmpty ?? true)
+            const SizedBox(height: 20),
+            FilledButton.icon(
+              onPressed: addressUuid == null
                   ? null
-                  : _pay,
-              child: Text(
-                processing
-                    ? AppLocalizations.of(context).text('checkoutPreparing')
-                    : AppLocalizations.of(context).text('checkoutPay'),
+                  : () => setState(() => checkoutStep = 1),
+              icon: const Icon(Icons.arrow_forward),
+              label: Text(
+                AppLocalizations.of(context).text('checkoutContinue'),
               ),
             ),
-          if (!StripePaymentGateway.isConfigured)
-            Text(AppLocalizations.of(context).text('checkoutUnconfigured')),
+          ],
+          if (checkoutStep == 1) ...[
+            Text(
+              AppLocalizations.of(context).text('shippingMethod'),
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            methods.when(
+              loading: () => const LinearProgressIndicator(),
+              error: (error, _) => TextButton(
+                onPressed: () => ref.invalidate(shippingMethodsProvider),
+                child: Text('Could not load shipping. Retry: $error'),
+              ),
+              data: (items) => items.isEmpty
+                  ? Text(
+                      AppLocalizations.of(context).text('checkoutNoShipping'),
+                    )
+                  : DropdownButtonFormField<String>(
+                      initialValue: items.any((e) => e['code'] == shippingCode)
+                          ? shippingCode
+                          : null,
+                      decoration: InputDecoration(
+                        labelText: AppLocalizations.of(
+                          context,
+                        ).text('checkoutShipping'),
+                      ),
+                      items: items
+                          .map(
+                            (item) => DropdownMenuItem(
+                              value: item['code']?.toString(),
+                              child: Text(item['name']?.toString() ?? ''),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (v) => setState(() => shippingCode = v),
+                    ),
+            ),
+            const SizedBox(height: 20),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => setState(() => checkoutStep = 0),
+                    child: Text(AppLocalizations.of(context).text('cancel')),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: FilledButton(
+                    onPressed: shippingCode == null
+                        ? null
+                        : () => setState(() => checkoutStep = 2),
+                    child: Text(
+                      AppLocalizations.of(context).text('checkoutContinue'),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+          if (checkoutStep == 2) ...[
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      AppLocalizations.of(context).text('deliveryAddress'),
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      addresses.value == null
+                          ? '—'
+                          : addresses.value!
+                                    .where(
+                                      (entry) => entry['uuid'] == addressUuid,
+                                    )
+                                    .map(
+                                      (entry) =>
+                                          '${entry['recipient_name']} · ${entry['city']}',
+                                    )
+                                    .firstOrNull ??
+                                '—',
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      AppLocalizations.of(context).text('shippingMethod'),
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      methods.value == null
+                          ? '—'
+                          : methods.value!
+                                    .where(
+                                      (entry) => entry['code'] == shippingCode,
+                                    )
+                                    .map(
+                                      (entry) =>
+                                          entry['name']?.toString() ?? '',
+                                    )
+                                    .firstOrNull ??
+                                '—',
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 18),
+            TextField(
+              controller: coupon,
+              textCapitalization: TextCapitalization.characters,
+              decoration: InputDecoration(
+                labelText: AppLocalizations.of(context).text('coupon'),
+              ),
+            ),
+            const SizedBox(height: 20),
+            cart.when(
+              loading: () => const LinearProgressIndicator(),
+              error: (error, _) => Text('Cart unavailable: $error'),
+              data: (data) => Container(
+                padding: const EdgeInsets.all(18),
+                decoration: BoxDecoration(
+                  color: BrandColors.cream,
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        AppLocalizations.of(context).text('checkoutSubtotal'),
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                    ),
+                    Text(
+                      _formattedSubtotal(data),
+                      style: const TextStyle(
+                        color: BrandColors.burgundy,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(AppLocalizations.of(context).text('checkoutNotice')),
+            const SizedBox(height: 16),
+            if (pendingOrderUuid != null) ...[
+              Text(
+                "${AppLocalizations.of(context).text('checkoutPending')}: $pendingOrderUuid.",
+              ),
+              TextButton(
+                onPressed: () => context.push('/orders'),
+                child: Text(
+                  AppLocalizations.of(context).text('checkoutReview'),
+                ),
+              ),
+            ] else
+              FilledButton(
+                onPressed:
+                    processing ||
+                        !StripePaymentGateway.isConfigured ||
+                        addressUuid == null ||
+                        shippingCode == null ||
+                        !cart.hasValue ||
+                        cart.value?['currency'] != 'USD' ||
+                        ((cart.value?['items'] as List?)?.isEmpty ?? true)
+                    ? null
+                    : _pay,
+                child: Text(
+                  processing
+                      ? AppLocalizations.of(context).text('checkoutPreparing')
+                      : AppLocalizations.of(context).text('checkoutPay'),
+                ),
+              ),
+            if (!StripePaymentGateway.isConfigured)
+              Text(AppLocalizations.of(context).text('checkoutUnconfigured')),
+            const SizedBox(height: 14),
+            OutlinedButton(
+              onPressed: processing
+                  ? null
+                  : () => setState(() => checkoutStep = 1),
+              child: Text(switch (Localizations.localeOf(
+                context,
+              ).languageCode) {
+                'fa' => 'ویرایش روش ارسال',
+                'ps' => 'د لېږد طریقه بدله کړئ',
+                _ => 'Edit delivery',
+              }),
+            ),
+          ],
         ],
       ),
     );

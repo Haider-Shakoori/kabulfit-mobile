@@ -64,6 +64,13 @@ class CommerceActions {
     ref.invalidate(cartProvider);
   }
 
+  Future<void> removeFromWishlist(String slug) async {
+    await ref
+        .read(apiClientProvider)
+        .delete('/wishlist/${Uri.encodeComponent(slug)}');
+    ref.invalidate(wishlistProvider);
+  }
+
   Future<void> addToWishlist(String slug) async {
     await ref
         .read(apiClientProvider)
