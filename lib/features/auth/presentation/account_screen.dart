@@ -95,6 +95,15 @@ class AccountScreen extends ConsumerWidget {
             onTap: () => context.push('/orders'),
           ),
           _AccountAction(
+            icon: Icons.menu_book_outlined,
+            label: switch (locale) {
+              'fa' => 'رهنمای اندازه‌گیری',
+              'ps' => 'د اندازې لارښود',
+              _ => 'Measurement guide',
+            },
+            onTap: () => context.push('/measurement-guide'),
+          ),
+          _AccountAction(
             icon: Icons.straighten_outlined,
             label: strings.text('myMeasurements'),
             onTap: () => context.go('/measurements'),
