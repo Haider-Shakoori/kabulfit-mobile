@@ -8,8 +8,8 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../core/widgets/kabulfit_brand_logo.dart';
 import '../../../core/widgets/kabulfit_bottom_navigation.dart';
+import '../../../core/widgets/kabulfit_brand_logo.dart';
 import '../../auth/application/auth_controller.dart';
 import '../application/measurement_providers.dart';
 import 'original_measurement_guide_data.dart';
@@ -127,7 +127,7 @@ class _MeasurementGuideScreenState
     final measurements = <Map<String, dynamic>>[];
     for (final item in definitions) {
       final code = item['code']?.toString() ?? '';
-      final raw = _values[_garmentType + '_' + code]?.text.trim() ?? '';
+      final raw = _values['${_garmentType}_$code']?.text.trim() ?? '';
       final parsed = double.tryParse(raw);
       if (raw.isEmpty && item['required'] != true) continue;
       if (parsed == null || !parsed.isFinite || parsed <= 0) {
@@ -175,7 +175,7 @@ class _MeasurementGuideScreenState
   void _showInvalid(String field) {
     ScaffoldMessenger.of(
       context,
-    ).showSnackBar(SnackBar(content: Text('Check measurement: ' + field)));
+    ).showSnackBar(SnackBar(content: Text('Check measurement: $field')));
   }
 
   Future<void> _promptForAccount() async {
@@ -485,9 +485,7 @@ class _MeasurementGuideScreenState
                           ),
                         ),
                         Text(
-                          (safeIndex + 1).toString() +
-                              ' / ' +
-                              guideSteps.length.toString(),
+                          '${safeIndex + 1} / ${guideSteps.length}',
                         ),
                         TextButton.icon(
                           onPressed: safeIndex < guideSteps.length - 1
@@ -599,10 +597,10 @@ class _MeasurementGuideScreenState
                       padding: const EdgeInsets.only(bottom: 12),
                       child: TextFormField(
                         key: ValueKey(
-                          _garmentType + '_' + item['code'].toString(),
+                          '${_garmentType}_${item['code']}',
                         ),
                         controller: _values.putIfAbsent(
-                          _garmentType + '_' + item['code'].toString(),
+                          '${_garmentType}_${item['code']}',
                           TextEditingController.new,
                         ),
                         keyboardType: const TextInputType.numberWithOptions(
@@ -610,10 +608,7 @@ class _MeasurementGuideScreenState
                         ),
                         decoration: InputDecoration(
                           labelText:
-                              (item['name'] ?? item['code']).toString() +
-                              ' (' +
-                              unit +
-                              ')',
+                              "${item['name'] ?? item['code']} ($unit)",
                           helperText: item['instructions']?.toString(),
                           suffixText: item['required'] == true ? '*' : null,
                         ),
