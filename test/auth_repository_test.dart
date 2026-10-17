@@ -13,13 +13,17 @@ class _MemoryTokenStore implements TokenStore {
   String? token;
 
   @override
-  Future<void> clear() async => token = null;
+  Future<void> clear() async {
+    token = null;
+  }
 
   @override
   Future<String?> read() async => token;
 
   @override
-  Future<void> write(String value) async => token = value;
+  Future<void> write(String value) async {
+    token = value;
+  }
 }
 
 void main() {
@@ -27,6 +31,18 @@ void main() {
   late _MockDeviceIdentity device;
   late _MemoryTokenStore tokens;
   late AuthRepository repository;
+
+  void stubPost(String path, Map<String, dynamic> body) {
+    when(
+      () => client.post(path, data: any(named: 'data')),
+    ).thenAnswer((_) async => body);
+  }
+
+  Map<String, dynamic> authResponse(String? token, Object? user) {
+    return {
+      'data': {'token': token, 'user': user},
+    };
+  }
 
   setUp(() {
     client = _MockApiClient();
@@ -47,20 +63,14 @@ void main() {
     );
   });
 
-  test('login accepts the real API account shape without uuid', () async {
-    when(() => client.post('/auth/login', data: any(named: 'data')))
-        .thenAnswer(
-          (_) async => <String, dynamic>{
-            'data': {
-              'token': 'secure-login-token',
-              'user': {
-                'name': 'Mobile Customer',
-                'email': 'customer@example.com',
-                'email_verified': false,
-              },
-            },
-          },
-        );
+  test('login accepts the API account shape without uuid', () async {
+    stubPost(
+      '/auth/login',
+      authResponse('secure-login-token', {
+        'name': 'Mobile Customer',
+        'email': 'customer@example.com',
+      }),
+    );
 
     final session = await repository.signIn(
       email: 'customer@example.com',
@@ -71,20 +81,14 @@ void main() {
     expect(await tokens.read(), 'secure-login-token');
   });
 
-  test('signup accepts the real API account shape without uuid', () async {
-    when(() => client.post('/auth/register', data: any(named: 'data')))
-        .thenAnswer(
-          (_) async => <String, dynamic>{
-            'data': {
-              'token': 'secure-registration-token',
-              'user': {
-                'name': 'New Customer',
-                'email': 'new@example.com',
-                'preferred_locale': 'en',
-              },
-            },
-          },
-        );
+  test('signup accepts the API account shape without uuid', () async {
+    stubPost(
+      '/auth/register',
+      authResponse('secure-registration-token', {
+        'name': 'New Customer',
+        'email': 'new@example.com',
+      }),
+    );
 
     final session = await repository.register(
       name: 'New Customer',
@@ -115,15 +119,10 @@ void main() {
   });
 
   test('rejects missing account email before storing token', () async {
-    when(() => client.post('/auth/login', data: any(named: 'data')))
-        .thenAnswer(
-          (_) async => <String, dynamic>{
-            'data': {
-              'token': 'should-not-be-saved',
-              'user': {'email': null},
-            },
-          },
-        );
+    stubPost(
+      '/auth/login',
+      authResponse('should-not-be-saved', {'email': null}),
+    );
 
     await expectLater(
       repository.signIn(email: 'test@example.com', password: 'Secure1234'),
@@ -133,15 +132,9 @@ void main() {
   });
 
   test('rejects missing token before storing a session', () async {
-    when(() => client.post('/auth/register', data: any(named: 'data')))
-        .thenAnswer(
-          (_) async => <String, dynamic>{
-            'data': {
-              'token': null,
-              'user': {'email': 'new@example.com'},
-            },
-          },
-        );
+    stubPost('/auth/register', authResponse(null, {
+      'email': 'new@example.com',
+    }));
 
     await expectLater(
       repository.register(
