@@ -132,9 +132,10 @@ void main() {
   });
 
   test('rejects missing token before storing a session', () async {
-    stubPost('/auth/register', authResponse(null, {
-      'email': 'new@example.com',
-    }));
+    stubPost(
+      '/auth/register',
+      authResponse(null, {'email': 'new@example.com'}),
+    );
 
     await expectLater(
       repository.register(
