@@ -7,14 +7,14 @@ import '../features/catalog/presentation/catalog_screen.dart';
 import '../features/commerce/presentation/address_order_screens.dart';
 import '../features/commerce/presentation/checkout_screen.dart';
 import '../features/commerce/presentation/commerce_screens.dart';
-import '../features/home/presentation/home_screen.dart';
+import '../features/home/presentation/onboarding_screen.dart';
 import '../features/tailoring/presentation/measurement_screens.dart';
 import '../features/tailoring/presentation/tailor_product_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     routes: [
-      GoRoute(path: '/', builder: (_, _) => const HomeScreen()),
+      GoRoute(path: '/', builder: (_, _) => const KabulFitLaunchScreen()),
       GoRoute(path: '/account', builder: (_, _) => const AccountScreen()),
       GoRoute(path: '/shop', builder: (_, _) => const CatalogScreen()),
       GoRoute(
