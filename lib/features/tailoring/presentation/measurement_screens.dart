@@ -77,28 +77,32 @@ class MeasurementProfilesScreen extends ConsumerWidget {
                                 context: context,
                                 builder: (dialog) => AlertDialog(
                                   title: Text(
-                                    AppLocalizations.of(context)
-                                        .text('deleteProfileConfirm'),
+                                    AppLocalizations.of(
+                                      context,
+                                    ).text('deleteProfileConfirm'),
                                   ),
                                   content: Text(
-                                    AppLocalizations.of(context)
-                                        .text('cannotUndo'),
+                                    AppLocalizations.of(
+                                      context,
+                                    ).text('cannotUndo'),
                                   ),
                                   actions: [
                                     TextButton(
                                       onPressed: () =>
                                           Navigator.pop(dialog, false),
                                       child: Text(
-                                        AppLocalizations.of(context)
-                                            .text('cancel'),
+                                        AppLocalizations.of(
+                                          context,
+                                        ).text('cancel'),
                                       ),
                                     ),
                                     FilledButton(
                                       onPressed: () =>
                                           Navigator.pop(dialog, true),
                                       child: Text(
-                                        AppLocalizations.of(context)
-                                            .text('delete'),
+                                        AppLocalizations.of(
+                                          context,
+                                        ).text('delete'),
                                       ),
                                     ),
                                   ],

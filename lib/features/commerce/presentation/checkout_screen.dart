@@ -120,8 +120,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                         ? addressUuid
                         : null,
                     decoration: InputDecoration(
-                      labelText: AppLocalizations.of(context)
-                          .text('checkoutShipTo'),
+                      labelText: AppLocalizations.of(
+                        context,
+                      ).text('checkoutShipTo'),
                     ),
                     items: items
                         .map(
@@ -154,8 +155,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                         ? shippingCode
                         : null,
                     decoration: InputDecoration(
-                      labelText: AppLocalizations.of(context)
-                          .text('checkoutShipping'),
+                      labelText: AppLocalizations.of(
+                        context,
+                      ).text('checkoutShipping'),
                     ),
                     items: items
                         .map(

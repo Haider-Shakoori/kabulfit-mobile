@@ -198,8 +198,9 @@ class CartScreen extends ConsumerWidget {
                         children: [
                           Expanded(
                             child: Text(
-                              AppLocalizations.of(context)
-                                  .text('checkoutSubtotal'),
+                              AppLocalizations.of(
+                                context,
+                              ).text('checkoutSubtotal'),
                               style: Theme.of(context).textTheme.titleMedium,
                             ),
                           ),
@@ -331,8 +332,9 @@ Future<void> _mutate(
     await request();
   } catch (error) {
     if (context.mounted) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(error.toString())));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.toString())));
     }
   }
 }
