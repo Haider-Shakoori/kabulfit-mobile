@@ -52,8 +52,8 @@ class CartScreen extends ConsumerWidget {
           }
           final currency = cart['currency']?.toString() ?? '';
           final subtotal = cart['subtotal_minor'];
-          final subtotalText = subtotal is num
-              ? '${(subtotal / 100).toStringAsFixed(2)} $currency'
+          final subtotalText = subtotal is num && currency == 'USD'
+              ? '\${(subtotal / 100).toStringAsFixed(2)}'
               : '—';
           return RefreshIndicator(
             onRefresh: () => ref.refresh(cartProvider.future).then((_) {}),
@@ -66,7 +66,9 @@ class CartScreen extends ConsumerWidget {
                       child: ListTile(
                         title: Text(item['name']?.toString() ?? ''),
                         subtitle: Text(
-                          'Qty: ${item['quantity']}  ·  ${item['sku']}',
+                          'Qty: ${item['quantity']}  ·  '
+                          '${item['size_code'] == null ? '' : 'Size: ${item['size_code']}  ·  '}'
+                          '${item['sku']}',
                         ),
                         trailing: SizedBox(
                           width: 144,
@@ -156,7 +158,9 @@ class CartScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 16),
                 FilledButton.icon(
-                  onPressed: () => context.push('/checkout'),
+                  onPressed: currency == 'USD'
+                      ? () => context.push('/checkout')
+                      : null,
                   icon: const Icon(Icons.lock_outline),
                   label: Text(AppLocalizations.of(context).text('checkout')),
                 ),
