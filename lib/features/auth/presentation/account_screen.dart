@@ -6,6 +6,7 @@ import '../../../core/localization/app_localizations.dart';
 import '../../../core/localization/locale_controller.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/kabulfit_bottom_navigation.dart';
+import '../../../core/widgets/kabulfit_brand_logo.dart';
 import '../application/auth_controller.dart';
 
 /// Customer account screen from the approved luxury-fashion mockup.
@@ -23,7 +24,7 @@ class AccountScreen extends ConsumerWidget {
         : email[0].toUpperCase();
 
     return Scaffold(
-      appBar: AppBar(title: Text(strings.text('account'))),
+      appBar: AppBar(title: const KabulFitBrandLogo(width: 160, height: 50)),
       bottomNavigationBar: const KabulFitBottomNavigation(selectedIndex: 4),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 4, 16, 32),
@@ -86,6 +87,11 @@ class AccountScreen extends ConsumerWidget {
             FilledButton(
               onPressed: () => context.push('/login'),
               child: Text(strings.text('signIn')),
+            ),
+            const SizedBox(height: 9),
+            OutlinedButton(
+              onPressed: () => context.push('/register'),
+              child: Text(strings.text('createAccount')),
             ),
             const SizedBox(height: 16),
           ],
