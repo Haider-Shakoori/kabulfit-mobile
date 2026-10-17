@@ -29,7 +29,7 @@ class CartScreen extends ConsumerWidget {
     final response = ref.watch(cartProvider);
     return Scaffold(
       appBar: AppBar(title: Text(AppLocalizations.of(context).text('cart'))),
-        bottomNavigationBar: const KabulFitBottomNavigation(selectedIndex: 3),
+      bottomNavigationBar: const KabulFitBottomNavigation(selectedIndex: 3),
       body: response.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(
