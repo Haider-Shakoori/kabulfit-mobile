@@ -22,7 +22,7 @@ class KabulFitBottomNavigation extends StatelessWidget {
           case 1:
             context.go('/shop');
           case 2:
-            context.go('/measurements');
+            context.go('/measurement-guide');
           case 3:
             context.go('/cart');
           case 4:
