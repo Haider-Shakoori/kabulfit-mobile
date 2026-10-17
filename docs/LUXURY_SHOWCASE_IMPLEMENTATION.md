@@ -61,3 +61,6 @@ The order-history redesign was added on this branch and formatted with the Flutt
 - Guest measurement drafts are stored in platform secure storage (iOS Keychain/Android Keystore-backed plugin), not ordinary preferences; saving private data remains account-scoped.
 - The public registration endpoint was checked with an invalid request and returned HTTP 422 validation errors as expected (no account was created in this validation check).
 - The original dark/white logo PNG bytes have been added as bundled Flutter assets (offline), with regression checks for their canonical byte sizes.
+
+### Verification release-candidate trigger
+The one-time CI Flutter formatter completed and removed itself. The next Mobile CI run must be evaluated on the new branch HEAD; earlier cancelled runs are not acceptance evidence. Do not merge the draft without actual device QA and alignment of body-type/weight fields to the original website.
