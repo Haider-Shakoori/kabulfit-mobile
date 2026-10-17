@@ -165,8 +165,18 @@ class HomeScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 32),
             _SectionHeading(
-              eyebrow: _copy(locale, 'FIND YOUR STYLE', 'سبک خود را بیابید', 'خپل سټایل ومومئ'),
-              title: _copy(locale, 'Shop by category', 'خرید بر اساس دسته‌بندی', 'د کټګورۍ له مخې پیرود'),
+              eyebrow: _copy(
+                locale,
+                'FIND YOUR STYLE',
+                'سبک خود را بیابید',
+                'خپل سټایل ومومئ',
+              ),
+              title: _copy(
+                locale,
+                'Shop by category',
+                'خرید بر اساس دسته‌بندی',
+                'د کټګورۍ له مخې پیرود',
+              ),
               onAll: () => context.go('/shop'),
               allLabel: strings.text('shop'),
             ),
@@ -202,8 +212,18 @@ class HomeScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 32),
             _SectionHeading(
-              eyebrow: _copy(locale, 'DISCOVER MORE', 'بیشتر کشف کنید', 'نور ومومئ'),
-              title: _copy(locale, 'The collection', 'مجموعه لباس‌ها', 'د جامو ټولګه'),
+              eyebrow: _copy(
+                locale,
+                'DISCOVER MORE',
+                'بیشتر کشف کنید',
+                'نور ومومئ',
+              ),
+              title: _copy(
+                locale,
+                'The collection',
+                'مجموعه لباس‌ها',
+                'د جامو ټولګه',
+              ),
               onAll: () => context.go('/shop'),
               allLabel: strings.text('shop'),
             ),
@@ -345,9 +365,8 @@ class _EditorialHero extends StatelessWidget {
               Image.network(
                 imageUrl!,
                 fit: BoxFit.cover,
-                errorBuilder: (_, _, _) => const ColoredBox(
-                  color: BrandColors.deepBurgundy,
-                ),
+                errorBuilder: (_, _, _) =>
+                    const ColoredBox(color: BrandColors.deepBurgundy),
               )
             else
               const ColoredBox(color: BrandColors.deepBurgundy),
@@ -487,9 +506,8 @@ class _EditorialProductCard extends StatelessWidget {
       width: 188,
       child: Card(
         child: InkWell(
-          onTap: () => context.push(
-            '/products/${Uri.encodeComponent(product.slug)}',
-          ),
+          onTap: () =>
+              context.push('/products/${Uri.encodeComponent(product.slug)}'),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -552,3 +570,5 @@ class _EditorialProductCard extends StatelessWidget {
     );
   }
 }
+
+[executed on device: businessos-dev-vps (9b1cdbf1-1a02-4fe8-9e81-8871c3eca22c)]
