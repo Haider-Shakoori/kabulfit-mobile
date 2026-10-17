@@ -44,8 +44,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     final auth = ref.watch(authControllerProvider);
     ref.listen(authControllerProvider, (_, next) {
       if (next.hasValue && next.value != null) {
-        context.go(widget.next == '/measurement-guide'
-            ? '/measurement-guide' : '/account');
+        context.go(
+          widget.next == '/measurement-guide'
+              ? '/measurement-guide'
+              : '/account',
+        );
       }
     });
 
@@ -194,8 +197,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           : Text(local.text('createAccount')),
                     ),
                     TextButton(
-                      onPressed: () => context.go(widget.next == '/measurement-guide'
-                          ? '/login?next=%2Fmeasurement-guide' : '/login'),
+                      onPressed: () => context.go(
+                        widget.next == '/measurement-guide'
+                            ? '/login?next=%2Fmeasurement-guide'
+                            : '/login',
+                      ),
                       child: Text(
                         _copy(
                           context,
