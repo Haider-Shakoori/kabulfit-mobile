@@ -242,7 +242,7 @@ class HomeScreen extends ConsumerWidget {
                             width: 75,
                             child: InkWell(
                               borderRadius: BorderRadius.circular(13),
-                              onTap: () => context.go('/shop'),
+                              onTap: () => context.go('/shop?category=${Uri.encodeQueryComponent(slug)}'),
                               child: Column(
                                 children: [
                                   CircleAvatar(
