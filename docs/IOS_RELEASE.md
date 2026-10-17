@@ -8,6 +8,20 @@ Batch 17 prepares the existing Flutter storefront, product catalog, customer acc
 
 Use the latest `Mobile CI` run for this branch. It checks Dart formatting, strict analysis, Flutter tests, Android development and release builds, and unsigned iOS compilation. The iOS job additionally uploads `KabulFit-UNSIGNED.ipa` as a packaging preflight **only**. An unsigned IPA cannot be installed on an ordinary iPhone.
 
+## Staging-only IPA while Base44 remains live
+
+Until the final domain cutover, the unsigned iOS CI preflight uses
+`https://kabulfit.businessos.af/api/v1`, launches `main_staging.dart`, and
+explicitly disables demo catalog fallback. This allows honest validation of
+the original 130 active USD-priced products from Laravel rather than
+`kabulfit.com`'s existing Base44 HTML responses.
+
+**Release blocker:** archived product photo URLs on cPanel staging returned
+HTTP 404 during the 2026-10-17 readiness check. Do not sign, distribute, or
+claim a production-ready storefront until these assets are publicly served
+and full EN/FA/PS catalog/detail/cart QA passes. The original website's
+domain remains unchanged until all web and Flutter work is complete.
+
 ## Requirements for an installable IPA
 
 An Apple Developer Program membership, a distribution certificate exported as a password-protected P12, a matching provisioning profile, the Apple Team ID, and an App ID matching `af.kabulfit.mobile` are required. For Ad Hoc distribution, registered test-device UDIDs must be included in the Ad Hoc profile. App Store distribution instead requires the appropriate App Store distribution profile and App Store Connect setup.
