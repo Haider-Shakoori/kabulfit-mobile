@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/localization/app_localizations.dart';
+import '../../../core/widgets/kabulfit_bottom_navigation.dart';
 import '../../auth/application/auth_controller.dart';
 import '../application/measurement_providers.dart';
 
@@ -13,6 +14,8 @@ class MeasurementProfilesScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     if (ref.watch(authControllerProvider).value == null) {
       return Scaffold(
+      bottomNavigationBar: const KabulFitBottomNavigation(selectedIndex: 2),
+        bottomNavigationBar: const KabulFitBottomNavigation(selectedIndex: 2),
         appBar: AppBar(
           title: Text(AppLocalizations.of(context).text('measurements')),
         ),
