@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/kabulfit_brand_logo.dart';
 import '../../catalog/presentation/catalog_screen.dart';
 import 'home_screen.dart';
 
@@ -147,15 +148,7 @@ class _LuxuryOnboardingState extends ConsumerState<_LuxuryOnboarding> {
               child: Column(
                 children: [
                   const Spacer(flex: 5),
-                  const Text(
-                    'KabulFit',
-                    style: TextStyle(
-                      fontFamily: 'serif',
-                      fontSize: 47,
-                      color: Colors.white,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
+                  const KabulFitBrandLogo(white: true, width: 260, height: 110),
                   const SizedBox(height: 12),
                   Text(
                     _copy(
