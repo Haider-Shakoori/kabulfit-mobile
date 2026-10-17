@@ -13,9 +13,12 @@ void main() {
         expect(step.title('en'), isNotEmpty);
         expect(step.title('fa'), isNotEmpty);
         expect(step.title('ps'), isNotEmpty);
-        expect(step.imageUrl.startsWith(
-          'https://kabulfit.businessos.af/images/kabulfit-base44/source/',
-        ), isTrue);
+        expect(
+          step.imageUrl.startsWith(
+            'https://kabulfit.businessos.af/images/kabulfit-base44/source/',
+          ),
+          isTrue,
+        );
         for (final locale in ['en', 'fa', 'ps']) {
           expect(Uri.parse(step.video(locale)).host, 'www.youtube.com');
         }
