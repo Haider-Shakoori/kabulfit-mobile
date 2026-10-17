@@ -472,7 +472,8 @@ class _MeasurementGuideScreenState
             ),
             const SizedBox(height: 14),
             DropdownButtonFormField<String>(
-              value: unit,
+              key: ValueKey(unit),
+              initialValue: unit,
               decoration: InputDecoration(
                 labelText: _copy(language, 'Measurement unit',
                     'واحد اندازه‌گیری', 'د اندازې واحد'),
