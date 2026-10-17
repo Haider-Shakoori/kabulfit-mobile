@@ -8,7 +8,9 @@ class AuthSession {
   factory AuthSession.fromAccount(Map<String, dynamic> account) {
     final email = account['email'];
     if (email is! String || email.trim().isEmpty) {
-      throw const FormatException('Invalid account details returned by KabulFit.');
+      throw const FormatException(
+        'Invalid account details returned by KabulFit.',
+      );
     }
     return AuthSession(email: email.trim());
   }
