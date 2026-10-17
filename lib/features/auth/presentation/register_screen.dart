@@ -8,7 +8,8 @@ import '../application/auth_controller.dart';
 
 /// Registers against Laravel's existing /auth/register endpoint.
 class RegisterScreen extends ConsumerStatefulWidget {
-  const RegisterScreen({super.key});
+  const RegisterScreen({this.next, super.key});
+  final String? next;
 
   @override
   ConsumerState<RegisterScreen> createState() => _RegisterScreenState();
@@ -42,7 +43,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     final local = AppLocalizations.of(context);
     final auth = ref.watch(authControllerProvider);
     ref.listen(authControllerProvider, (_, next) {
-      if (next.hasValue && next.value != null) context.go('/account');
+      if (next.hasValue && next.value != null) {
+        context.go(widget.next == '/measurement-guide'
+            ? '/measurement-guide' : '/account');
+      }
     });
 
     return Scaffold(
@@ -190,7 +194,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           : Text(local.text('createAccount')),
                     ),
                     TextButton(
-                      onPressed: () => context.go('/login'),
+                      onPressed: () => context.go(widget.next == '/measurement-guide'
+                          ? '/login?next=%2Fmeasurement-guide' : '/login'),
                       child: Text(
                         _copy(
                           context,
