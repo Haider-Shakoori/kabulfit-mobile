@@ -484,9 +484,7 @@ class _MeasurementGuideScreenState
                             _copy(language, 'Previous', 'قبلی', 'مخکې'),
                           ),
                         ),
-                        Text(
-                          '${safeIndex + 1} / ${guideSteps.length}',
-                        ),
+                        Text('${safeIndex + 1} / ${guideSteps.length}'),
                         TextButton.icon(
                           onPressed: safeIndex < guideSteps.length - 1
                               ? () => setState(() => selectedIndex++)
@@ -596,9 +594,7 @@ class _MeasurementGuideScreenState
                     Padding(
                       padding: const EdgeInsets.only(bottom: 12),
                       child: TextFormField(
-                        key: ValueKey(
-                          '${_garmentType}_${item['code']}',
-                        ),
+                        key: ValueKey('${_garmentType}_${item['code']}'),
                         controller: _values.putIfAbsent(
                           '${_garmentType}_${item['code']}',
                           TextEditingController.new,
@@ -607,8 +603,7 @@ class _MeasurementGuideScreenState
                           decimal: true,
                         ),
                         decoration: InputDecoration(
-                          labelText:
-                              "${item['name'] ?? item['code']} ($unit)",
+                          labelText: "${item['name'] ?? item['code']} ($unit)",
                           helperText: item['instructions']?.toString(),
                           suffixText: item['required'] == true ? '*' : null,
                         ),
