@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/localization/app_localizations.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../auth/application/auth_controller.dart';
 import '../application/commerce_providers.dart';
 
@@ -60,11 +61,44 @@ class CartScreen extends ConsumerWidget {
             child: ListView(
               padding: const EdgeInsets.all(16),
               children: [
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 17),
+                  child: Text(
+                    switch (Localizations.localeOf(context).languageCode) {
+                      'fa' => 'محصولات انتخاب‌شده',
+                      'ps' => 'غوره شوي توکي',
+                      _ => 'YOUR SELECTION',
+                    },
+                    style: const TextStyle(
+                      color: BrandColors.gold,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 1.6,
+                    ),
+                  ),
+                ),
                 for (final item in items)
                   if (item is Map)
                     Card(
+                      margin: const EdgeInsets.only(bottom: 12),
                       child: ListTile(
-                        title: Text(item['name']?.toString() ?? ''),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 12,
+                        ),
+                        leading: const CircleAvatar(
+                          backgroundColor: BrandColors.cream,
+                          child: Icon(
+                            Icons.checkroom_outlined,
+                            color: BrandColors.burgundy,
+                          ),
+                        ),
+                        title: Text(
+                          item['name']?.toString() ?? '',
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
                         subtitle: Text(
                           'Qty: ${item['quantity']}  ·  '
                           '${item['size_code'] == null ? '' : 'Size: ${item['size_code']}  ·  '}'
@@ -147,16 +181,48 @@ class CartScreen extends ConsumerWidget {
                         ),
                       ),
                     ),
-                const SizedBox(height: 16),
-                Text(
-                  'Subtotal: $subtotalText',
-                  style: Theme.of(context).textTheme.titleLarge,
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.all(22),
+                  decoration: BoxDecoration(
+                    color: BrandColors.cream,
+                    borderRadius: BorderRadius.circular(22),
+                    border: Border.all(color: BrandColors.champagne),
+                  ),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              AppLocalizations.of(context).text('checkoutSubtotal'),
+                              style: Theme.of(context).textTheme.titleMedium,
+                            ),
+                          ),
+                          Text(
+                            subtotalText,
+                            style: const TextStyle(
+                              fontSize: 22,
+                              color: BrandColors.burgundy,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      const Divider(),
+                      const SizedBox(height: 9),
+                      const Text(
+                        'Shipping, discounts and final charges are calculated at checkout.',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: BrandColors.mutedInk,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 8),
-                const Text(
-                  'Shipping, discounts, and final charges are calculated by KabulFit at checkout.',
-                ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 22),
                 FilledButton.icon(
                   onPressed: currency == 'USD'
                       ? () => context.push('/checkout')
@@ -213,19 +279,37 @@ class WishlistScreen extends ConsumerWidget {
                     ),
                   )
                 : ListView.builder(
+                    padding: const EdgeInsets.all(16),
                     itemCount: items.length,
                     itemBuilder: (context, index) {
                       final item = items[index];
                       final slug = item['slug']?.toString() ?? '';
-                      return ListTile(
-                        title: Text(item['name']?.toString() ?? ''),
-                        subtitle: Text(item['sku']?.toString() ?? ''),
-                        trailing: const Icon(Icons.chevron_right),
-                        onTap: slug.isEmpty
-                            ? null
-                            : () => context.push(
-                                '/products/${Uri.encodeComponent(slug)}',
-                              ),
+                      return Card(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        child: ListTile(
+                          contentPadding: const EdgeInsets.all(16),
+                          leading: const CircleAvatar(
+                            backgroundColor: BrandColors.cream,
+                            child: Icon(
+                              Icons.favorite,
+                              color: BrandColors.burgundy,
+                            ),
+                          ),
+                          title: Text(
+                            item['name']?.toString() ?? '',
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                          subtitle: Text(item['sku']?.toString() ?? ''),
+                          trailing: const Icon(
+                            Icons.chevron_right,
+                            color: BrandColors.burgundy,
+                          ),
+                          onTap: slug.isEmpty
+                              ? null
+                              : () => context.push(
+                                  '/products/${Uri.encodeComponent(slug)}',
+                                ),
+                        ),
                       );
                     },
                   ),
