@@ -21,10 +21,37 @@ class MeasurementProfilesScreen extends ConsumerWidget {
           title: Text(AppLocalizations.of(context).text('measurements')),
         ),
         body: Center(
-          child: FilledButton(
-            onPressed: () => context.push('/login'),
-            child: Text(
-              AppLocalizations.of(context).text('signInMeasurements'),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.straighten, size: 56, color: BrandColors.burgundy),
+                const SizedBox(height: 15),
+                Text(
+                  AppLocalizations.of(context).text('signInMeasurements'),
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                const SizedBox(height: 15),
+                FilledButton(
+                  onPressed: () => context.push('/measurement-guide'),
+                  child: Text(switch (Localizations.localeOf(context).languageCode) {
+                    'fa' => 'رهنمای اندازه‌گیری',
+                    'ps' => 'د اندازې لارښود',
+                    _ => 'View measurement guide',
+                  }),
+                ),
+                const SizedBox(height: 12),
+                OutlinedButton(
+                  onPressed: () => context.push('/login'),
+                  child: Text(AppLocalizations.of(context).text('signIn')),
+                ),
+                TextButton(
+                  onPressed: () => context.push('/register'),
+                  child: Text(AppLocalizations.of(context).text('createAccount')),
+                ),
+              ],
             ),
           ),
         ),
