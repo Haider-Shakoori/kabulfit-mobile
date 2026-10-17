@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/localization/app_localizations.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../auth/application/auth_controller.dart';
 import '../application/address_order_providers.dart';
 import '../application/checkout_providers.dart';
@@ -64,6 +65,39 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
+          Container(
+            padding: const EdgeInsets.all(21),
+            margin: const EdgeInsets.only(bottom: 25),
+            decoration: BoxDecoration(
+              color: BrandColors.cream,
+              borderRadius: BorderRadius.circular(22),
+              border: Border.all(color: BrandColors.champagne),
+            ),
+            child: Column(
+              children: [
+                const Icon(
+                  Icons.lock_outline_rounded,
+                  color: BrandColors.burgundy,
+                  size: 34,
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  AppLocalizations.of(context).text('checkout'),
+                  style: Theme.of(context).textTheme.headlineMedium,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  switch (Localizations.localeOf(context).languageCode) {
+                    'fa' => 'جزئیات سفارش خود را بررسی کنید',
+                    'ps' => 'د خپل فرمایش معلومات وګورئ',
+                    _ => 'Review your details before placing an order',
+                  },
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ],
+            ),
+          ),
           Text(
             AppLocalizations.of(context).text('deliveryAddress'),
             style: Theme.of(context).textTheme.titleLarge,
@@ -148,8 +182,30 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           cart.when(
             loading: () => const LinearProgressIndicator(),
             error: (error, _) => Text('Cart unavailable: $error'),
-            data: (data) => Text(
-              "${AppLocalizations.of(context).text('checkoutSubtotal')}: ${_formattedSubtotal(data)}",
+            data: (data) => Container(
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                color: BrandColors.cream,
+                borderRadius: BorderRadius.circular(18),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      AppLocalizations.of(context).text('checkoutSubtotal'),
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                  ),
+                  Text(
+                    _formattedSubtotal(data),
+                    style: const TextStyle(
+                      color: BrandColors.burgundy,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           const SizedBox(height: 20),
