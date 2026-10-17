@@ -65,7 +65,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ),
                       child: const Column(
                         children: [
-                          KabulFitBrandLogo(white: true, width: 230, height: 85),
+                          KabulFitBrandLogo(
+                            white: true,
+                            width: 230,
+                            height: 85,
+                          ),
                           SizedBox(height: 7),
                           Text(
                             'HERITAGE IN EVERY STITCH',
