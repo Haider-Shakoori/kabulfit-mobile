@@ -26,7 +26,11 @@ class MeasurementProfilesScreen extends ConsumerWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.straighten, size: 56, color: BrandColors.burgundy),
+                const Icon(
+                  Icons.straighten,
+                  size: 56,
+                  color: BrandColors.burgundy,
+                ),
                 const SizedBox(height: 15),
                 Text(
                   AppLocalizations.of(context).text('signInMeasurements'),
@@ -36,7 +40,8 @@ class MeasurementProfilesScreen extends ConsumerWidget {
                 const SizedBox(height: 15),
                 FilledButton(
                   onPressed: () => context.push('/measurement-guide'),
-                  child: Text(switch (Localizations.localeOf(context).languageCode) {
+                  child: Text(switch (Localizations.localeOf(context)
+                      .languageCode) {
                     'fa' => 'رهنمای اندازه‌گیری',
                     'ps' => 'د اندازې لارښود',
                     _ => 'View measurement guide',
@@ -49,7 +54,9 @@ class MeasurementProfilesScreen extends ConsumerWidget {
                 ),
                 TextButton(
                   onPressed: () => context.push('/register'),
-                  child: Text(AppLocalizations.of(context).text('createAccount')),
+                  child: Text(
+                    AppLocalizations.of(context).text('createAccount'),
+                  ),
                 ),
               ],
             ),
@@ -103,32 +110,28 @@ class MeasurementProfilesScreen extends ConsumerWidget {
                                 context: context,
                                 builder: (dialog) => AlertDialog(
                                   title: Text(
-                                    AppLocalizations.of(
-                                      context,
-                                    ).text('deleteProfileConfirm'),
+                                    AppLocalizations.of(context)
+                                        .text('deleteProfileConfirm'),
                                   ),
                                   content: Text(
-                                    AppLocalizations.of(
-                                      context,
-                                    ).text('cannotUndo'),
+                                    AppLocalizations.of(context)
+                                        .text('cannotUndo'),
                                   ),
                                   actions: [
                                     TextButton(
                                       onPressed: () =>
                                           Navigator.pop(dialog, false),
                                       child: Text(
-                                        AppLocalizations.of(
-                                          context,
-                                        ).text('cancel'),
+                                        AppLocalizations.of(context)
+                                            .text('cancel'),
                                       ),
                                     ),
                                     FilledButton(
                                       onPressed: () =>
                                           Navigator.pop(dialog, true),
                                       child: Text(
-                                        AppLocalizations.of(
-                                          context,
-                                        ).text('delete'),
+                                        AppLocalizations.of(context)
+                                            .text('delete'),
                                       ),
                                     ),
                                   ],
