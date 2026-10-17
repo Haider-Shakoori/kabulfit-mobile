@@ -17,7 +17,7 @@ This design branch is based on `feat/batch-18-opt-in-demo-catalog` and connects 
 | 7. Cart | Redesigned cards, safe quantity mutations, USD subtotal, navigation | Display real product thumbnails and refined row spacing |
 | 8. Checkout | Elegant address/shipping/summary design while preserving pending-order/payment safety | Full 3-step visual workflow, payment deliberately disabled without Stripe config |
 | 9. Account | Branded customer account header with live email, all real destinations | Real-device avatar and email overflow QA |
-| 10. Orders | Existing real backend orders/tracking screens | Redesign order status cards and tabs to reference |
+| 10. Orders | Luxury order-history cards showing actual order/payment status, with real backend tracking retained | Refine status grouping and compare on real iPhone |
 | 11. Wishlist | Branded card/list view, real customer wishlist items | Show product photography and quick actions when API supports them |
 | 12. Measurement profile | Real profile CRUD with bottom navigation | Add visual measurement summary; never invent body measurements |
 
@@ -33,3 +33,7 @@ This design branch is based on `feat/batch-18-opt-in-demo-catalog` and connects 
 ## Development-only verification
 
 The redesign is committed as draft PR #14. Verify it with the **current branch HEAD** and an uncancelled Mobile CI workflow; success from prior branches does not validate the new screens. The iOS artifact is unsigned and is not an ordinary installable IPA. Compare all 12 panels on a device before visual sign-off.
+
+## CI verification note
+
+The order-history redesign was added on this branch and formatted with the Flutter project's CI toolchain. Release acceptance requires a fresh CI run on the final branch commit; preceding runs may have been cancelled as the branch was updated. The original domain and `main` remain unchanged.
