@@ -45,3 +45,15 @@ The order-history redesign was added on this branch and formatted with the Flutt
 - Wishlist calls the existing authenticated DELETE route; shoppers choose size/variant on the product page rather than bypassing inventory validation.
 - Only the approved original Base44-inspired photography is displayed. The illustrative tailor figure is static, not a depiction of a customer's body.
 - This is **not yet pixel-perfect or production-approved** without side-by-side iPhone screenshots, long-text/RTL QA, actual size and inventory scenarios, and payment acceptance. The reference mockup's AFN pricing is intentionally **not** copied; the approved real app currency remains USD.
+
+## Original KabulFit website parity fixes — signup, guide, branding
+
+- `/register` provides first-class customer signup using the already-existing Laravel `/api/v1/{locale}/auth/register` endpoint and real mobile device payload. Name, email, optional phone, password confirmation and backend validation are retained.
+- Sign-in and registration can navigate back to the public measurements form, restoring a locally saved measurement draft rather than losing the entered values.
+- The Measurements navigation tab now opens `/measurement-guide` publicly. `/measurements` remains login-protected for private persisted profiles; guest users can access the guide and register or sign in to save.
+- The public guide mirrors the original Laravel `resources/views/content/pages/measurement-guide.blade.php`: **11 male and 17 female measurement steps**, exact translated labels, 28 original image URLs, and the original English/Dari/Pashto tutorial-video links from `database/data/base44_measurement_guide_videos.json`. All **28 original photos returned HTTP 200** during staging checks.
+- The measurements entry form displays real public Laravel measurement definitions for each garment type and converts displayed inch values into authoritative centimeter values before the server save.
+- Both exact original KabulFit header/white logo PNG blobs (verified identical Git object SHA to the Laravel original) are bundled under `assets/brand/` and shown in app headers, onboarding, login and registration. Logos no longer depend on staging image availability.
+- Android and iOS builds and regression tests must pass on the **final commit**, not an earlier branch SHA. No original production domain changes or automatic PR merge.
+
+**Outstanding source-of-truth acceptance:** the original web guide additionally shows body-type/weight planning inputs that the currently published mobile measurement-profile API does not persist; do not imply these have been synchronized. Physical iPhone and RTL screenshot comparison and real authenticated signup-to-profile QA remain necessary.
