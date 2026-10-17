@@ -21,6 +21,7 @@ class CheckoutScreen extends ConsumerStatefulWidget {
 class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   String? addressUuid;
   String? shippingCode;
+  int checkoutStep = 0;
   bool processing = false;
   String? pendingOrderUuid;
   final coupon = TextEditingController();
@@ -98,6 +99,62 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
               ],
             ),
           ),
+          Row(
+            children: [
+              for (var index = 0; index < 3; index++) ...[
+                if (index > 0)
+                  Expanded(
+                    child: Container(
+                      height: 2,
+                      color: checkoutStep >= index
+                          ? BrandColors.burgundy
+                          : BrandColors.champagne,
+                    ),
+                  ),
+                Column(
+                  children: [
+                    CircleAvatar(
+                      radius: 17,
+                      backgroundColor: checkoutStep >= index
+                          ? BrandColors.burgundy
+                          : BrandColors.cream,
+                      child: Text(
+                        '${index + 1}',
+                        style: TextStyle(
+                          color: checkoutStep >= index
+                              ? Colors.white
+                              : BrandColors.mutedInk,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      switch (index) {
+                        0 => switch (Localizations.localeOf(context).languageCode) {
+                          'fa' => 'آدرس',
+                          'ps' => 'پته',
+                          _ => 'Shipping',
+                        },
+                        1 => switch (Localizations.localeOf(context).languageCode) {
+                          'fa' => 'ارسال',
+                          'ps' => 'لېږد',
+                          _ => 'Delivery',
+                        },
+                        _ => switch (Localizations.localeOf(context).languageCode) {
+                          'fa' => 'بازبینی',
+                          'ps' => 'بیاکتنه',
+                          _ => 'Review',
+                        },
+                      },
+                      style: const TextStyle(fontSize: 11),
+                    ),
+                  ],
+                ),
+              ],
+            ],
+          ),
+          const SizedBox(height: 26),
+          if (checkoutStep == 0) ...[
           Text(
             AppLocalizations.of(context).text('deliveryAddress'),
             style: Theme.of(context).textTheme.titleLarge,
@@ -138,6 +195,15 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                   ),
           ),
           const SizedBox(height: 20),
+          FilledButton.icon(
+            onPressed: addressUuid == null
+                ? null
+                : () => setState(() => checkoutStep = 1),
+            icon: const Icon(Icons.arrow_forward),
+            label: Text(AppLocalizations.of(context).text('checkoutContinue')),
+          ),
+          ],
+          if (checkoutStep == 1) ...[
           Text(
             AppLocalizations.of(context).text('shippingMethod'),
             style: Theme.of(context).textTheme.titleLarge,
@@ -171,6 +237,65 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                   ),
           ),
           const SizedBox(height: 20),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () => setState(() => checkoutStep = 0),
+                  child: Text(AppLocalizations.of(context).text('cancel')),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: FilledButton(
+                  onPressed: shippingCode == null
+                      ? null
+                      : () => setState(() => checkoutStep = 2),
+                  child: Text(AppLocalizations.of(context).text('checkoutContinue')),
+                ),
+              ),
+            ],
+          ),
+          ],
+          if (checkoutStep == 2) ...[
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    AppLocalizations.of(context).text('deliveryAddress'),
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    addresses.value == null
+                        ? '—'
+                        : addresses.value!
+                            .where((entry) => entry['uuid'] == addressUuid)
+                            .map((entry) => '${entry['recipient_name']} · ${entry['city']}')
+                            .firstOrNull ?? '—',
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    AppLocalizations.of(context).text('shippingMethod'),
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    methods.value == null
+                        ? '—'
+                        : methods.value!
+                            .where((entry) => entry['code'] == shippingCode)
+                            .map((entry) => entry['name']?.toString() ?? '')
+                            .firstOrNull ?? '—',
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 18),
           TextField(
             controller: coupon,
             textCapitalization: TextCapitalization.characters,
@@ -239,6 +364,18 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             ),
           if (!StripePaymentGateway.isConfigured)
             Text(AppLocalizations.of(context).text('checkoutUnconfigured')),
+          const SizedBox(height: 14),
+          OutlinedButton(
+            onPressed: processing ? null : () => setState(() => checkoutStep = 1),
+            child: Text(
+              switch (Localizations.localeOf(context).languageCode) {
+                'fa' => 'ویرایش روش ارسال',
+                'ps' => 'د لېږد طریقه بدله کړئ',
+                _ => 'Edit delivery',
+              },
+            ),
+          ),
+          ],
         ],
       ),
     );
