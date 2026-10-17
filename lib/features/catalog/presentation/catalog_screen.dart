@@ -6,16 +6,17 @@ import '../../../core/config/providers.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../auth/application/auth_controller.dart';
 import '../../commerce/application/commerce_providers.dart';
+import '../application/catalog_pagination.dart';
 import '../application/demo_catalog.dart';
 
 /// Live products are loaded from Laravel; optional preview data is read-only.
 final catalogProvider = FutureProvider<List<KabulProduct>>((ref) async {
   try {
-    final response = await ref.watch(apiClientProvider).get('/catalog');
-    final items = response['data'];
-    if (items is! List) throw const FormatException('Invalid catalog response');
+    final api = ref.watch(apiClientProvider);
+    final items = await loadAllCatalogPages(
+      (page) => api.get('/catalog?page=$page'),
+    );
     final products = items
-        .whereType<Map<String, dynamic>>()
         .map(KabulProduct.fromJson)
         .where((product) => product.slug.isNotEmpty)
         .toList(growable: false);
