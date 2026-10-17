@@ -314,9 +314,9 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
                                           product.name,
                                           maxLines: 2,
                                           overflow: TextOverflow.ellipsis,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .titleSmall,
+                                          style: Theme.of(
+                                            context,
+                                          ).textTheme.titleSmall,
                                         ),
                                         const SizedBox(height: 7),
                                         Text(
