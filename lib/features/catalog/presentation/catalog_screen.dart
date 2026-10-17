@@ -365,12 +365,36 @@ final productProvider = FutureProvider.family<Map<String, dynamic>, String>((
   return data;
 });
 
-class ProductScreen extends ConsumerWidget {
+class ProductScreen extends ConsumerStatefulWidget {
   const ProductScreen({required this.slug, super.key});
   final String slug;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ProductScreen> createState() => _ProductScreenState();
+}
+
+class _ProductScreenState extends ConsumerState<ProductScreen> {
+  final PageController _photos = PageController();
+  int _selectedPhoto = 0;
+
+  @override
+  void didUpdateWidget(covariant ProductScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.slug != widget.slug) {
+      _selectedPhoto = 0;
+      if (_photos.hasClients) _photos.jumpToPage(0);
+    }
+  }
+
+  @override
+  void dispose() {
+    _photos.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final slug = widget.slug;
     final result = ref.watch(productProvider(slug));
     return Scaffold(
       appBar: AppBar(title: const Text('KabulFit')),
@@ -428,6 +452,10 @@ class ProductScreen extends ConsumerWidget {
                           child: Icon(Icons.checkroom_outlined, size: 72),
                         )
                       : PageView.builder(
+                          controller: _photos,
+                          onPageChanged: (index) {
+                            if (mounted) setState(() => _selectedPhoto = index);
+                          },
                           itemCount: photoUrls.length,
                           itemBuilder: (context, index) => Image.network(
                             photoUrls[index],
@@ -441,9 +469,59 @@ class ProductScreen extends ConsumerWidget {
                 ),
               ),
               if (photoUrls.length > 1) ...[
-                const SizedBox(height: 10),
+                const SizedBox(height: 11),
+                SizedBox(
+                  height: 74,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: photoUrls.length,
+                    separatorBuilder: (_, _) => const SizedBox(width: 9),
+                    itemBuilder: (context, index) {
+                      final selected = _selectedPhoto == index;
+                      return Semantics(
+                        label: 'Photo ${index + 1} of ${photoUrls.length}',
+                        selected: selected,
+                        button: true,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(10),
+                          onTap: () => _photos.animateToPage(
+                            index,
+                            duration: const Duration(milliseconds: 250),
+                            curve: Curves.easeInOut,
+                          ),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            width: 64,
+                            padding: const EdgeInsets.all(3),
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: selected
+                                    ? BrandColors.burgundy
+                                    : BrandColors.champagne,
+                                width: selected ? 2.5 : 1,
+                              ),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.network(
+                                photoUrls[index],
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, _, _) => const ColoredBox(
+                                  color: BrandColors.cream,
+                                  child: Icon(Icons.image_not_supported_outlined),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: 4),
                 Text(
-                  '${photoUrls.length} photos · Swipe to explore',
+                  '${_selectedPhoto + 1} / ${photoUrls.length}',
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
