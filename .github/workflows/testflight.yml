@@ -120,6 +120,27 @@ jobs:
               plistlib.dump(settings, output)
           PY
 
+      - name: Patch connectivity_plus Swift SDK compatibility
+        run: |
+          plugin_file=$(find "$HOME/.pub-cache/hosted/pub.dev" -path '*/connectivity_plus-*/ios/connectivity_plus/Sources/connectivity_plus/PathMonitorConnectivityProvider.swift' -print -quit)
+          if [ -z "$plugin_file" ]; then
+            echo "::error::connectivity_plus Swift source not found"
+            exit 1
+          fi
+          python3 - "$plugin_file" <<'PY'
+          from pathlib import Path
+          import sys
+          path = Path(sys.argv[1])
+          source = path.read_text()
+          needle = 'path.isUltraConstrained'
+          if needle not in source:
+              print('No incompatible NWPath property found; leaving plugin unchanged')
+          else:
+              source = source.replace(needle, 'false')
+              path.write_text(source)
+              print('Patched unavailable NWPath.isUltraConstrained for CI build')
+          PY
+
       - name: Build signed iOS IPA
         run: |
           build_number=$((GITHUB_RUN_NUMBER * 100 + GITHUB_RUN_ATTEMPT))
