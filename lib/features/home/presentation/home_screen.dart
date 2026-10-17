@@ -30,12 +30,15 @@ class HomeScreen extends ConsumerWidget {
     final categories = ref.watch(categoriesProvider);
 
     return Scaffold(
+      drawer: const _LuxuryDrawer(),
       appBar: AppBar(
         title: const Text('KABULFIT'),
-        leading: IconButton(
-          tooltip: strings.text('shop'),
-          icon: const Icon(Icons.grid_view_rounded),
-          onPressed: () => context.go('/shop'),
+        leading: Builder(
+          builder: (drawerContext) => IconButton(
+            tooltip: strings.text('account'),
+            icon: const Icon(Icons.menu_rounded),
+            onPressed: () => Scaffold.of(drawerContext).openDrawer(),
+          ),
         ),
         actions: [
           IconButton(
@@ -602,6 +605,127 @@ class _EditorialProductCard extends StatelessWidget {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The sixth showcase panel: a functional navigation drawer with locale picker.
+class _LuxuryDrawer extends ConsumerWidget {
+  const _LuxuryDrawer();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final strings = AppLocalizations.of(context);
+    final locale = Localizations.localeOf(context).languageCode;
+
+    Widget destination(IconData icon, String label, String path) {
+      return ListTile(
+        leading: Icon(icon, color: BrandColors.burgundy),
+        title: Text(label),
+        trailing: const Icon(
+          Icons.chevron_right_rounded,
+          size: 17,
+          color: BrandColors.mutedInk,
+        ),
+        onTap: () {
+          Navigator.of(context).pop();
+          context.go(path);
+        },
+      );
+    }
+
+    return Drawer(
+      backgroundColor: BrandColors.warmWhite,
+      child: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(12, 12, 12, 20),
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(14),
+                    child: Text(
+                      'KabulFit',
+                      style: Theme.of(context).textTheme.headlineMedium,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  tooltip: strings.text('cancel'),
+                  onPressed: () => Navigator.of(context).pop(),
+                  icon: const Icon(Icons.close_rounded),
+                ),
+              ],
+            ),
+            const SizedBox(height: 9),
+            Container(
+              decoration: BoxDecoration(
+                color: BrandColors.burgundy,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: ListTile(
+                leading: const Icon(Icons.home_rounded, color: Colors.white),
+                title: Text(
+                  strings.text('home'),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                onTap: () => Navigator.of(context).pop(),
+              ),
+            ),
+            destination(Icons.shopping_bag_outlined, strings.text('shop'), '/shop'),
+            destination(
+              Icons.menu_book_outlined,
+              switch (locale) {
+                'fa' => 'رهنمای اندازه‌گیری',
+                'ps' => 'د اندازې لارښود',
+                _ => 'Measurement guide',
+              },
+              '/measurement-guide',
+            ),
+            destination(
+              Icons.straighten_outlined,
+              strings.text('myMeasurements'),
+              '/measurements',
+            ),
+            destination(
+              Icons.favorite_border_rounded,
+              strings.text('wishlist'),
+              '/wishlist',
+            ),
+            destination(Icons.receipt_long_outlined, strings.text('myOrders'), '/orders'),
+            destination(Icons.person_outline_rounded, strings.text('account'), '/account'),
+            const Divider(height: 28),
+            ExpansionTile(
+              leading: const Icon(
+                Icons.language_rounded,
+                color: BrandColors.burgundy,
+              ),
+              title: Text(strings.text('language')),
+              children: [
+                for (final entry in [
+                  ('en', 'English'),
+                  ('fa', 'دری'),
+                  ('ps', 'پښتو'),
+                ])
+                  ListTile(
+                    title: Text(entry.$2),
+                    trailing: locale == entry.$1
+                        ? const Icon(Icons.check, color: BrandColors.burgundy)
+                        : null,
+                    onTap: () {
+                      ref.read(appLocaleProvider.notifier).change(entry.$1);
+                      Navigator.of(context).pop();
+                    },
+                  ),
+              ],
+            ),
+          ],
         ),
       ),
     );
