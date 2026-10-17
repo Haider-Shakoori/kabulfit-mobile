@@ -11,15 +11,15 @@ This design branch is based on `feat/batch-18-opt-in-demo-catalog` and connects 
 | 1. Splash / onboarding | Three-slide first-install introduction with real product photography, localized labels, stored completion | Confirm imagery/cropping and layout on actual iPhone |
 | 2. Home | Branded light storefront, search navigation, editorial catalog hero, backend category photo avatars, featured products, five tabs | Screenshot/layout comparison, localized long-copy and image loading |
 | 3. Shop / category | Responsive product photo cards, search, real USD pricing, backend category filter, five tabs | Visual polish and device RTL QA |
-| 4. Product detail | Swipeable gallery, size chips, tailoring section, backend stock-safe cart/wishlist actions | Add thumbnail rail, preview actual size/variant combinations |
-| 5. Measurement guide | Guide route with live hero and actionable step-by-step written tips | Tutorial videos must not be shown as real until verified content exists |
+| 4. Product detail | Swipeable image gallery with linked selectable thumbnails, size chips, tailoring section, stock-safe cart/wishlist | Compare on device; verify original sizes and variants |
+| 5. Measurement guide | Live-catalog hero, original step-by-step tips, and drawn measurement-marker mannequin | Check accessibility, garment-specific directions; no fabricated tutorial videos |
 | 6. Side menu | Branded navigation drawer, real destinations, language options | Match drawer spacing and typography on phone |
-| 7. Cart | Redesigned cards, safe quantity mutations, USD subtotal, navigation | Display real product thumbnails and refined row spacing |
-| 8. Checkout | Elegant address/shipping/summary design while preserving pending-order/payment safety | Full 3-step visual workflow, payment deliberately disabled without Stripe config |
+| 7. Cart | Redesigned cart rows with real photos matched from live catalog, USD totals and safe quantities/removals | Verify small-phone layout and locales; image fallback if product no longer exists |
+| 8. Checkout | Three-stage address, shipping-method and review interface, USD subtotal, preserving guarded Stripe PaymentSheet flow | End-to-end payment acceptance unavailable until Stripe keys and device QA |
 | 9. Account | Branded customer account header with live email, all real destinations | Real-device avatar and email overflow QA |
 | 10. Orders | Luxury order-history cards showing actual order/payment status, with real backend tracking retained | Refine status grouping and compare on real iPhone |
-| 11. Wishlist | Branded card/list view, real customer wishlist items | Show product photography and quick actions when API supports them |
-| 12. Measurement profile | Real profile CRUD with bottom navigation | Add visual measurement summary; never invent body measurements |
+| 11. Wishlist | Live product photos/prices matched from catalog, choose-options link to accurate sizes, wishlist removal via backend | Test long product names, empty and sold-out states |
+| 12. Measurement profile | Real profile CRUD with expandable visual measurement summary, illustrated figure and API-supplied numbers | Verify real-device RTL and varied measurement sets; never invent body measurements |
 
 ## Verification before merge
 
@@ -37,3 +37,11 @@ The redesign is committed as draft PR #14. Verify it with the **current branch H
 ## CI verification note
 
 The order-history redesign was added on this branch and formatted with the Flutter project's CI toolchain. Release acceptance requires a fresh CI run on the final branch commit; preceding runs may have been cancelled as the branch was updated. The original domain and `main` remain unchanged.
+
+## Design completion checkpoint (implementation, not pixel-perfect certification)
+
+- The six previously partial screen areas now have implemented UI elements: product thumbnail rail, illustrated fitting guide, photograph-based cart and wishlist cards, three-stage checkout, and profile-value illustration.
+- Catalog images and prices are taken from the live USD Laravel API, never from invented local demo product records. Cart/wishlist data does not include photographs; the UI matches its returned localized product slug against the already-loaded catalog and falls back gracefully if missing.
+- Wishlist calls the existing authenticated DELETE route; shoppers choose size/variant on the product page rather than bypassing inventory validation.
+- Only the approved original Base44-inspired photography is displayed. The illustrative tailor figure is static, not a depiction of a customer's body.
+- This is **not yet pixel-perfect or production-approved** without side-by-side iPhone screenshots, long-text/RTL QA, actual size and inventory scenarios, and payment acceptance. The reference mockup's AFN pricing is intentionally **not** copied; the approved real app currency remains USD.
