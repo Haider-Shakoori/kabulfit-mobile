@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../features/auth/presentation/login_screen.dart';
+import '../features/auth/presentation/account_screen.dart';
 import '../features/catalog/presentation/catalog_screen.dart';
 import '../features/commerce/presentation/address_order_screens.dart';
 import '../features/commerce/presentation/checkout_screen.dart';
@@ -14,6 +15,7 @@ final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     routes: [
       GoRoute(path: '/', builder: (_, _) => const HomeScreen()),
+      GoRoute(path: '/account', builder: (_, _) => const AccountScreen()),
       GoRoute(path: '/shop', builder: (_, _) => const CatalogScreen()),
       GoRoute(
         path: '/products/:slug',
