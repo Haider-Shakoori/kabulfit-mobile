@@ -163,8 +163,9 @@ class _MeasurementGuideScreenState
       if (mounted) context.go('/measurements');
     } catch (error) {
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(error.toString())));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(error.toString())));
       }
     } finally {
       if (mounted) setState(() => saving = false);
@@ -172,8 +173,9 @@ class _MeasurementGuideScreenState
   }
 
   void _showInvalid(String field) {
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text('Check measurement: ' + field)));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('Check measurement: ' + field)));
   }
 
   Future<void> _promptForAccount() async {
@@ -298,8 +300,9 @@ class _MeasurementGuideScreenState
                     'خپلې دقیقې اندازې واخلئ',
                   ),
                   textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.titleLarge
-                      ?.copyWith(color: Colors.white),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(color: Colors.white),
                 ),
                 const SizedBox(height: 9),
                 Text(
@@ -623,8 +626,9 @@ class _MeasurementGuideScreenState
                       saving
                           ? AppLocalizations.of(context).text('saving')
                           : authenticated
-                          ? AppLocalizations.of(context)
-                                .text('saveMeasurements')
+                          ? AppLocalizations.of(
+                              context,
+                            ).text('saveMeasurements')
                           : _copy(
                               language,
                               'Save measurements (sign in)',
