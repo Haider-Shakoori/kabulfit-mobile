@@ -158,8 +158,7 @@ class WishlistScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final session = ref.watch(authControllerProvider).value;
     if (session == null) {
-      final liveCatalog = ref.watch(catalogProvider).value ?? const <KabulProduct>[];
-    return Scaffold(
+      return Scaffold(
         appBar: AppBar(
           title: Text(AppLocalizations.of(context).text('wishlist')),
         ),
@@ -171,6 +170,7 @@ class WishlistScreen extends ConsumerWidget {
         ),
       );
     }
+    final liveCatalog = ref.watch(catalogProvider).value ?? const <KabulProduct>[];
     return Scaffold(
       appBar: AppBar(
         title: Text(AppLocalizations.of(context).text('wishlist')),
