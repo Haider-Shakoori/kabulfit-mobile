@@ -9,6 +9,7 @@ import '../features/commerce/presentation/checkout_screen.dart';
 import '../features/commerce/presentation/commerce_screens.dart';
 import '../features/home/presentation/onboarding_screen.dart';
 import '../features/tailoring/presentation/measurement_screens.dart';
+import '../features/tailoring/presentation/measurement_guide_screen.dart';
 import '../features/tailoring/presentation/tailor_product_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -22,6 +23,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (_, state) =>
             ProductScreen(slug: state.pathParameters['slug']!),
       ),
+      GoRoute(path: '/measurement-guide', builder: (_, _) => const MeasurementGuideScreen()),
       GoRoute(
         path: '/measurements',
         builder: (_, _) => const MeasurementProfilesScreen(),
