@@ -6,6 +6,7 @@ import '../../../core/config/providers.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/kabulfit_bottom_navigation.dart';
+import '../../../core/widgets/kabulfit_brand_logo.dart';
 import '../../auth/application/auth_controller.dart';
 import '../../commerce/application/commerce_providers.dart';
 import '../application/catalog_pagination.dart';
@@ -397,7 +398,7 @@ class _ProductScreenState extends ConsumerState<ProductScreen> {
     final slug = widget.slug;
     final result = ref.watch(productProvider(slug));
     return Scaffold(
-      appBar: AppBar(title: const Text('KabulFit')),
+      appBar: AppBar(title: const KabulFitBrandLogo(width: 150, height: 48)),
       body: result.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, _) => Center(
