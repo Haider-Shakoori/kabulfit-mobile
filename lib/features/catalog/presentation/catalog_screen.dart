@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/config/providers.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/kabulfit_bottom_navigation.dart';
 import '../../auth/application/auth_controller.dart';
 import '../../commerce/application/commerce_providers.dart';
 import '../application/catalog_pagination.dart';
@@ -117,6 +118,7 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
           const SizedBox(width: 8),
         ],
       ),
+      bottomNavigationBar: const KabulFitBottomNavigation(selectedIndex: 1),
       body: RefreshIndicator(
         onRefresh: () => ref.refresh(catalogProvider.future),
         child: CustomScrollView(
