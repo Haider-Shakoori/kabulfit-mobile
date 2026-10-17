@@ -72,8 +72,16 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (_, state) =>
             TrackingScreen(uuid: state.pathParameters['uuid']!),
       ),
-      GoRoute(path: '/login', builder: (_, _) => const LoginScreen()),
-      GoRoute(path: '/register', builder: (_, _) => const RegisterScreen()),
+      GoRoute(
+        path: '/login',
+        builder: (_, state) =>
+            LoginScreen(next: state.uri.queryParameters['next']),
+      ),
+      GoRoute(
+        path: '/register',
+        builder: (_, state) =>
+            RegisterScreen(next: state.uri.queryParameters['next']),
+      ),
     ],
   );
 });
