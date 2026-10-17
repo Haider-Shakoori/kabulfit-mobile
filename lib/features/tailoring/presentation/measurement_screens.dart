@@ -15,7 +15,6 @@ class MeasurementProfilesScreen extends ConsumerWidget {
     if (ref.watch(authControllerProvider).value == null) {
       return Scaffold(
         bottomNavigationBar: const KabulFitBottomNavigation(selectedIndex: 2),
-        bottomNavigationBar: const KabulFitBottomNavigation(selectedIndex: 2),
         appBar: AppBar(
           title: Text(AppLocalizations.of(context).text('measurements')),
         ),
@@ -30,6 +29,7 @@ class MeasurementProfilesScreen extends ConsumerWidget {
       );
     }
     return Scaffold(
+      bottomNavigationBar: const KabulFitBottomNavigation(selectedIndex: 2),
       appBar: AppBar(
         title: Text(AppLocalizations.of(context).text('myMeasurements')),
       ),
