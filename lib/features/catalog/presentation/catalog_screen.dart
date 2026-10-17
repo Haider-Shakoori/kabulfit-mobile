@@ -391,6 +391,7 @@ class _ProductActions extends ConsumerStatefulWidget {
 class _ProductActionsState extends ConsumerState<_ProductActions> {
   bool busy = false;
   String? selectedVariant;
+  String? selectedSize;
 
   @override
   Widget build(BuildContext context) {
@@ -399,6 +400,12 @@ class _ProductActionsState extends ConsumerState<_ProductActions> {
             ?.whereType<Map<String, dynamic>>()
             .toList() ??
         [];
+    final originalSizes =
+        (widget.product['size_options'] as List?)
+            ?.whereType<String>()
+            .toList(growable: false) ??
+        const <String>[];
+    final requiresOriginalSize = variants.isEmpty && originalSizes.isNotEmpty;
     final available = variants.where((variant) {
       final stock = variant['stock'];
       return stock is Map && stock['in_stock'] == true;
@@ -434,11 +441,30 @@ class _ProductActionsState extends ConsumerState<_ProductActions> {
                 ? null
                 : (value) => setState(() => selectedVariant = value),
           ),
+        if (requiresOriginalSize)
+          DropdownButtonFormField<String>(
+            initialValue: selectedSize,
+            decoration: InputDecoration(
+              labelText: AppLocalizations.of(context).text('selectOriginalSize'),
+            ),
+            items: originalSizes
+                .map(
+                  (size) => DropdownMenuItem(
+                    value: size,
+                    child: Text(size),
+                  ),
+                )
+                .toList(),
+            onChanged: busy
+                ? null
+                : (value) => setState(() => selectedSize = value),
+          ),
         const SizedBox(height: 12),
         FilledButton.icon(
           onPressed:
               busy ||
                   (variants.isNotEmpty && selectedVariant == null) ||
+                  (requiresOriginalSize && selectedSize == null) ||
                   (variants.isEmpty &&
                       widget.product['stock'] is Map &&
                       (widget.product['stock'] as Map)['in_stock'] != true)
@@ -448,7 +474,11 @@ class _ProductActionsState extends ConsumerState<_ProductActions> {
                   try {
                     await ref
                         .read(commerceActionsProvider)
-                        .addToCart(widget.slug, variantSku: selectedVariant);
+                        .addToCart(
+                          widget.slug,
+                          variantSku: selectedVariant,
+                          sizeCode: requiresOriginalSize ? selectedSize : null,
+                        );
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('Added to cart')),
