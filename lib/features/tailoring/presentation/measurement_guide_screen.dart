@@ -9,6 +9,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/kabulfit_brand_logo.dart';
+import '../../../core/widgets/kabulfit_bottom_navigation.dart';
 import '../../auth/application/auth_controller.dart';
 import '../application/measurement_providers.dart';
 import 'original_measurement_guide_data.dart';
@@ -253,6 +254,7 @@ class _MeasurementGuideScreenState
     final selected = guideSteps[safeIndex];
     final definitions = ref.watch(measurementDefinitionsProvider(_garmentType));
     return Scaffold(
+      bottomNavigationBar: const KabulFitBottomNavigation(selectedIndex: 2),
       appBar: AppBar(
         title: const KabulFitBrandLogo(width: 140, height: 48),
         actions: [
