@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/kabulfit_brand_logo.dart';
 import '../application/auth_controller.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -64,21 +65,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ),
                       child: const Column(
                         children: [
-                          Icon(
-                            Icons.auto_awesome_outlined,
-                            size: 39,
-                            color: BrandColors.champagne,
-                          ),
-                          SizedBox(height: 12),
-                          Text(
-                            'KABULFIT',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 25,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: 3,
-                            ),
-                          ),
+                          KabulFitBrandLogo(white: true, width: 230, height: 85),
                           SizedBox(height: 7),
                           Text(
                             'HERITAGE IN EVERY STITCH',
@@ -159,6 +146,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       child: auth.isLoading
                           ? const CircularProgressIndicator.adaptive()
                           : Text(strings.text('signIn')),
+                    ),
+                    OutlinedButton(
+                      onPressed: () => context.push('/register'),
+                      child: Text(strings.text('createAccount')),
                     ),
                     TextButton(
                       onPressed: () => context.go('/'),
