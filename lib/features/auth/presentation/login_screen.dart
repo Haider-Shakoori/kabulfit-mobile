@@ -33,8 +33,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final auth = ref.watch(authControllerProvider);
     ref.listen(authControllerProvider, (_, next) {
       if (next.hasValue && next.value != null) {
-        context.go(widget.next == '/measurement-guide'
-            ? '/measurement-guide' : '/');
+        context.go(
+          widget.next == '/measurement-guide' ? '/measurement-guide' : '/',
+        );
       }
     });
 
@@ -156,8 +157,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           : Text(strings.text('signIn')),
                     ),
                     OutlinedButton(
-                      onPressed: () => context.push(widget.next == '/measurement-guide'
-                          ? '/register?next=%2Fmeasurement-guide' : '/register'),
+                      onPressed: () => context.push(
+                        widget.next == '/measurement-guide'
+                            ? '/register?next=%2Fmeasurement-guide'
+                            : '/register',
+                      ),
                       child: Text(strings.text('createAccount')),
                     ),
                     TextButton(
