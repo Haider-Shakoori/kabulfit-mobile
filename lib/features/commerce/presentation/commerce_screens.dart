@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/formatting/usd_money.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/kabulfit_bottom_navigation.dart';
@@ -59,9 +60,7 @@ class CartScreen extends ConsumerWidget {
           }
           final currency = cart['currency']?.toString() ?? '';
           final subtotal = cart['subtotal_minor'];
-          final subtotalText = subtotal is num && currency == 'USD'
-              ? '\${(subtotal / 100).toStringAsFixed(2)}'
-              : '—';
+          final subtotalText = formatUsdMinor(subtotal, currency: currency);
           return RefreshIndicator(
             onRefresh: () => ref.refresh(cartProvider.future).then((_) {}),
             child: ListView(
@@ -352,9 +351,7 @@ class _LuxuryCartLine extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final qty = item['quantity'] is num ? (item['quantity'] as num).toInt() : 0;
     final lineTotal = item['line_total_minor'];
-    final totalText = lineTotal is num
-        ? '\$${(lineTotal / 100).toStringAsFixed(2)}'
-        : '—';
+    final totalText = formatUsdMinor(lineTotal);
     final size = item['size_code']?.toString();
     final uuid = item['uuid']?.toString() ?? '';
     final locale = Localizations.localeOf(context).languageCode;
