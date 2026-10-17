@@ -63,7 +63,6 @@ class _KabulFitLaunchScreenState extends State<KabulFitLaunchScreen> {
   }
 }
 
-
 /// A lightweight, offline-safe branded startup screen. This is not the
 /// first-install onboarding flow, which still appears only on first launch.
 class KabulFitPreloader extends StatelessWidget {
