@@ -29,3 +29,7 @@ This design branch is based on `feat/batch-18-opt-in-demo-catalog` and connects 
 - All categories/products/photos/prices, USD-only, original sizes, stock, auth, cart and orders tested against staging API.
 - No real charges and no domain cutover before final approval.
 - An unsigned IPA is a packaging test only, **not a normally installable iOS distribution**. Signed IPA requires Apple provisioning.
+
+## Development-only verification
+
+The redesign is committed as draft PR #14. Verify it with the **current branch HEAD** and an uncancelled Mobile CI workflow; success from prior branches does not validate the new screens. The iOS artifact is unsigned and is not an ordinary installable IPA. Compare all 12 panels on a device before visual sign-off.
