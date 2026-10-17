@@ -1,16 +1,38 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../catalog/presentation/catalog_screen.dart';
-import 'measurement_figure.dart';
+import '../../../core/widgets/kabulfit_brand_logo.dart';
+import '../../auth/application/auth_controller.dart';
+import '../application/measurement_providers.dart';
+import 'original_measurement_guide_data.dart';
 
-/// Step-by-step measurement education inspired by the approved visual guide.
-/// Shows honest written directions until KabulFit has verified tutorial videos.
-class MeasurementGuideScreen extends ConsumerWidget {
+/// Public guide mirrors the original KabulFit men's/women's step images and
+/// localized tutorial videos. Only saving a private profile requires a login.
+class MeasurementGuideScreen extends ConsumerStatefulWidget {
   const MeasurementGuideScreen({super.key});
+
+  @override
+  ConsumerState<MeasurementGuideScreen> createState() =>
+      _MeasurementGuideScreenState();
+}
+
+class _MeasurementGuideScreenState
+    extends ConsumerState<MeasurementGuideScreen> {
+  static const _draftKey = 'kabulfit.original_measurement_draft.v1';
+  bool isMale = true;
+  bool enteringValues = false;
+  bool saving = false;
+  int selectedIndex = 0;
+  String unit = 'cm';
+  final _name = TextEditingController();
+  final _values = <String, TextEditingController>{};
 
   String _copy(String language, String en, String fa, String ps) =>
       switch (language) {
@@ -19,246 +41,514 @@ class MeasurementGuideScreen extends ConsumerWidget {
         _ => en,
       };
 
+  String get _garmentType => isMale ? 'perahan_tunban' : 'dress';
+
+  List<KabulFitGuideStep> get _steps => isMale
+      ? OriginalKabulFitMeasurementGuide.male
+      : OriginalKabulFitMeasurementGuide.female;
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final locale = Localizations.localeOf(context).languageCode;
-    final products = ref.watch(catalogProvider).value ?? const <KabulProduct>[];
-    final photo = products
-        .where((p) => p.imageUrl != null)
-        .firstOrNull
-        ?.imageUrl;
-    final sections = [
-      (
-        icon: Icons.face_outlined,
-        title: _copy(locale, 'Neck', 'گردن', 'غاړه'),
-        detail: _copy(
-          locale,
-          'Measure gently around the base of your neck. Keep the tape level and allow comfortable breathing.',
-          'دور پایه گردن را اندازه بگیرید. متر را صاف و بدون فشار نگه دارید.',
-          'د غاړې د بېخ چاپېره اندازه واخلئ. متر نېغ او لږ نرم وساتئ.',
-        ),
-      ),
-      (
-        icon: Icons.accessibility_new_outlined,
-        title: _copy(locale, 'Shoulder', 'شانه', 'اوږه'),
-        detail: _copy(
-          locale,
-          'Measure from one shoulder tip to the other across your back.',
-          'از سر یک شانه تا سر شانه دیگر از پشت اندازه بگیرید.',
-          'له یوې اوږې تر بلې اوږې پورې د شا له لوري اندازه واخلئ.',
-        ),
-      ),
-      (
-        icon: Icons.straighten_outlined,
-        title: _copy(locale, 'Chest / Bust', 'سینه', 'سینه'),
-        detail: _copy(
-          locale,
-          'Wrap the tape around the fullest part of your chest, parallel to the floor.',
-          'متر را دور پهن‌ترین قسمت سینه، موازی با زمین بپیچید.',
-          'متر د سینې تر ټولو پلنې برخې چاپېره نېغ تاو کړئ.',
-        ),
-      ),
-      (
-        icon: Icons.checkroom_outlined,
-        title: _copy(locale, 'Waist', 'کمر', 'ملا'),
-        detail: _copy(
-          locale,
-          'Measure your natural waistline without pulling the tape tight.',
-          'دور باریک‌ترین بخش کمر را بدون کشیدن متر اندازه بگیرید.',
-          'د ملا طبیعي نرۍ برخه په نرم متر اندازه کړئ.',
-        ),
-      ),
-      (
-        icon: Icons.accessibility_outlined,
-        title: _copy(locale, 'Hip', 'باسن', 'کوناټي'),
-        detail: _copy(
-          locale,
-          'Measure around the fullest part of your hips while standing straight.',
-          'ایستاده دور پهن‌ترین قسمت باسن را اندازه بگیرید.',
-          'په نېغه ولاړه د کوناټو تر ټولو پلنه برخه اندازه کړئ.',
-        ),
-      ),
-      (
-        icon: Icons.pan_tool_alt_outlined,
-        title: _copy(locale, 'Sleeve length', 'طول آستین', 'د لستوڼي اوږدوالی'),
-        detail: _copy(
-          locale,
-          'Bend your arm slightly; measure from shoulder tip to wrist along your arm.',
-          'دست را کمی خم کنید و از شانه تا مچ اندازه بگیرید.',
-          'لاس لږ کوږ کړئ او له اوږې تر مړوند اندازه واخلئ.',
-        ),
-      ),
-      (
-        icon: Icons.height_rounded,
-        title: _copy(locale, 'Garment length', 'طول لباس', 'د جامو اوږدوالی'),
-        detail: _copy(
-          locale,
-          'Measure vertically from the high shoulder point to your preferred garment hem.',
-          'از بالای شانه تا قد دلخواه لباس به صورت عمودی اندازه بگیرید.',
-          'له اوږې څخه د جامو تر خوښې اوږدوالي پورې اندازه واخلئ.',
-        ),
-      ),
-    ];
-    return DefaultTabController(
-      length: 3,
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(
-            _copy(
-              locale,
-              'Measurement guide',
-              'رهنمای اندازه‌گیری',
-              'د اندازې لارښود',
-            ),
-          ),
-          bottom: TabBar(
-            indicatorColor: BrandColors.burgundy,
-            labelColor: BrandColors.burgundy,
-            tabs: [
-              Tab(text: _copy(locale, 'Women', 'زنانه', 'ښځې')),
-              Tab(text: _copy(locale, 'Men', 'مردانه', 'نارینه')),
-              Tab(text: _copy(locale, 'Kids', 'اطفال', 'ماشومان')),
+  void initState() {
+    super.initState();
+    _restoreDraft();
+  }
+
+  Future<void> _restoreDraft() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_draftKey);
+    if (raw == null || !mounted) return;
+    try {
+      final draft = jsonDecode(raw);
+      if (draft is! Map) return;
+      _name.text = draft['name']?.toString() ?? '';
+      final measurements = draft['measurements'];
+      if (measurements is Map) {
+        for (final entry in measurements.entries) {
+          _values.putIfAbsent(
+            entry.key.toString(),
+            TextEditingController.new,
+          ).text = entry.value.toString();
+        }
+      }
+      setState(() => unit = draft['unit'] == 'in' ? 'in' : 'cm');
+    } catch (_) {
+      // Ignore corrupt local draft; never send a partially decoded profile.
+    }
+  }
+
+  Future<void> _preserveDraft() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(
+      _draftKey,
+      jsonEncode({
+        'name': _name.text,
+        'unit': unit,
+        'measurements': _values.map((key, value) =>
+            MapEntry(key, value.text)),
+      }),
+    );
+  }
+
+  void _changeUnit(String newUnit) {
+    if (newUnit == unit) return;
+    final fromCm = unit == 'cm';
+    for (final controller in _values.values) {
+      final number = double.tryParse(controller.text);
+      if (number != null) {
+        controller.text =
+            (fromCm ? number / 2.54 : number * 2.54).toStringAsFixed(2);
+      }
+    }
+    setState(() => unit = newUnit);
+  }
+
+  Future<void> _saveProfile(List<Map<String, dynamic>> definitions) async {
+    if (_name.text.trim().length < 2) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(_copy(
+          Localizations.localeOf(context).languageCode,
+          'Enter a profile name.',
+          'نام پروفایل را وارد کنید.',
+          'د پروفایل نوم ولیکئ.',
+        ))),
+      );
+      return;
+    }
+    final measurements = <Map<String, dynamic>>[];
+    for (final item in definitions) {
+      final code = item['code']?.toString() ?? '';
+      final raw = _values[_garmentType + '_' + code]?.text.trim() ?? '';
+      final parsed = double.tryParse(raw);
+      if (raw.isEmpty && item['required'] != true) continue;
+      if (parsed == null || !parsed.isFinite || parsed <= 0) {
+        _showInvalid(item['name']?.toString() ?? code);
+        return;
+      }
+      final cm = unit == 'in' ? parsed * 2.54 : parsed;
+      final minimum = (item['min'] as num?)?.toDouble() ?? 0;
+      final maximum = (item['max'] as num?)?.toDouble() ?? double.infinity;
+      if (cm < minimum || cm > maximum) {
+        _showInvalid(item['name']?.toString() ?? code);
+        return;
+      }
+      measurements.add({'code': code, 'value': cm});
+    }
+    await _preserveDraft();
+    if (!mounted) return;
+    if (ref.read(authControllerProvider).value == null) {
+      await _promptForAccount();
+      return;
+    }
+    setState(() => saving = true);
+    try {
+      await ref.read(measurementActionsProvider).saveProfile(
+        name: _name.text.trim(),
+        garmentType: _garmentType,
+        measurements: measurements,
+      );
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_draftKey);
+      if (mounted) context.go('/measurements');
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(error.toString())),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => saving = false);
+    }
+  }
+
+  void _showInvalid(String field) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Check measurement: ' + field)),
+    );
+  }
+
+  Future<void> _promptForAccount() async {
+    final language = Localizations.localeOf(context).languageCode;
+    await showModalBottomSheet<void>(
+      context: context,
+      builder: (sheet) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(_copy(language, 'Save your measurements',
+                  'ذخیره اندازه‌های شما', 'خپلې اندازې خوندي کړئ'),
+                  style: Theme.of(sheet).textTheme.titleLarge),
+              const SizedBox(height: 12),
+              Text(_copy(language,
+                'Your entries are kept on this device. Create an account or sign in to save a reusable measurement profile.',
+                'اندازه‌های شما در این دستگاه نگهداری می‌شود. برای ذخیره پروفایل حساب بسازید یا وارد شوید.',
+                'ستاسې اندازې پر همدې وسیله ساتل کېږي. د پروفایل خوندي کولو لپاره حساب جوړ کړئ یا ننوځئ.',
+              ), textAlign: TextAlign.center),
+              const SizedBox(height: 18),
+              FilledButton(
+                onPressed: () {
+                  Navigator.pop(sheet);
+                  context.push('/register');
+                },
+                child: Text(AppLocalizations.of(context).text('createAccount')),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(sheet);
+                  context.push('/login');
+                },
+                child: Text(AppLocalizations.of(context).text('signIn')),
+              ),
             ],
           ),
         ),
-        body: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 15, 16, 25),
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(23),
-              child: SizedBox(
-                height: 200,
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    if (photo == null)
-                      const ColoredBox(color: BrandColors.deepBurgundy)
-                    else
-                      Image.network(
-                        photo,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, _, _) =>
-                            const ColoredBox(color: BrandColors.deepBurgundy),
-                      ),
-                    const DecoratedBox(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [Color(0xF04B1528), Color(0x554B1528)],
-                          begin: Alignment.centerLeft,
-                          end: Alignment.centerRight,
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(24),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          _copy(
-                            locale,
-                            'Get the\nperfect fit',
-                            'اندازه‌گیری\nدقیق',
-                            'سمه\nاندازه',
-                          ),
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontFamily: 'serif',
-                            fontSize: 27,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+      ),
+    );
+  }
+
+  Future<void> _watchVideo(String video) async {
+    final uri = Uri.tryParse(video);
+    if (uri == null || uri.scheme != 'https' ||
+        !({'www.youtube.com', 'youtube.com', 'youtu.be'}).contains(uri.host)) {
+      return;
+    }
+    final opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!opened && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Unable to open tutorial video.')),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _name.dispose();
+    for (final controller in _values.values) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final language = Localizations.localeOf(context).languageCode;
+    final authenticated = ref.watch(authControllerProvider).value != null;
+    final guideSteps = _steps;
+    final safeIndex = selectedIndex.clamp(0, guideSteps.length - 1);
+    final selected = guideSteps[safeIndex];
+    final definitions = ref.watch(measurementDefinitionsProvider(_garmentType));
+    return Scaffold(
+      appBar: AppBar(
+        title: const KabulFitBrandLogo(width: 140, height: 48),
+        actions: [
+          IconButton(
+            tooltip: AppLocalizations.of(context).text('myMeasurements'),
+            icon: const Icon(Icons.account_circle_outlined),
+            onPressed: () => context.push('/measurements'),
+          ),
+        ],
+      ),
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(15, 12, 15, 40),
+        children: [
+          Container(
+            padding: const EdgeInsets.all(23),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFF881C27), Color(0xFF2A6867)],
               ),
+              borderRadius: BorderRadius.circular(20),
             ),
-            const SizedBox(height: 17),
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(18, 16, 18, 15),
-                child: Column(
-                  children: [
-                    Text(
-                      _copy(
-                        locale,
-                        'WHERE TO MEASURE',
-                        'محل اندازه‌گیری',
-                        'د اندازه اخیستلو ځای',
-                      ),
-                      style: const TextStyle(
-                        fontSize: 11,
-                        letterSpacing: 1.4,
-                        color: BrandColors.burgundy,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    const MeasurementFigure(height: 230),
-                    const SizedBox(height: 5),
-                    Text(
-                      _copy(
-                        locale,
-                        'Illustrated guide — use the steps below for exact tape placement.',
-                        'رهنمای تصویری — برای محل دقیق متر، مراحل زیر را دنبال کنید.',
-                        'انځوریز لارښود — د متر سم ځای لپاره لاندې ګامونه تعقیب کړئ.',
-                      ),
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ],
+            child: Column(
+              children: [
+                const Icon(Icons.straighten_outlined,
+                    size: 36, color: Colors.white),
+                const SizedBox(height: 12),
+                Text(
+                  _copy(language, 'Get your perfect measurements',
+                    'اندازه‌گیری دقیق', 'خپلې دقیقې اندازې واخلئ'),
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    color: Colors.white,
+                  ),
                 ),
-              ),
+                const SizedBox(height: 9),
+                Text(
+                  _copy(language,
+                    'Follow the original KabulFit step-by-step photo and video guide.',
+                    'رهنمای تصویری و ویدیویی گام‌به‌گام کابل‌فیت.',
+                    'د کابل‌فټ اصلي انځوریز او ویډیويي لارښود.',
+                  ),
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: Colors.white),
+                ),
+              ],
             ),
-            const SizedBox(height: 19),
+          ),
+          const SizedBox(height: 20),
+          SegmentedButton<bool>(
+            segments: [
+              ButtonSegment(value: true,
+                label: Text(_copy(language, 'Men', 'مردانه', 'نارینه')),
+                icon: const Icon(Icons.man)),
+              ButtonSegment(value: false,
+                label: Text(_copy(language, 'Women', 'زنانه', 'ښځینه')),
+                icon: const Icon(Icons.woman)),
+            ],
+            selected: {isMale},
+            onSelectionChanged: (value) => setState(() {
+              isMale = value.first;
+              selectedIndex = 0;
+            }),
+          ),
+          const SizedBox(height: 15),
+          SegmentedButton<bool>(
+            segments: [
+              ButtonSegment(value: false,
+                label: Text(_copy(language, 'How to measure',
+                  'چگونه اندازه بگیریم', 'څنګه اندازه وکړو')),
+                icon: const Icon(Icons.menu_book_outlined)),
+              ButtonSegment(value: true,
+                label: Text(_copy(language, 'Enter measurements',
+                  'ثبت اندازه‌ها', 'اندازې ثبت کړئ')),
+                icon: const Icon(Icons.edit_note)),
+            ],
+            selected: {enteringValues},
+            onSelectionChanged: (value) =>
+                setState(() => enteringValues = value.first),
+          ),
+          const SizedBox(height: 18),
+          if (!enteringValues) ...[
             Text(
-              _copy(
-                locale,
-                'Follow each step and keep the tape comfortably snug.',
-                'هر مرحله را دنبال کنید و متر را مناسب نگه دارید.',
-                'هر ګام تعقیب کړئ او متر په ارام ډول ونیسئ.',
-              ),
-              style: Theme.of(context).textTheme.bodyMedium,
+              _copy(language, 'Body measurements', 'اندازه‌های بدن', 'د بدن اندازې'),
+              style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 13),
-            for (final step in sections)
-              Card(
-                margin: const EdgeInsets.only(bottom: 11),
-                child: ExpansionTile(
-                  leading: CircleAvatar(
-                    backgroundColor: BrandColors.cream,
-                    child: Icon(step.icon, color: BrandColors.burgundy),
+            GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: guideSteps.length,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                mainAxisSpacing: 8,
+                crossAxisSpacing: 8,
+                childAspectRatio: 2.6,
+              ),
+              itemBuilder: (context, index) {
+                final active = index == safeIndex;
+                return OutlinedButton(
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 7),
+                    backgroundColor: active
+                        ? const Color(0xFF881C27)
+                        : Colors.white,
+                    foregroundColor: active
+                        ? Colors.white
+                        : BrandColors.ink,
                   ),
-                  title: Text(
-                    step.title,
-                    style: Theme.of(context).textTheme.titleMedium,
+                  onPressed: () => setState(() => selectedIndex = index),
+                  child: Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 12,
+                        backgroundColor: active
+                            ? Colors.white24
+                            : BrandColors.cream,
+                        child: Text(
+                          (index + 1).toString(),
+                          style: TextStyle(
+                            color: active ? Colors.white : BrandColors.burgundy,
+                            fontSize: 11,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          guideSteps[index].title(language),
+                          style: const TextStyle(fontSize: 11),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
                   ),
-                  subtitle: Text(
-                    _copy(
-                      locale,
-                      'View instructions',
-                      'مشاهده رهنما',
-                      'لارښوونې وګورئ',
-                    ),
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                  childrenPadding: const EdgeInsets.fromLTRB(19, 0, 19, 18),
+                );
+              },
+            ),
+            const SizedBox(height: 18),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(14),
+                child: Column(
                   children: [
-                    Text(
-                      step.detail,
-                      style: Theme.of(context).textTheme.bodyMedium,
+                    Text(selected.title(language),
+                      style: Theme.of(context).textTheme.titleLarge),
+                    const SizedBox(height: 12),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(13),
+                      child: AspectRatio(
+                        aspectRatio: 1,
+                        child: Image.network(
+                          selected.imageUrl,
+                          fit: BoxFit.contain,
+                          errorBuilder: (_, _, _) =>
+                              const ColoredBox(
+                                color: BrandColors.cream,
+                                child: Icon(Icons.image_not_supported_outlined),
+                              ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    if (selected.video(language).isNotEmpty)
+                      FilledButton.icon(
+                        onPressed: () => _watchVideo(selected.video(language)),
+                        icon: const Icon(Icons.play_circle_outline),
+                        label: Text(_copy(language,
+                            'Watch original tutorial', 'تماشای ویدیوی اصلی',
+                            'اصلي ویډیو وګورئ')),
+                      ),
+                    const SizedBox(height: 10),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        TextButton.icon(
+                          onPressed: safeIndex > 0
+                              ? () => setState(() => selectedIndex--)
+                              : null,
+                          icon: const Icon(Icons.chevron_left),
+                          label: Text(_copy(language, 'Previous', 'قبلی', 'مخکې')),
+                        ),
+                        Text((safeIndex + 1).toString() +
+                            ' / ' + guideSteps.length.toString()),
+                        TextButton.icon(
+                          onPressed: safeIndex < guideSteps.length - 1
+                              ? () => setState(() => selectedIndex++)
+                              : null,
+                          icon: const Icon(Icons.chevron_right),
+                          label: Text(_copy(language, 'Next', 'بعدی', 'بل')),
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ),
-            const SizedBox(height: 16),
-            FilledButton.icon(
-              onPressed: () => context.push('/measurements'),
-              icon: const Icon(Icons.straighten),
-              label: Text(AppLocalizations.of(context).text('myMeasurements')),
             ),
+            const SizedBox(height: 16),
+            Text(
+              _copy(language,
+                'Use a flexible tape, ask someone for help and double-check each measurement.',
+                'از متر انعطاف‌پذیر استفاده کنید، کمک بگیرید و هر اندازه را دوباره بررسی کنید.',
+                'نرم متر و مرسته وکاروئ او هره اندازه دوه ځله وګورئ.',
+              ),
+            ),
+            const SizedBox(height: 15),
+            FilledButton.icon(
+              onPressed: () => setState(() => enteringValues = true),
+              icon: const Icon(Icons.edit_note),
+              label: Text(_copy(language, 'Enter your measurements',
+                  'اندازه‌های خود را وارد کنید', 'خپلې اندازې ثبت کړئ')),
+            ),
+          ] else ...[
+            Text(
+              _copy(language, 'Enter your measurements',
+                'اندازه‌های خود را وارد کنید', 'خپلې اندازې ثبت کړئ'),
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 9),
+            Text(_copy(language,
+              'Enter your measurements below. You can browse the guide without an account; saving a profile requires an account.',
+              'اندازه‌ها را وارد کنید. مشاهده رهنما بدون حساب ممکن است؛ ذخیره پروفایل نیاز به حساب دارد.',
+              'اندازې ولیکئ. لارښود بې حسابه کتلای شئ؛ د پروفایل خوندي کولو لپاره حساب اړین دی.',
+            )),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _name,
+              decoration: InputDecoration(
+                labelText: AppLocalizations.of(context).text('profileName'),
+              ),
+            ),
+            const SizedBox(height: 14),
+            DropdownButtonFormField<String>(
+              value: unit,
+              decoration: InputDecoration(
+                labelText: _copy(language, 'Measurement unit',
+                    'واحد اندازه‌گیری', 'د اندازې واحد'),
+              ),
+              items: [
+                DropdownMenuItem(value: 'cm',
+                    child: Text(_copy(language,
+                        'Centimeters', 'سانتی‌متر', 'سانتي متر'))),
+                DropdownMenuItem(value: 'in',
+                    child: Text(_copy(language,
+                        'Inches', 'اینچ', 'انچ'))),
+              ],
+              onChanged: (v) {
+                if (v != null) _changeUnit(v);
+              },
+            ),
+            const SizedBox(height: 16),
+            definitions.when(
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (error, _) => Column(
+                children: [
+                  Text(error.toString()),
+                  TextButton(
+                    onPressed: () => ref.invalidate(
+                        measurementDefinitionsProvider(_garmentType)),
+                    child: Text(AppLocalizations.of(context).text('retry')),
+                  ),
+                ],
+              ),
+              data: (items) => Column(
+                children: [
+                  for (final item in items)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: TextFormField(
+                        key: ValueKey(_garmentType + '_' + item['code'].toString()),
+                        controller: _values.putIfAbsent(
+                          _garmentType + '_' + item['code'].toString(),
+                          TextEditingController.new,
+                        ),
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                        decoration: InputDecoration(
+                          labelText: (item['name'] ?? item['code']).toString() +
+                              ' (' + unit + ')',
+                          helperText: item['instructions']?.toString(),
+                          suffixText: item['required'] == true ? '*' : null,
+                        ),
+                      ),
+                    ),
+                  const SizedBox(height: 10),
+                  FilledButton(
+                    onPressed: saving ? null : () => _saveProfile(items),
+                    child: Text(saving
+                        ? AppLocalizations.of(context).text('saving')
+                        : authenticated
+                            ? AppLocalizations.of(context).text('saveMeasurements')
+                            : _copy(language, 'Save measurements (sign in)',
+                                'ذخیره اندازه‌ها (ورود)',
+                                'اندازې خوندي کړئ (ننوتل)')),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+            if (!authenticated)
+              OutlinedButton(
+                onPressed: () async {
+                  await _preserveDraft();
+                  if (context.mounted) context.push('/register');
+                },
+                child: Text(AppLocalizations.of(context).text('createAccount')),
+              ),
           ],
-        ),
+        ],
       ),
     );
   }
