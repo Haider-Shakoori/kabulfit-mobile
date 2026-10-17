@@ -105,10 +105,7 @@ void main() {
     await tokens.write('existing-token');
     when(() => client.get('/account')).thenAnswer(
       (_) async => <String, dynamic>{
-        'data': {
-          'name': 'Existing Customer',
-          'email': 'existing@example.com',
-        },
+        'data': {'name': 'Existing Customer', 'email': 'existing@example.com'},
       },
     );
 
