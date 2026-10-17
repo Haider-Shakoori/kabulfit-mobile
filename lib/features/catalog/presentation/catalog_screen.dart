@@ -127,7 +127,10 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
                 child: SearchBar(
                   elevation: WidgetStateProperty.all(0),
                   backgroundColor: WidgetStateProperty.all(BrandColors.cream),
-                  leading: const Icon(Icons.search, color: BrandColors.burgundy),
+                  leading: const Icon(
+                    Icons.search,
+                    color: BrandColors.burgundy,
+                  ),
                   hintText: strings.text('searchProducts'),
                   onChanged: (value) => setState(() => query = value),
                 ),
@@ -146,7 +149,11 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
                           scrollDirection: Axis.horizontal,
                           children: [
                             ChoiceChip(
-                              label: Text(switch (locale) { 'fa' => 'همه', 'ps' => 'ټول', _ => 'All' }),
+                              label: Text(switch (locale) {
+                                'fa' => 'همه',
+                                'ps' => 'ټول',
+                                _ => 'All',
+                              }),
                               selected: selectedCategory == null,
                               onSelected: (_) =>
                                   setState(() => selectedCategory = null),
@@ -234,7 +241,9 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
                                         product.imageUrl == null
                                             ? const ColoredBox(
                                                 color: BrandColors.cream,
-                                                child: Icon(Icons.checkroom_outlined),
+                                                child: Icon(
+                                                  Icons.checkroom_outlined,
+                                                ),
                                               )
                                             : Image.network(
                                                 product.imageUrl!,
@@ -242,7 +251,10 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
                                                 errorBuilder: (_, _, _) =>
                                                     const ColoredBox(
                                                       color: BrandColors.cream,
-                                                      child: Icon(Icons.image_not_supported_outlined),
+                                                      child: Icon(
+                                                        Icons
+                                                            .image_not_supported_outlined,
+                                                      ),
                                                     ),
                                               ),
                                         if (!product.inStock)
@@ -251,14 +263,13 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
                                             child: Padding(
                                               padding: const EdgeInsets.all(10),
                                               child: Chip(
-                                                label: Text(
-                                                  switch (locale) {
-                                                    'fa' => 'ناموجود',
-                                                    'ps' => 'نشته',
-                                                    _ => 'Sold out',
-                                                  },
-                                                ),
-                                                visualDensity: VisualDensity.compact,
+                                                label: Text(switch (locale) {
+                                                  'fa' => 'ناموجود',
+                                                  'ps' => 'نشته',
+                                                  _ => 'Sold out',
+                                                }),
+                                                visualDensity:
+                                                    VisualDensity.compact,
                                               ),
                                             ),
                                           ),
@@ -266,9 +277,15 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
                                     ),
                                   ),
                                   Padding(
-                                    padding: const EdgeInsets.fromLTRB(11, 11, 11, 14),
+                                    padding: const EdgeInsets.fromLTRB(
+                                      11,
+                                      11,
+                                      11,
+                                      14,
+                                    ),
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           product.category.toUpperCase(),
@@ -286,7 +303,9 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
                                           product.name,
                                           maxLines: 2,
                                           overflow: TextOverflow.ellipsis,
-                                          style: Theme.of(context).textTheme.titleSmall,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .titleSmall,
                                         ),
                                         const SizedBox(height: 7),
                                         Text(
@@ -364,16 +383,21 @@ class ProductScreen extends ConsumerWidget {
               : null;
           final price = data['price'];
           final gallery = images is List
-              ? images.whereType<Map>().map((entry) => entry['url']?.toString())
-                    .whereType<String>().where((url) => url.isNotEmpty)
+              ? images
+                    .whereType<Map>()
+                    .map((entry) => entry['url']?.toString())
+                    .whereType<String>()
+                    .where((url) => url.isNotEmpty)
                     .toList(growable: false)
               : <String>[];
           final photoUrls = gallery.isNotEmpty
               ? gallery
-              : imageUrl == null ? <String>[] : <String>[imageUrl];
+              : imageUrl == null
+              ? <String>[]
+              : <String>[imageUrl];
           final originalSizes =
               (data['size_options'] as List?)?.whereType<String>().toList() ??
-                  const <String>[];
+              const <String>[];
           final stock = data['stock'];
           final inStock = stock is Map && stock['in_stock'] == true;
           final currency = price is Map ? price['currency']?.toString() : null;
@@ -417,7 +441,8 @@ class ProductScreen extends ConsumerWidget {
               const SizedBox(height: 22),
               Text(
                 data['category'] is Map
-                    ? ((data['category'] as Map)['name']?.toString() ?? '').toUpperCase()
+                    ? ((data['category'] as Map)['name']?.toString() ?? '')
+                          .toUpperCase()
                     : 'KABULFIT',
                 style: const TextStyle(
                   fontSize: 10,
@@ -444,8 +469,7 @@ class ProductScreen extends ConsumerWidget {
                       ),
                     ),
                   ),
-                  if (!inStock)
-                    const Chip(label: Text('Sold out')),
+                  if (!inStock) const Chip(label: Text('Sold out')),
                 ],
               ),
               const SizedBox(height: 15),
@@ -489,7 +513,9 @@ class ProductScreen extends ConsumerWidget {
                           '/products/${Uri.encodeComponent(slug)}/tailor',
                         ),
                         icon: const Icon(Icons.straighten),
-                        label: Text(AppLocalizations.of(context).text('customize')),
+                        label: Text(
+                          AppLocalizations.of(context).text('customize'),
+                        ),
                       ),
                     ],
                   ),
@@ -673,3 +699,5 @@ class _ProductActionsState extends ConsumerState<_ProductActions> {
     );
   }
 }
+
+[executed on device: businessos-dev-vps (9b1cdbf1-1a02-4fe8-9e81-8871c3eca22c)]
