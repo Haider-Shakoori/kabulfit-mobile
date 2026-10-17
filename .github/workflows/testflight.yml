@@ -1,0 +1,150 @@
+name: KabulFit iOS TestFlight
+
+on:
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: "Upload the signed IPA to TestFlight (uncheck to build only)"
+        required: true
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: kabulfit-ios-testflight
+  cancel-in-progress: false
+
+jobs:
+  ios-testflight:
+    name: Build signed iOS app
+    runs-on: macos-15
+    timeout-minutes: 90
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Verify Apple configuration
+        env:
+          TEAM_ID: ${{ vars.APPLE_TEAM_ID }}
+          ISSUER_ID: ${{ secrets.APPSTORE_ISSUER_ID }}
+          API_KEY_ID: ${{ secrets.APPSTORE_API_KEY_ID }}
+          API_PRIVATE_KEY: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
+          CERT_FILE: ${{ secrets.APPSTORE_CERTIFICATES_FILE_BASE64 }}
+          CERT_PASSWORD: ${{ secrets.APPSTORE_CERTIFICATES_PASSWORD }}
+        run: |
+          for name in TEAM_ID ISSUER_ID API_KEY_ID API_PRIVATE_KEY CERT_FILE CERT_PASSWORD; do
+            if [ -z "${!name}" ]; then
+              echo "::error::Missing GitHub Actions credential/variable: $name"
+              exit 1
+            fi
+          done
+
+      - name: Resolve Flutter dependencies
+        run: flutter pub get
+
+      - name: Install Xcode project editor
+        run: gem install xcodeproj --no-document
+
+      - name: Import Apple Distribution certificate
+        uses: apple-actions/import-codesign-certs@v7
+        with:
+          p12-file-base64: ${{ secrets.APPSTORE_CERTIFICATES_FILE_BASE64 }}
+          p12-password: ${{ secrets.APPSTORE_CERTIFICATES_PASSWORD }}
+
+      - name: Download App Store Connect provisioning profile
+        id: profiles
+        uses: apple-actions/download-provisioning-profiles@v7
+        with:
+          bundle-id: af.kabulfit.mobile
+          profile-type: IOS_APP_STORE
+          issuer-id: ${{ secrets.APPSTORE_ISSUER_ID }}
+          api-key-id: ${{ secrets.APPSTORE_API_KEY_ID }}
+          api-private-key: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
+
+      - name: Verify requested provisioning profile
+        env:
+          PROFILES_JSON: ${{ steps.profiles.outputs.profiles }}
+        run: |
+          profile_name=$(jq -r '[.[] | select(.name == "KabulFit AppStore" and .type == "IOS_APP_STORE")] | first | .name // empty' <<<"$PROFILES_JSON")
+          if [ -z "$profile_name" ]; then
+            echo "::error::No active IOS_APP_STORE profile named KabulFit AppStore for af.kabulfit.mobile"
+            exit 1
+          fi
+          echo "APPSTORE_PROFILE_NAME=$profile_name" >> "$GITHUB_ENV"
+
+      - name: Configure temporary manual signing settings
+        env:
+          TEAM_ID: ${{ vars.APPLE_TEAM_ID }}
+        run: |
+          ruby <<'RUBY'
+          require 'xcodeproj'
+          project = Xcodeproj::Project.open('ios/Runner.xcodeproj')
+          target = project.targets.find { |t| t.name == 'Runner' }
+          abort 'Xcode Runner target not found' unless target
+
+          %w[Release Profile].each do |configuration_name|
+            config = target.build_configurations.find { |c| c.name == configuration_name }
+            abort "Missing Xcode configuration: #{configuration_name}" unless config
+
+            config.build_settings['DEVELOPMENT_TEAM'] = ENV.fetch('TEAM_ID')
+            config.build_settings['CODE_SIGN_STYLE'] = 'Manual'
+            config.build_settings['CODE_SIGN_IDENTITY'] = 'Apple Distribution'
+            config.build_settings['CODE_SIGN_IDENTITY[sdk=iphoneos*]'] = 'Apple Distribution'
+            config.build_settings['PROVISIONING_PROFILE_SPECIFIER'] = ENV.fetch('APPSTORE_PROFILE_NAME')
+          end
+
+          project.save
+          RUBY
+
+          python3 <<'PY'
+          import os
+          import plistlib
+          settings = {
+              "method": "app-store-connect",
+              "signingStyle": "manual",
+              "signingCertificate": "Apple Distribution",
+              "teamID": os.environ["TEAM_ID"],
+              "provisioningProfiles": {
+                  "af.kabulfit.mobile": os.environ["APPSTORE_PROFILE_NAME"]
+              },
+          }
+          with open("ios/ExportOptions.plist", "wb") as output:
+              plistlib.dump(settings, output)
+          PY
+
+      - name: Build signed iOS IPA
+        run: |
+          build_number=$((GITHUB_RUN_NUMBER * 100 + GITHUB_RUN_ATTEMPT))
+          flutter build ipa --release \
+            --target=lib/main_production.dart \
+            --build-name=1.0.0 \
+            --build-number="$build_number" \
+            --dart-define=API_BASE_URL=https://kabulfit.com/api/v1 \
+            --export-options-plist=ios/ExportOptions.plist
+
+      - name: Locate signed IPA
+        id: ipa
+        run: |
+          ipa_file=$(find build/ios/ipa -maxdepth 1 -name '*.ipa' -print -quit)
+          if [ -z "$ipa_file" ]; then
+            echo "::error::The signed IPA was not produced"
+            exit 1
+          fi
+          echo "path=$ipa_file" >> "$GITHUB_OUTPUT"
+
+      - name: Upload to TestFlight (opt-in)
+        if: ${{ inputs.publish }}
+        uses: apple-actions/upload-testflight-build@v5
+        with:
+          app-path: ${{ steps.ipa.outputs.path }}
+          issuer-id: ${{ secrets.APPSTORE_ISSUER_ID }}
+          api-key-id: ${{ secrets.APPSTORE_API_KEY_ID }}
+          api-private-key: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
