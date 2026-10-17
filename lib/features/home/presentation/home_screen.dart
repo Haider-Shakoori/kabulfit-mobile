@@ -99,7 +99,8 @@ class HomeScreen extends ConsumerWidget {
       body: RefreshIndicator(
         onRefresh: () async {
           ref.invalidate(categoriesProvider);
-          await ref.refresh(catalogProvider.future);
+          ref.invalidate(catalogProvider);
+          await ref.read(catalogProvider.future);
         },
         child: ListView(
           padding: const EdgeInsets.only(bottom: 30),
