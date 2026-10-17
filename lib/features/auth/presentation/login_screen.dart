@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/localization/app_localizations.dart';
+import '../../../core/theme/app_theme.dart';
 import '../application/auth_controller.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -33,7 +34,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     });
 
     return Scaffold(
-      appBar: AppBar(title: Text(strings.text('appName'))),
+      appBar: AppBar(title: const Text('KABULFIT')),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -45,17 +46,75 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Text(
-                      strings.text('welcome'),
-                      style: Theme.of(context).textTheme.displaySmall,
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 28,
+                        horizontal: 18,
+                      ),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            BrandColors.deepBurgundy,
+                            BrandColors.burgundy,
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                      child: const Column(
+                        children: [
+                          Icon(
+                            Icons.auto_awesome_outlined,
+                            size: 39,
+                            color: BrandColors.champagne,
+                          ),
+                          SizedBox(height: 12),
+                          Text(
+                            'KABULFIT',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 25,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 3,
+                            ),
+                          ),
+                          SizedBox(height: 7),
+                          Text(
+                            'HERITAGE IN EVERY STITCH',
+                            style: TextStyle(
+                              color: BrandColors.champagne,
+                              fontSize: 10,
+                              letterSpacing: 1.4,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                     const SizedBox(height: 32),
+                    Text(
+                      strings.text('welcome'),
+                      style: Theme.of(context).textTheme.headlineMedium,
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 9),
+                    Text(
+                      switch (Localizations.localeOf(context).languageCode) {
+                        'fa' => 'برای ادامه وارد حساب خود شوید',
+                        'ps' => 'د دوام لپاره خپل حساب ته ننوځئ',
+                        _ => 'Sign in to discover your personal collection',
+                      },
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    const SizedBox(height: 28),
                     TextFormField(
                       controller: _email,
                       keyboardType: TextInputType.emailAddress,
                       autofillHints: const [AutofillHints.email],
                       decoration: InputDecoration(
                         labelText: strings.text('email'),
+                        prefixIcon: const Icon(Icons.mail_outline_rounded),
                       ),
                       validator: (value) {
                         if (value == null || !value.contains('@')) {
@@ -71,6 +130,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       autofillHints: const [AutofillHints.password],
                       decoration: InputDecoration(
                         labelText: strings.text('password'),
+                        prefixIcon: const Icon(Icons.lock_outline_rounded),
                       ),
                       validator: (value) => value == null || value.isEmpty
                           ? strings.text('required')
