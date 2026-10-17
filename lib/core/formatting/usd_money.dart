@@ -2,5 +2,5 @@
 /// A missing or non-USD value is never represented as a valid price.
 String formatUsdMinor(Object? minor, {String currency = 'USD'}) {
   if (currency != 'USD' || minor is! num || !minor.isFinite) return '—';
-  return '$' + (minor / 100).toStringAsFixed(2);
+  return String.fromCharCode(36) + (minor / 100).toStringAsFixed(2);
 }
