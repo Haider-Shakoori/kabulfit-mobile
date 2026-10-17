@@ -58,7 +58,9 @@ class AccountScreen extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        email == null ? strings.text('welcome') : strings.text('account'),
+                        email == null
+                            ? strings.text('welcome')
+                            : strings.text('account'),
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 20,
@@ -75,10 +77,7 @@ class AccountScreen extends ConsumerWidget {
                     ],
                   ),
                 ),
-                const Icon(
-                  Icons.settings_outlined,
-                  color: Colors.white,
-                ),
+                const Icon(Icons.settings_outlined, color: Colors.white),
               ],
             ),
           ),
@@ -142,7 +141,9 @@ class AccountScreen extends ConsumerWidget {
                                 )
                               : null,
                           onTap: () {
-                            ref.read(appLocaleProvider.notifier).change(entry.$1);
+                            ref
+                                .read(appLocaleProvider.notifier)
+                                .change(entry.$1);
                             Navigator.of(sheetContext).pop();
                           },
                         ),
@@ -195,12 +196,16 @@ class _AccountAction extends StatelessWidget {
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
         leading: Icon(
           icon,
-          color: danger ? Theme.of(context).colorScheme.error : BrandColors.burgundy,
+          color: danger
+              ? Theme.of(context).colorScheme.error
+              : BrandColors.burgundy,
         ),
         title: Text(
           label,
           style: TextStyle(
-            color: danger ? Theme.of(context).colorScheme.error : BrandColors.ink,
+            color: danger
+                ? Theme.of(context).colorScheme.error
+                : BrandColors.ink,
             fontWeight: FontWeight.w600,
           ),
         ),
