@@ -6,16 +6,36 @@ import '../../../core/config/providers.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../auth/application/auth_controller.dart';
 import '../../commerce/application/commerce_providers.dart';
+import '../application/catalog_pagination.dart';
+import '../application/demo_catalog.dart';
 
-/// These products are loaded from Laravel, never from hard-coded demo data.
+/// Live products are loaded from Laravel; optional preview data is read-only.
 final catalogProvider = FutureProvider<List<KabulProduct>>((ref) async {
-  final response = await ref.watch(apiClientProvider).get('/catalog');
-  final items = response['data'];
-  if (items is! List) throw const FormatException('Invalid catalog response');
-  return items
+  try {
+    final api = ref.watch(apiClientProvider);
+    final items = await loadAllCatalogPages(
+      (page) => api.get('/catalog?page=$page'),
+    );
+    final products = items
+        .map(KabulProduct.fromJson)
+        .where((product) => product.slug.isNotEmpty)
+        .toList(growable: false);
+    if (products.isNotEmpty || !demoCatalogEnabled) return products;
+  } catch (_) {
+    if (!demoCatalogEnabled) rethrow;
+  }
+  return demoCatalog.map(KabulProduct.fromJson).toList(growable: false);
+});
+
+final categoriesProvider = FutureProvider<List<Map<String, dynamic>>>((
+  ref,
+) async {
+  final response = await ref.watch(apiClientProvider).get('/categories');
+  final data = response['data'];
+  if (data is! List) throw const FormatException('Invalid categories response');
+  return data
       .whereType<Map<String, dynamic>>()
-      .map(KabulProduct.fromJson)
-      .where((product) => product.slug.isNotEmpty)
+      .where((entry) => entry['slug'] is String && entry['name'] is String)
       .toList(growable: false);
 });
 
@@ -28,9 +48,15 @@ class KabulProduct {
     return KabulProduct(
       slug: json['slug']?.toString() ?? '',
       name: json['name']?.toString() ?? '',
-      price: price is Map ? price['formatted']?.toString() ?? '' : '',
+      price: price is Map && price['currency'] == 'USD' && price['minor'] is num
+          ? String.fromCharCode(36) +
+                ((price['minor'] as num) / 100).toStringAsFixed(2)
+          : price is Map
+          ? price['formatted']?.toString() ?? ''
+          : '',
       imageUrl: media is Map ? media['url']?.toString() : null,
       category: category is Map ? category['name']?.toString() ?? '' : '',
+      categorySlug: category is Map ? category['slug']?.toString() : null,
       inStock: stock is Map && stock['in_stock'] == true,
       description: json['short_description']?.toString() ?? '',
     );
@@ -41,6 +67,7 @@ class KabulProduct {
     required this.price,
     required this.imageUrl,
     required this.category,
+    required this.categorySlug,
     required this.inStock,
     required this.description,
   });
@@ -50,6 +77,7 @@ class KabulProduct {
   final String price;
   final String? imageUrl;
   final String category;
+  final String? categorySlug;
   final bool inStock;
   final String description;
 }
@@ -63,6 +91,7 @@ class CatalogScreen extends ConsumerStatefulWidget {
 
 class _CatalogScreenState extends ConsumerState<CatalogScreen> {
   String query = '';
+  String? selectedCategory;
 
   @override
   Widget build(BuildContext context) {
@@ -74,6 +103,7 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
     };
     final strings = AppLocalizations.of(context);
     final result = ref.watch(catalogProvider);
+    final categories = ref.watch(categoriesProvider);
     return Scaffold(
       appBar: AppBar(title: Text(shop)),
       body: RefreshIndicator(
@@ -88,6 +118,40 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
                   hintText: strings.text('searchProducts'),
                   onChanged: (value) => setState(() => query = value),
                 ),
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: categories.when(
+                loading: () => const SizedBox(height: 8),
+                error: (_, _) => const SizedBox.shrink(),
+                data: (items) => items.isEmpty
+                    ? const SizedBox.shrink()
+                    : SizedBox(
+                        height: 52,
+                        child: ListView(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          scrollDirection: Axis.horizontal,
+                          children: [
+                            ChoiceChip(
+                              label: const Text('All'),
+                              selected: selectedCategory == null,
+                              onSelected: (_) =>
+                                  setState(() => selectedCategory = null),
+                            ),
+                            for (final category in items) ...[
+                              const SizedBox(width: 8),
+                              ChoiceChip(
+                                label: Text(category['name'].toString()),
+                                selected: selectedCategory == category['slug'],
+                                onSelected: (_) => setState(
+                                  () => selectedCategory = category['slug']
+                                      .toString(),
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
               ),
             ),
             result.when(
@@ -112,12 +176,14 @@ class _CatalogScreenState extends ConsumerState<CatalogScreen> {
                 final visible = products
                     .where(
                       (product) =>
-                          product.name.toLowerCase().contains(
-                            query.toLowerCase(),
-                          ) ||
-                          product.category.toLowerCase().contains(
-                            query.toLowerCase(),
-                          ),
+                          (selectedCategory == null ||
+                              product.categorySlug == selectedCategory) &&
+                          (product.name.toLowerCase().contains(
+                                query.toLowerCase(),
+                              ) ||
+                              product.category.toLowerCase().contains(
+                                query.toLowerCase(),
+                              )),
                     )
                     .toList();
                 if (visible.isEmpty) {
@@ -220,6 +286,10 @@ final productProvider = FutureProvider.family<Map<String, dynamic>, String>((
   ref,
   slug,
 ) async {
+  if (demoCatalogEnabled) {
+    final demo = demoProductBySlug(slug);
+    if (demo != null) return demo;
+  }
   final response = await ref
       .watch(apiClientProvider)
       .get('/products/${Uri.encodeComponent(slug)}');
@@ -259,6 +329,7 @@ class ProductScreen extends ConsumerWidget {
           final price = data['price'];
           return ListView(
             padding: const EdgeInsets.all(20),
+
             children: [
               AspectRatio(
                 aspectRatio: 4 / 5,
@@ -295,7 +366,10 @@ class ProductScreen extends ConsumerWidget {
                 ),
               ],
               const SizedBox(height: 12),
-              _ProductActions(slug: slug, product: data),
+              if (data['is_demo'] == true)
+                const Text('DEMO PREVIEW — not available to purchase')
+              else
+                _ProductActions(slug: slug, product: data),
             ],
           );
         },
@@ -317,6 +391,7 @@ class _ProductActions extends ConsumerStatefulWidget {
 class _ProductActionsState extends ConsumerState<_ProductActions> {
   bool busy = false;
   String? selectedVariant;
+  String? selectedSize;
 
   @override
   Widget build(BuildContext context) {
@@ -325,6 +400,12 @@ class _ProductActionsState extends ConsumerState<_ProductActions> {
             ?.whereType<Map<String, dynamic>>()
             .toList() ??
         [];
+    final originalSizes =
+        (widget.product['size_options'] as List?)?.whereType<String>().toList(
+          growable: false,
+        ) ??
+        const <String>[];
+    final requiresOriginalSize = variants.isEmpty && originalSizes.isNotEmpty;
     final available = variants.where((variant) {
       final stock = variant['stock'];
       return stock is Map && stock['in_stock'] == true;
@@ -360,11 +441,27 @@ class _ProductActionsState extends ConsumerState<_ProductActions> {
                 ? null
                 : (value) => setState(() => selectedVariant = value),
           ),
+        if (requiresOriginalSize)
+          DropdownButtonFormField<String>(
+            initialValue: selectedSize,
+            decoration: InputDecoration(
+              labelText: AppLocalizations.of(
+                context,
+              ).text('selectOriginalSize'),
+            ),
+            items: originalSizes
+                .map((size) => DropdownMenuItem(value: size, child: Text(size)))
+                .toList(),
+            onChanged: busy
+                ? null
+                : (value) => setState(() => selectedSize = value),
+          ),
         const SizedBox(height: 12),
         FilledButton.icon(
           onPressed:
               busy ||
                   (variants.isNotEmpty && selectedVariant == null) ||
+                  (requiresOriginalSize && selectedSize == null) ||
                   (variants.isEmpty &&
                       widget.product['stock'] is Map &&
                       (widget.product['stock'] as Map)['in_stock'] != true)
@@ -374,7 +471,11 @@ class _ProductActionsState extends ConsumerState<_ProductActions> {
                   try {
                     await ref
                         .read(commerceActionsProvider)
-                        .addToCart(widget.slug, variantSku: selectedVariant);
+                        .addToCart(
+                          widget.slug,
+                          variantSku: selectedVariant,
+                          sizeCode: requiresOriginalSize ? selectedSize : null,
+                        );
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('Added to cart')),

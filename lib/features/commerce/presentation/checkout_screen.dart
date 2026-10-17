@@ -24,6 +24,14 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   String? pendingOrderUuid;
   final coupon = TextEditingController();
 
+  String _formattedSubtotal(Map<String, dynamic> data) {
+    final minor = data['subtotal_minor'];
+    if (data['currency'] != 'USD' || minor is! num) {
+      return '—';
+    }
+    return String.fromCharCode(36) + (minor / 100).toStringAsFixed(2);
+  }
+
   @override
   void dispose() {
     coupon.dispose();
@@ -141,7 +149,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             loading: () => const LinearProgressIndicator(),
             error: (error, _) => Text('Cart unavailable: $error'),
             data: (data) => Text(
-              "${AppLocalizations.of(context).text('checkoutSubtotal')}: ${data['subtotal_minor'] is num ? ((data['subtotal_minor'] as num) / 100).toStringAsFixed(2) : '—'} ${data['currency'] ?? ''}",
+              "${AppLocalizations.of(context).text('checkoutSubtotal')}: ${_formattedSubtotal(data)}",
             ),
           ),
           const SizedBox(height: 20),
@@ -163,6 +171,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                       addressUuid == null ||
                       shippingCode == null ||
                       !cart.hasValue ||
+                      cart.value?['currency'] != 'USD' ||
                       ((cart.value?['items'] as List?)?.isEmpty ?? true)
                   ? null
                   : _pay,

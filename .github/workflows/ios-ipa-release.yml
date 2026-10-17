@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       api_base_url:
-        description: Production HTTPS Laravel API base URL
+        description: Verified HTTPS Laravel API base URL (staging until final domain cutover)
         required: true
-        default: https://kabulfit.com/api/v1
+        default: https://kabulfit.businessos.af/api/v1
         type: string
       distribution_method:
         description: Apple distribution method
@@ -41,7 +41,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          [[ "$API_BASE_URL" =~ ^https:// ]] || { echo "Production API must use HTTPS"; exit 1; }
+          [[ "$API_BASE_URL" =~ ^https:// ]] || { echo "Laravel API must use HTTPS"; exit 1; }
           for key in CERT_B64 CERT_PASSWORD PROFILE_B64 TEAM_ID BUNDLE_ID KEYCHAIN_PASSWORD; do
             [[ -n "${!key}" ]] || { echo "Missing iOS release secret: $key"; exit 1; }
           done

@@ -8,6 +8,34 @@ Batch 17 prepares the existing Flutter storefront, product catalog, customer acc
 
 Use the latest `Mobile CI` run for this branch. It checks Dart formatting, strict analysis, Flutter tests, Android development and release builds, and unsigned iOS compilation. The iOS job additionally uploads `KabulFit-UNSIGNED.ipa` as a packaging preflight **only**. An unsigned IPA cannot be installed on an ordinary iPhone.
 
+## Staging-only IPA while Base44 remains live
+
+Until the final domain cutover, the unsigned iOS CI preflight uses
+`https://kabulfit.businessos.af/api/v1`, launches `main_staging.dart`, and
+explicitly disables demo catalog fallback. This allows honest validation of
+the original 130 active USD-priced products from Laravel rather than
+`kabulfit.com`'s existing Base44 HTML responses.
+
+**Release blocker:** archived product photo URLs on cPanel staging returned
+HTTP 404 during the 2026-10-17 readiness check. Do not sign, distribute, or
+claim a production-ready storefront until these assets are publicly served
+and full EN/FA/PS catalog/detail/cart QA passes. The original website's
+domain remains unchanged until all web and Flutter work is complete.
+
+## Original Base44 catalog parity in the staging app
+
+The staging app now retrieves the **entire Laravel paginated catalog** (130 original
+active products over 11 API pages), rather than only the first 12 products.
+The original size choices appear on product detail pages and are sent as
+`size_code` on cart lines for products without variants. Laravel holds aggregate
+stock; never fake separate S/M/L/XL/XXL inventory counts.
+
+Before accepting an iOS build, deploy Laravel's additive aggregate stock and
+size-option migrations to cPanel staging, run the protected sizes-only
+backfill using the verified private 141-product snapshot, and verify the
+catalog image HTTP responses. Both backend and mobile need full device and
+checkout acceptance testing. This remains a pre-cutover staging build.
+
 ## Requirements for an installable IPA
 
 An Apple Developer Program membership, a distribution certificate exported as a password-protected P12, a matching provisioning profile, the Apple Team ID, and an App ID matching `af.kabulfit.mobile` are required. For Ad Hoc distribution, registered test-device UDIDs must be included in the Ad Hoc profile. App Store distribution instead requires the appropriate App Store distribution profile and App Store Connect setup.

@@ -27,6 +27,7 @@ class CommerceActions {
   Future<void> addToCart(
     String slug, {
     String? variantSku,
+    String? sizeCode,
     int quantity = 1,
   }) async {
     await ref
@@ -37,6 +38,7 @@ class CommerceActions {
             'product_slug': slug,
             'quantity': quantity,
             'variant_sku': ?variantSku,
+            'size_code': ?sizeCode,
           },
         );
     ref.invalidate(cartProvider);
