@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/widgets/kabulfit_bottom_navigation.dart';
+import '../../../core/theme/app_theme.dart';
+import 'measurement_figure.dart';
 import '../../auth/application/auth_controller.dart';
 import '../application/measurement_providers.dart';
 
@@ -58,12 +60,9 @@ class MeasurementProfilesScreen extends ConsumerWidget {
                     itemCount: profiles.length,
                     itemBuilder: (context, i) {
                       final profile = profiles[i];
-                      return ListTile(
-                        title: Text(profile['name']?.toString() ?? ''),
-                        subtitle: Text(
-                          profile['garment_type']?.toString() ?? '',
-                        ),
-                        trailing: PopupMenuButton<String>(
+                      return _MeasurementProfileCard(
+                        profile: profile,
+                        menu: trailing: PopupMenuButton<String>(
                           onSelected: (choice) async {
                             final uuid = profile['uuid']?.toString();
                             if (uuid == null) return;
@@ -380,4 +379,99 @@ class TailoringRequestsScreen extends ConsumerWidget {
                 ),
         ),
   );
+}
+
+class _MeasurementProfileCard extends StatelessWidget {
+  const _MeasurementProfileCard({
+    required this.profile,
+    required this.menu,
+  });
+
+  final Map<String, dynamic> profile;
+  final Widget menu;
+
+  @override
+  Widget build(BuildContext context) {
+    final list = (profile['measurements'] as List?)
+            ?.whereType<Map<String, dynamic>>()
+            .toList(growable: false) ??
+        const <Map<String, dynamic>>[];
+    final unit = profile['display_unit'] == 'in' ? 'in' : 'cm';
+    return Card(
+      margin: const EdgeInsets.only(bottom: 13),
+      child: ExpansionTile(
+        initiallyExpanded: profile['is_default'] == true,
+        leading: const CircleAvatar(
+          backgroundColor: BrandColors.cream,
+          child: Icon(Icons.accessibility_new_outlined, color: BrandColors.burgundy),
+        ),
+        title: Text(
+          profile['name']?.toString() ?? '',
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+        subtitle: Text(
+          (profile['garment_type']?.toString() ?? '').replaceAll('_', ' '),
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
+        trailing: menu,
+        childrenPadding: const EdgeInsets.fromLTRB(14, 0, 14, 18),
+        children: [
+          const Divider(),
+          const SizedBox(height: 8),
+          if (list.isEmpty)
+            Text(AppLocalizations.of(context).text('emptyProfiles'))
+          else
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const MeasurementFigure(height: 210),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Column(
+                    children: [
+                      for (final value in list)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 5),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  value['name']?.toString() ??
+                                      value['code']?.toString() ?? '',
+                                  style: Theme.of(context).textTheme.bodySmall,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              const SizedBox(width: 5),
+                              Text(
+                                '${value['value'] ?? '—'} $unit',
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                  color: BrandColors.deepBurgundy,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          const SizedBox(height: 15),
+          OutlinedButton.icon(
+            onPressed: () => context.push(
+              '/measurements/edit',
+              extra: profile,
+            ),
+            icon: const Icon(Icons.edit_outlined),
+            label: Text(AppLocalizations.of(context).text('editMeasurement')),
+          ),
+        ],
+      ),
+    );
+  }
 }
