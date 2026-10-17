@@ -228,7 +228,8 @@ class HomeScreen extends ConsumerWidget {
                           final category = items[index];
                           final name = category['name']?.toString() ?? '';
                           final slug = category['slug']?.toString() ?? '';
-                          final photos = catalog.value ?? const <KabulProduct>[];
+                          final photos =
+                              catalog.value ?? const <KabulProduct>[];
                           KabulProduct? sample;
                           for (final product in photos) {
                             if (product.categorySlug == slug &&
