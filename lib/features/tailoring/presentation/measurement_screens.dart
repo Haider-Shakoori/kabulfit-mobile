@@ -3,11 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/localization/app_localizations.dart';
-import '../../../core/widgets/kabulfit_bottom_navigation.dart';
 import '../../../core/theme/app_theme.dart';
-import 'measurement_figure.dart';
+import '../../../core/widgets/kabulfit_bottom_navigation.dart';
 import '../../auth/application/auth_controller.dart';
 import '../application/measurement_providers.dart';
+import 'measurement_figure.dart';
 
 class MeasurementProfilesScreen extends ConsumerWidget {
   const MeasurementProfilesScreen({super.key});
