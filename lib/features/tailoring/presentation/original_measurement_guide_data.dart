@@ -14,7 +14,7 @@ class KabulFitGuideStep {
   final String videoPs;
   String title(String locale) => switch (locale) { 'fa' => fa, 'ps' => ps, _ => en };
   String video(String locale) => switch (locale) { 'fa' => videoFa.isEmpty ? videoEn : videoFa, 'ps' => videoPs.isEmpty ? videoEn : videoPs, _ => videoEn };
-  String get imageUrl => 'https://kabulfit.businessos.af/images/kabulfit-base44/source/\$image';
+  String get imageUrl => 'https://kabulfit.businessos.af/images/kabulfit-base44/source/$image';
 }
 
 abstract final class OriginalKabulFitMeasurementGuide {
