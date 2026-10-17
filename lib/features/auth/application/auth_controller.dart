@@ -37,13 +37,15 @@ class AuthController extends AsyncNotifier<AuthSession?> {
   }) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(
-      () => ref.read(authRepositoryProvider).register(
-        name: name,
-        email: email,
-        password: password,
-        passwordConfirmation: passwordConfirmation,
-        phone: phone,
-      ),
+      () => ref
+          .read(authRepositoryProvider)
+          .register(
+            name: name,
+            email: email,
+            password: password,
+            passwordConfirmation: passwordConfirmation,
+            phone: phone,
+          ),
     );
   }
 
