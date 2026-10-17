@@ -71,7 +71,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       autofillHints: const [AutofillHints.name],
                       textCapitalization: TextCapitalization.words,
                       decoration: InputDecoration(
-                        labelText: _copy(context, 'Full name', 'نام کامل', 'بشپړ نوم'),
+                        labelText: _copy(
+                          context,
+                          'Full name',
+                          'نام کامل',
+                          'بشپړ نوم',
+                        ),
                         prefixIcon: const Icon(Icons.person_outline),
                       ),
                       validator: (value) => (value?.trim().length ?? 0) < 2
@@ -89,8 +94,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       ),
                       validator: (value) =>
                           value == null || !value.contains('@')
-                              ? local.text('invalidEmail')
-                              : null,
+                          ? local.text('invalidEmail')
+                          : null,
                     ),
                     const SizedBox(height: 12),
                     TextFormField(
@@ -169,13 +174,15 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           ? null
                           : () {
                               if (_form.currentState!.validate()) {
-                                ref.read(authControllerProvider.notifier).register(
-                                  name: _name.text.trim(),
-                                  email: _email.text.trim(),
-                                  phone: _phone.text.trim(),
-                                  password: _password.text,
-                                  passwordConfirmation: _confirmation.text,
-                                );
+                                ref
+                                    .read(authControllerProvider.notifier)
+                                    .register(
+                                      name: _name.text.trim(),
+                                      email: _email.text.trim(),
+                                      phone: _phone.text.trim(),
+                                      password: _password.text,
+                                      passwordConfirmation: _confirmation.text,
+                                    );
                               }
                             },
                       child: auth.isLoading
@@ -184,12 +191,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     ),
                     TextButton(
                       onPressed: () => context.go('/login'),
-                      child: Text(_copy(
-                        context,
-                        'Already have an account? Sign in',
-                        'حساب دارید؟ وارد شوید',
-                        'حساب لرئ؟ ننوځئ',
-                      )),
+                      child: Text(
+                        _copy(
+                          context,
+                          'Already have an account? Sign in',
+                          'حساب دارید؟ وارد شوید',
+                          'حساب لرئ؟ ننوځئ',
+                        ),
+                      ),
                     ),
                     TextButton(
                       onPressed: () => context.go('/'),
