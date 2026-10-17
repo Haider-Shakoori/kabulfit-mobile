@@ -62,7 +62,7 @@ class MeasurementProfilesScreen extends ConsumerWidget {
                       final profile = profiles[i];
                       return _MeasurementProfileCard(
                         profile: profile,
-                        menu: trailing: PopupMenuButton<String>(
+                        menu: PopupMenuButton<String>(
                           onSelected: (choice) async {
                             final uuid = profile['uuid']?.toString();
                             if (uuid == null) return;
