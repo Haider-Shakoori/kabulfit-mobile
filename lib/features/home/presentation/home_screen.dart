@@ -6,6 +6,7 @@ import '../../../core/localization/app_localizations.dart';
 import '../../../core/localization/locale_controller.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/kabulfit_bottom_navigation.dart';
+import '../../../core/widgets/kabulfit_brand_logo.dart';
 import '../../auth/application/auth_controller.dart';
 import '../../catalog/presentation/catalog_screen.dart';
 
@@ -32,7 +33,7 @@ class HomeScreen extends ConsumerWidget {
     return Scaffold(
       drawer: const _LuxuryDrawer(),
       appBar: AppBar(
-        title: const Text('KABULFIT'),
+        title: const KabulFitBrandLogo(width: 142, height: 42),
         leading: Builder(
           builder: (drawerContext) => IconButton(
             tooltip: strings.text('account'),
