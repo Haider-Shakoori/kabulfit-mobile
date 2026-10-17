@@ -64,10 +64,10 @@ class _MeasurementGuideScreenState
       final measurements = draft['measurements'];
       if (measurements is Map) {
         for (final entry in measurements.entries) {
-          _values.putIfAbsent(
-            entry.key.toString(),
-            TextEditingController.new,
-          ).text = entry.value.toString();
+          _values
+              .putIfAbsent(entry.key.toString(), TextEditingController.new)
+              .text = entry.value
+              .toString();
         }
       }
       setState(() => unit = draft['unit'] == 'in' ? 'in' : 'cm');
@@ -83,8 +83,7 @@ class _MeasurementGuideScreenState
       jsonEncode({
         'name': _name.text,
         'unit': unit,
-        'measurements': _values.map((key, value) =>
-            MapEntry(key, value.text)),
+        'measurements': _values.map((key, value) => MapEntry(key, value.text)),
       }),
     );
   }
@@ -95,8 +94,8 @@ class _MeasurementGuideScreenState
     for (final controller in _values.values) {
       final number = double.tryParse(controller.text);
       if (number != null) {
-        controller.text =
-            (fromCm ? number / 2.54 : number * 2.54).toStringAsFixed(2);
+        controller.text = (fromCm ? number / 2.54 : number * 2.54)
+            .toStringAsFixed(2);
       }
     }
     setState(() => unit = newUnit);
@@ -105,12 +104,16 @@ class _MeasurementGuideScreenState
   Future<void> _saveProfile(List<Map<String, dynamic>> definitions) async {
     if (_name.text.trim().length < 2) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(_copy(
-          Localizations.localeOf(context).languageCode,
-          'Enter a profile name.',
-          'نام پروفایل را وارد کنید.',
-          'د پروفایل نوم ولیکئ.',
-        ))),
+        SnackBar(
+          content: Text(
+            _copy(
+              Localizations.localeOf(context).languageCode,
+              'Enter a profile name.',
+              'نام پروفایل را وارد کنید.',
+              'د پروفایل نوم ولیکئ.',
+            ),
+          ),
+        ),
       );
       return;
     }
@@ -141,19 +144,20 @@ class _MeasurementGuideScreenState
     }
     setState(() => saving = true);
     try {
-      await ref.read(measurementActionsProvider).saveProfile(
-        name: _name.text.trim(),
-        garmentType: _garmentType,
-        measurements: measurements,
-      );
+      await ref
+          .read(measurementActionsProvider)
+          .saveProfile(
+            name: _name.text.trim(),
+            garmentType: _garmentType,
+            measurements: measurements,
+          );
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove(_draftKey);
       if (mounted) context.go('/measurements');
     } catch (error) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(error.toString())),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(error.toString())));
       }
     } finally {
       if (mounted) setState(() => saving = false);
@@ -161,9 +165,8 @@ class _MeasurementGuideScreenState
   }
 
   void _showInvalid(String field) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Check measurement: ' + field)),
-    );
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text('Check measurement: ' + field)));
   }
 
   Future<void> _promptForAccount() async {
@@ -176,15 +179,25 @@ class _MeasurementGuideScreenState
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(_copy(language, 'Save your measurements',
-                  'ذخیره اندازه‌های شما', 'خپلې اندازې خوندي کړئ'),
-                  style: Theme.of(sheet).textTheme.titleLarge),
+              Text(
+                _copy(
+                  language,
+                  'Save your measurements',
+                  'ذخیره اندازه‌های شما',
+                  'خپلې اندازې خوندي کړئ',
+                ),
+                style: Theme.of(sheet).textTheme.titleLarge,
+              ),
               const SizedBox(height: 12),
-              Text(_copy(language,
-                'Your entries are kept on this device. Create an account or sign in to save a reusable measurement profile.',
-                'اندازه‌های شما در این دستگاه نگهداری می‌شود. برای ذخیره پروفایل حساب بسازید یا وارد شوید.',
-                'ستاسې اندازې پر همدې وسیله ساتل کېږي. د پروفایل خوندي کولو لپاره حساب جوړ کړئ یا ننوځئ.',
-              ), textAlign: TextAlign.center),
+              Text(
+                _copy(
+                  language,
+                  'Your entries are kept on this device. Create an account or sign in to save a reusable measurement profile.',
+                  'اندازه‌های شما در این دستگاه نگهداری می‌شود. برای ذخیره پروفایل حساب بسازید یا وارد شوید.',
+                  'ستاسې اندازې پر همدې وسیله ساتل کېږي. د پروفایل خوندي کولو لپاره حساب جوړ کړئ یا ننوځئ.',
+                ),
+                textAlign: TextAlign.center,
+              ),
               const SizedBox(height: 18),
               FilledButton(
                 onPressed: () {
@@ -209,7 +222,8 @@ class _MeasurementGuideScreenState
 
   Future<void> _watchVideo(String video) async {
     final uri = Uri.tryParse(video);
-    if (uri == null || uri.scheme != 'https' ||
+    if (uri == null ||
+        uri.scheme != 'https' ||
         !({'www.youtube.com', 'youtube.com', 'youtu.be'}).contains(uri.host)) {
       return;
     }
@@ -262,20 +276,27 @@ class _MeasurementGuideScreenState
             ),
             child: Column(
               children: [
-                const Icon(Icons.straighten_outlined,
-                    size: 36, color: Colors.white),
+                const Icon(
+                  Icons.straighten_outlined,
+                  size: 36,
+                  color: Colors.white,
+                ),
                 const SizedBox(height: 12),
                 Text(
-                  _copy(language, 'Get your perfect measurements',
-                    'اندازه‌گیری دقیق', 'خپلې دقیقې اندازې واخلئ'),
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: Colors.white,
+                  _copy(
+                    language,
+                    'Get your perfect measurements',
+                    'اندازه‌گیری دقیق',
+                    'خپلې دقیقې اندازې واخلئ',
                   ),
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.titleLarge
+                      ?.copyWith(color: Colors.white),
                 ),
                 const SizedBox(height: 9),
                 Text(
-                  _copy(language,
+                  _copy(
+                    language,
                     'Follow the original KabulFit step-by-step photo and video guide.',
                     'رهنمای تصویری و ویدیویی گام‌به‌گام کابل‌فیت.',
                     'د کابل‌فټ اصلي انځوریز او ویډیويي لارښود.',
@@ -289,12 +310,16 @@ class _MeasurementGuideScreenState
           const SizedBox(height: 20),
           SegmentedButton<bool>(
             segments: [
-              ButtonSegment(value: true,
+              ButtonSegment(
+                value: true,
                 label: Text(_copy(language, 'Men', 'مردانه', 'نارینه')),
-                icon: const Icon(Icons.man)),
-              ButtonSegment(value: false,
+                icon: const Icon(Icons.man),
+              ),
+              ButtonSegment(
+                value: false,
                 label: Text(_copy(language, 'Women', 'زنانه', 'ښځینه')),
-                icon: const Icon(Icons.woman)),
+                icon: const Icon(Icons.woman),
+              ),
             ],
             selected: {isMale},
             onSelectionChanged: (value) => setState(() {
@@ -305,14 +330,30 @@ class _MeasurementGuideScreenState
           const SizedBox(height: 15),
           SegmentedButton<bool>(
             segments: [
-              ButtonSegment(value: false,
-                label: Text(_copy(language, 'How to measure',
-                  'چگونه اندازه بگیریم', 'څنګه اندازه وکړو')),
-                icon: const Icon(Icons.menu_book_outlined)),
-              ButtonSegment(value: true,
-                label: Text(_copy(language, 'Enter measurements',
-                  'ثبت اندازه‌ها', 'اندازې ثبت کړئ')),
-                icon: const Icon(Icons.edit_note)),
+              ButtonSegment(
+                value: false,
+                label: Text(
+                  _copy(
+                    language,
+                    'How to measure',
+                    'چگونه اندازه بگیریم',
+                    'څنګه اندازه وکړو',
+                  ),
+                ),
+                icon: const Icon(Icons.menu_book_outlined),
+              ),
+              ButtonSegment(
+                value: true,
+                label: Text(
+                  _copy(
+                    language,
+                    'Enter measurements',
+                    'ثبت اندازه‌ها',
+                    'اندازې ثبت کړئ',
+                  ),
+                ),
+                icon: const Icon(Icons.edit_note),
+              ),
             ],
             selected: {enteringValues},
             onSelectionChanged: (value) =>
@@ -321,7 +362,12 @@ class _MeasurementGuideScreenState
           const SizedBox(height: 18),
           if (!enteringValues) ...[
             Text(
-              _copy(language, 'Body measurements', 'اندازه‌های بدن', 'د بدن اندازې'),
+              _copy(
+                language,
+                'Body measurements',
+                'اندازه‌های بدن',
+                'د بدن اندازې',
+              ),
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 13),
@@ -343,9 +389,7 @@ class _MeasurementGuideScreenState
                     backgroundColor: active
                         ? const Color(0xFF881C27)
                         : Colors.white,
-                    foregroundColor: active
-                        ? Colors.white
-                        : BrandColors.ink,
+                    foregroundColor: active ? Colors.white : BrandColors.ink,
                   ),
                   onPressed: () => setState(() => selectedIndex = index),
                   child: Row(
@@ -383,8 +427,10 @@ class _MeasurementGuideScreenState
                 padding: const EdgeInsets.all(14),
                 child: Column(
                   children: [
-                    Text(selected.title(language),
-                      style: Theme.of(context).textTheme.titleLarge),
+                    Text(
+                      selected.title(language),
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
                     const SizedBox(height: 12),
                     ClipRRect(
                       borderRadius: BorderRadius.circular(13),
@@ -393,11 +439,10 @@ class _MeasurementGuideScreenState
                         child: Image.network(
                           selected.imageUrl,
                           fit: BoxFit.contain,
-                          errorBuilder: (_, _, _) =>
-                              const ColoredBox(
-                                color: BrandColors.cream,
-                                child: Icon(Icons.image_not_supported_outlined),
-                              ),
+                          errorBuilder: (_, _, _) => const ColoredBox(
+                            color: BrandColors.cream,
+                            child: Icon(Icons.image_not_supported_outlined),
+                          ),
                         ),
                       ),
                     ),
@@ -406,9 +451,14 @@ class _MeasurementGuideScreenState
                       FilledButton.icon(
                         onPressed: () => _watchVideo(selected.video(language)),
                         icon: const Icon(Icons.play_circle_outline),
-                        label: Text(_copy(language,
-                            'Watch original tutorial', 'تماشای ویدیوی اصلی',
-                            'اصلي ویډیو وګورئ')),
+                        label: Text(
+                          _copy(
+                            language,
+                            'Watch original tutorial',
+                            'تماشای ویدیوی اصلی',
+                            'اصلي ویډیو وګورئ',
+                          ),
+                        ),
                       ),
                     const SizedBox(height: 10),
                     Row(
@@ -419,10 +469,15 @@ class _MeasurementGuideScreenState
                               ? () => setState(() => selectedIndex--)
                               : null,
                           icon: const Icon(Icons.chevron_left),
-                          label: Text(_copy(language, 'Previous', 'قبلی', 'مخکې')),
+                          label: Text(
+                            _copy(language, 'Previous', 'قبلی', 'مخکې'),
+                          ),
                         ),
-                        Text((safeIndex + 1).toString() +
-                            ' / ' + guideSteps.length.toString()),
+                        Text(
+                          (safeIndex + 1).toString() +
+                              ' / ' +
+                              guideSteps.length.toString(),
+                        ),
                         TextButton.icon(
                           onPressed: safeIndex < guideSteps.length - 1
                               ? () => setState(() => selectedIndex++)
@@ -438,7 +493,8 @@ class _MeasurementGuideScreenState
             ),
             const SizedBox(height: 16),
             Text(
-              _copy(language,
+              _copy(
+                language,
                 'Use a flexible tape, ask someone for help and double-check each measurement.',
                 'از متر انعطاف‌پذیر استفاده کنید، کمک بگیرید و هر اندازه را دوباره بررسی کنید.',
                 'نرم متر و مرسته وکاروئ او هره اندازه دوه ځله وګورئ.',
@@ -448,21 +504,34 @@ class _MeasurementGuideScreenState
             FilledButton.icon(
               onPressed: () => setState(() => enteringValues = true),
               icon: const Icon(Icons.edit_note),
-              label: Text(_copy(language, 'Enter your measurements',
-                  'اندازه‌های خود را وارد کنید', 'خپلې اندازې ثبت کړئ')),
+              label: Text(
+                _copy(
+                  language,
+                  'Enter your measurements',
+                  'اندازه‌های خود را وارد کنید',
+                  'خپلې اندازې ثبت کړئ',
+                ),
+              ),
             ),
           ] else ...[
             Text(
-              _copy(language, 'Enter your measurements',
-                'اندازه‌های خود را وارد کنید', 'خپلې اندازې ثبت کړئ'),
+              _copy(
+                language,
+                'Enter your measurements',
+                'اندازه‌های خود را وارد کنید',
+                'خپلې اندازې ثبت کړئ',
+              ),
               style: Theme.of(context).textTheme.titleLarge,
             ),
             const SizedBox(height: 9),
-            Text(_copy(language,
-              'Enter your measurements below. You can browse the guide without an account; saving a profile requires an account.',
-              'اندازه‌ها را وارد کنید. مشاهده رهنما بدون حساب ممکن است؛ ذخیره پروفایل نیاز به حساب دارد.',
-              'اندازې ولیکئ. لارښود بې حسابه کتلای شئ؛ د پروفایل خوندي کولو لپاره حساب اړین دی.',
-            )),
+            Text(
+              _copy(
+                language,
+                'Enter your measurements below. You can browse the guide without an account; saving a profile requires an account.',
+                'اندازه‌ها را وارد کنید. مشاهده رهنما بدون حساب ممکن است؛ ذخیره پروفایل نیاز به حساب دارد.',
+                'اندازې ولیکئ. لارښود بې حسابه کتلای شئ؛ د پروفایل خوندي کولو لپاره حساب اړین دی.',
+              ),
+            ),
             const SizedBox(height: 16),
             TextFormField(
               controller: _name,
@@ -475,16 +544,24 @@ class _MeasurementGuideScreenState
               key: ValueKey(unit),
               initialValue: unit,
               decoration: InputDecoration(
-                labelText: _copy(language, 'Measurement unit',
-                    'واحد اندازه‌گیری', 'د اندازې واحد'),
+                labelText: _copy(
+                  language,
+                  'Measurement unit',
+                  'واحد اندازه‌گیری',
+                  'د اندازې واحد',
+                ),
               ),
               items: [
-                DropdownMenuItem(value: 'cm',
-                    child: Text(_copy(language,
-                        'Centimeters', 'سانتی‌متر', 'سانتي متر'))),
-                DropdownMenuItem(value: 'in',
-                    child: Text(_copy(language,
-                        'Inches', 'اینچ', 'انچ'))),
+                DropdownMenuItem(
+                  value: 'cm',
+                  child: Text(
+                    _copy(language, 'Centimeters', 'سانتی‌متر', 'سانتي متر'),
+                  ),
+                ),
+                DropdownMenuItem(
+                  value: 'in',
+                  child: Text(_copy(language, 'Inches', 'اینچ', 'انچ')),
+                ),
               ],
               onChanged: (v) {
                 if (v != null) _changeUnit(v);
@@ -498,7 +575,8 @@ class _MeasurementGuideScreenState
                   Text(error.toString()),
                   TextButton(
                     onPressed: () => ref.invalidate(
-                        measurementDefinitionsProvider(_garmentType)),
+                      measurementDefinitionsProvider(_garmentType),
+                    ),
                     child: Text(AppLocalizations.of(context).text('retry')),
                   ),
                 ],
@@ -509,7 +587,9 @@ class _MeasurementGuideScreenState
                     Padding(
                       padding: const EdgeInsets.only(bottom: 12),
                       child: TextFormField(
-                        key: ValueKey(_garmentType + '_' + item['code'].toString()),
+                        key: ValueKey(
+                          _garmentType + '_' + item['code'].toString(),
+                        ),
                         controller: _values.putIfAbsent(
                           _garmentType + '_' + item['code'].toString(),
                           TextEditingController.new,
@@ -518,8 +598,11 @@ class _MeasurementGuideScreenState
                           decimal: true,
                         ),
                         decoration: InputDecoration(
-                          labelText: (item['name'] ?? item['code']).toString() +
-                              ' (' + unit + ')',
+                          labelText:
+                              (item['name'] ?? item['code']).toString() +
+                              ' (' +
+                              unit +
+                              ')',
                           helperText: item['instructions']?.toString(),
                           suffixText: item['required'] == true ? '*' : null,
                         ),
@@ -528,13 +611,19 @@ class _MeasurementGuideScreenState
                   const SizedBox(height: 10),
                   FilledButton(
                     onPressed: saving ? null : () => _saveProfile(items),
-                    child: Text(saving
-                        ? AppLocalizations.of(context).text('saving')
-                        : authenticated
-                            ? AppLocalizations.of(context).text('saveMeasurements')
-                            : _copy(language, 'Save measurements (sign in)',
-                                'ذخیره اندازه‌ها (ورود)',
-                                'اندازې خوندي کړئ (ننوتل)')),
+                    child: Text(
+                      saving
+                          ? AppLocalizations.of(context).text('saving')
+                          : authenticated
+                          ? AppLocalizations.of(context)
+                                .text('saveMeasurements')
+                          : _copy(
+                              language,
+                              'Save measurements (sign in)',
+                              'ذخیره اندازه‌ها (ورود)',
+                              'اندازې خوندي کړئ (ننوتل)',
+                            ),
+                    ),
                   ),
                 ],
               ),
