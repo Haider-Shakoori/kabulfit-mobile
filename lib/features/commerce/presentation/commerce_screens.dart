@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/kabulfit_bottom_navigation.dart';
 import '../../auth/application/auth_controller.dart';
 import '../application/commerce_providers.dart';
 
@@ -16,6 +17,7 @@ class CartScreen extends ConsumerWidget {
     if (session == null) {
       return Scaffold(
         appBar: AppBar(title: Text(AppLocalizations.of(context).text('cart'))),
+        bottomNavigationBar: const KabulFitBottomNavigation(selectedIndex: 3),
         body: Center(
           child: FilledButton(
             onPressed: () => context.push('/login'),
@@ -27,6 +29,7 @@ class CartScreen extends ConsumerWidget {
     final response = ref.watch(cartProvider);
     return Scaffold(
       appBar: AppBar(title: Text(AppLocalizations.of(context).text('cart'))),
+        bottomNavigationBar: const KabulFitBottomNavigation(selectedIndex: 3),
       body: response.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(
