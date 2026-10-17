@@ -28,7 +28,8 @@ class CartScreen extends ConsumerWidget {
       );
     }
     final response = ref.watch(cartProvider);
-    final liveCatalog = ref.watch(catalogProvider).value ?? const <KabulProduct>[];
+    final liveCatalog =
+        ref.watch(catalogProvider).value ?? const <KabulProduct>[];
     return Scaffold(
       appBar: AppBar(title: Text(AppLocalizations.of(context).text('cart'))),
       bottomNavigationBar: const KabulFitBottomNavigation(selectedIndex: 3),
@@ -170,7 +171,8 @@ class WishlistScreen extends ConsumerWidget {
         ),
       );
     }
-    final liveCatalog = ref.watch(catalogProvider).value ?? const <KabulProduct>[];
+    final liveCatalog =
+        ref.watch(catalogProvider).value ?? const <KabulProduct>[];
     return Scaffold(
       appBar: AppBar(
         title: Text(AppLocalizations.of(context).text('wishlist')),
@@ -219,7 +221,9 @@ class WishlistScreen extends ConsumerWidget {
                                       item['name']?.toString() ?? '',
                                       maxLines: 2,
                                       overflow: TextOverflow.ellipsis,
-                                      style: Theme.of(context).textTheme.titleMedium,
+                                      style: Theme.of(
+                                        context,
+                                      ).textTheme.titleMedium,
                                     ),
                                     const SizedBox(height: 6),
                                     if (product != null)
@@ -238,7 +242,9 @@ class WishlistScreen extends ConsumerWidget {
                                               '/products/${Uri.encodeComponent(slug)}',
                                             ),
                                       child: Text(
-                                        switch (Localizations.localeOf(context).languageCode) {
+                                        switch (Localizations.localeOf(
+                                          context,
+                                        ).languageCode) {
                                           'fa' => 'انتخاب گزینه‌ها',
                                           'ps' => 'انتخابونه وټاکئ',
                                           _ => 'Choose options',
@@ -250,7 +256,9 @@ class WishlistScreen extends ConsumerWidget {
                                 ),
                               ),
                               IconButton(
-                                tooltip: AppLocalizations.of(context).text('delete'),
+                                tooltip: AppLocalizations.of(
+                                  context,
+                                ).text('delete'),
                                 onPressed: slug.isEmpty
                                     ? null
                                     : () => _mutate(
@@ -357,11 +365,7 @@ class _LuxuryCartLine extends ConsumerWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _LiveProductPhoto(
-              url: product?.imageUrl,
-              width: 86,
-              height: 110,
-            ),
+            _LiveProductPhoto(url: product?.imageUrl, width: 86, height: 110),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
@@ -411,7 +415,10 @@ class _LuxuryCartLine extends ConsumerWidget {
                             : null,
                         icon: const Icon(Icons.remove_circle_outline),
                       ),
-                      Text('$qty', style: Theme.of(context).textTheme.titleSmall),
+                      Text(
+                        '$qty',
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
                       IconButton(
                         tooltip: switch (locale) {
                           'fa' => 'زیاد کردن تعداد',

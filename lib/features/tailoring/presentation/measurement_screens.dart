@@ -382,17 +382,15 @@ class TailoringRequestsScreen extends ConsumerWidget {
 }
 
 class _MeasurementProfileCard extends StatelessWidget {
-  const _MeasurementProfileCard({
-    required this.profile,
-    required this.menu,
-  });
+  const _MeasurementProfileCard({required this.profile, required this.menu});
 
   final Map<String, dynamic> profile;
   final Widget menu;
 
   @override
   Widget build(BuildContext context) {
-    final list = (profile['measurements'] as List?)
+    final list =
+        (profile['measurements'] as List?)
             ?.whereType<Map<String, dynamic>>()
             .toList(growable: false) ??
         const <Map<String, dynamic>>[];
@@ -403,7 +401,10 @@ class _MeasurementProfileCard extends StatelessWidget {
         initiallyExpanded: profile['is_default'] == true,
         leading: const CircleAvatar(
           backgroundColor: BrandColors.cream,
-          child: Icon(Icons.accessibility_new_outlined, color: BrandColors.burgundy),
+          child: Icon(
+            Icons.accessibility_new_outlined,
+            color: BrandColors.burgundy,
+          ),
         ),
         title: Text(
           profile['name']?.toString() ?? '',
@@ -438,7 +439,8 @@ class _MeasurementProfileCard extends StatelessWidget {
                               Expanded(
                                 child: Text(
                                   value['name']?.toString() ??
-                                      value['code']?.toString() ?? '',
+                                      value['code']?.toString() ??
+                                      '',
                                   style: Theme.of(context).textTheme.bodySmall,
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
@@ -463,10 +465,7 @@ class _MeasurementProfileCard extends StatelessWidget {
             ),
           const SizedBox(height: 15),
           OutlinedButton.icon(
-            onPressed: () => context.push(
-              '/measurements/edit',
-              extra: profile,
-            ),
+            onPressed: () => context.push('/measurements/edit', extra: profile),
             icon: const Icon(Icons.edit_outlined),
             label: Text(AppLocalizations.of(context).text('editMeasurement')),
           ),

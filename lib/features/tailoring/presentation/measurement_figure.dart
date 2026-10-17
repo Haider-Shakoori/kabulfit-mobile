@@ -11,7 +11,8 @@ class MeasurementFigure extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Semantics(
-    label: 'Tailoring measurement illustration showing neck, chest, waist and hip lines',
+    label:
+        'Tailoring measurement illustration showing neck, chest, waist and hip lines',
     image: true,
     child: CustomPaint(
       size: Size(height * 0.64, height),
@@ -92,7 +93,9 @@ class _MeasurementFigurePainter extends CustomPainter {
       3.15,
       2.4,
       false,
-      hair..style = PaintingStyle.stroke..strokeWidth = 5,
+      hair
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 5,
     );
 
     // Fitting garment texture, not a person-specific body model.
@@ -117,9 +120,20 @@ class _MeasurementFigurePainter extends CustomPainter {
     canvas.restore();
   }
 
-  void _guide(Canvas canvas, double left, double y, double right, double y2, Paint line) {
+  void _guide(
+    Canvas canvas,
+    double left,
+    double y,
+    double right,
+    double y2,
+    Paint line,
+  ) {
     for (double x = left; x < right; x += 8) {
-      canvas.drawLine(Offset(x, y), Offset(x + 4 > right ? right : x + 4, y2), line);
+      canvas.drawLine(
+        Offset(x, y),
+        Offset(x + 4 > right ? right : x + 4, y2),
+        line,
+      );
     }
     final marker = Paint()..color = BrandColors.gold;
     canvas.drawCircle(Offset(left, y), 3, marker);

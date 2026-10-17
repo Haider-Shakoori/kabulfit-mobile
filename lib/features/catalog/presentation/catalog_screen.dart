@@ -509,7 +509,9 @@ class _ProductScreenState extends ConsumerState<ProductScreen> {
                                 fit: BoxFit.cover,
                                 errorBuilder: (_, _, _) => const ColoredBox(
                                   color: BrandColors.cream,
-                                  child: Icon(Icons.image_not_supported_outlined),
+                                  child: Icon(
+                                    Icons.image_not_supported_outlined,
+                                  ),
                                 ),
                               ),
                             ),
