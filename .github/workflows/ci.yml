@@ -25,6 +25,10 @@ jobs:
           channel: stable
           cache: true
       - run: flutter pub get
+      - name: Generate KabulFit native app icons
+        run: |
+          dart run tool/prepare_app_icon.dart
+          dart run flutter_launcher_icons
       - run: dart format --output=none --set-exit-if-changed lib test
       - run: flutter analyze --fatal-infos
       - run: flutter test --coverage
@@ -41,6 +45,10 @@ jobs:
           channel: stable
           cache: true
       - run: flutter pub get
+      - name: Generate KabulFit native app icons
+        run: |
+          dart run tool/prepare_app_icon.dart
+          dart run flutter_launcher_icons
       - name: Build unsigned production APK
         run: >-
           flutter build apk --release --flavor production
@@ -57,6 +65,10 @@ jobs:
           channel: stable
           cache: true
       - run: flutter pub get
+      - name: Generate KabulFit native app icons
+        run: |
+          dart run tool/prepare_app_icon.dart
+          dart run flutter_launcher_icons
       - name: Compile staging iOS (Laravel API, no demo catalog) without signing
         run: >-
           flutter build ios --release --no-codesign
