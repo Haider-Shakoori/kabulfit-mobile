@@ -119,7 +119,7 @@ class _MeasurementFigurePainter extends CustomPainter {
 
   void _guide(Canvas canvas, double left, double y, double right, double y2, Paint line) {
     for (double x = left; x < right; x += 8) {
-      canvas.drawLine(Offset(x, y), Offset((x + 4).clamp(left, right), y2), line);
+      canvas.drawLine(Offset(x, y), Offset(x + 4 > right ? right : x + 4, y2), line);
     }
     final marker = Paint()..color = BrandColors.gold;
     canvas.drawCircle(Offset(left, y), 3, marker);
