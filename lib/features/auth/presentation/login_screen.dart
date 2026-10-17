@@ -8,7 +8,8 @@ import '../../../core/widgets/kabulfit_brand_logo.dart';
 import '../application/auth_controller.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
-  const LoginScreen({super.key});
+  const LoginScreen({this.next, super.key});
+  final String? next;
 
   @override
   ConsumerState<LoginScreen> createState() => _LoginScreenState();
@@ -31,7 +32,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final strings = AppLocalizations.of(context);
     final auth = ref.watch(authControllerProvider);
     ref.listen(authControllerProvider, (_, next) {
-      if (next.hasValue && next.value != null) context.go('/');
+      if (next.hasValue && next.value != null) {
+        context.go(widget.next == '/measurement-guide'
+            ? '/measurement-guide' : '/');
+      }
     });
 
     return Scaffold(
@@ -152,7 +156,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           : Text(strings.text('signIn')),
                     ),
                     OutlinedButton(
-                      onPressed: () => context.push('/register'),
+                      onPressed: () => context.push(widget.next == '/measurement-guide'
+                          ? '/register?next=%2Fmeasurement-guide' : '/register'),
                       child: Text(strings.text('createAccount')),
                     ),
                     TextButton(
