@@ -57,12 +57,12 @@ jobs:
           channel: stable
           cache: true
       - run: flutter pub get
-      - name: Compile iOS without signing
+      - name: Compile staging iOS (Laravel API, no demo catalog) without signing
         run: >-
           flutter build ios --release --no-codesign
-          -t lib/main_production.dart
-          --dart-define=API_BASE_URL=https://kabulfit.com/api/v1
-          --dart-define=DEMO_CATALOG=${{ github.ref_name == 'feat/batch-18-opt-in-demo-catalog' && 'true' || 'false' }}
+          -t lib/main_staging.dart
+          --dart-define=API_BASE_URL=https://kabulfit.businessos.af/api/v1
+          --dart-define=DEMO_CATALOG=false
       - name: Package unsigned IPA for preflight only
         shell: bash
         run: |
