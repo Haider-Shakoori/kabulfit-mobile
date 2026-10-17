@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/localization/app_localizations.dart';
@@ -27,6 +27,7 @@ class MeasurementGuideScreen extends ConsumerStatefulWidget {
 class _MeasurementGuideScreenState
     extends ConsumerState<MeasurementGuideScreen> {
   static const _draftKey = 'kabulfit.original_measurement_draft.v1';
+  static const _secureDrafts = FlutterSecureStorage();
   bool isMale = true;
   bool enteringValues = false;
   bool saving = false;
@@ -55,8 +56,7 @@ class _MeasurementGuideScreenState
   }
 
   Future<void> _restoreDraft() async {
-    final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString(_draftKey);
+    final raw = await _secureDrafts.read(key: _draftKey);
     if (raw == null || !mounted) return;
     try {
       final draft = jsonDecode(raw);
@@ -82,9 +82,9 @@ class _MeasurementGuideScreenState
   }
 
   Future<void> _preserveDraft() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(
-      _draftKey,
+    await _secureDrafts.write(
+      key: _draftKey,
+      value:
       jsonEncode({
         'name': _name.text,
         'unit': unit,
@@ -158,8 +158,7 @@ class _MeasurementGuideScreenState
             garmentType: _garmentType,
             measurements: measurements,
           );
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove(_draftKey);
+      await _secureDrafts.delete(key: _draftKey);
       if (mounted) context.go('/measurements');
     } catch (error) {
       if (mounted) {
