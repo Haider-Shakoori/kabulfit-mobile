@@ -22,6 +22,20 @@ claim a production-ready storefront until these assets are publicly served
 and full EN/FA/PS catalog/detail/cart QA passes. The original website's
 domain remains unchanged until all web and Flutter work is complete.
 
+## Original Base44 catalog parity in the staging app
+
+The staging app now retrieves the **entire Laravel paginated catalog** (130 original
+active products over 11 API pages), rather than only the first 12 products.
+The original size choices appear on product detail pages and are sent as
+`size_code` on cart lines for products without variants. Laravel holds aggregate
+stock; never fake separate S/M/L/XL/XXL inventory counts.
+
+Before accepting an iOS build, deploy Laravel's additive aggregate stock and
+size-option migrations to cPanel staging, run the protected sizes-only
+backfill using the verified private 141-product snapshot, and verify the
+catalog image HTTP responses. Both backend and mobile need full device and
+checkout acceptance testing. This remains a pre-cutover staging build.
+
 ## Requirements for an installable IPA
 
 An Apple Developer Program membership, a distribution certificate exported as a password-protected P12, a matching provisioning profile, the Apple Team ID, and an App ID matching `af.kabulfit.mobile` are required. For Ad Hoc distribution, registered test-device UDIDs must be included in the Ad Hoc profile. App Store distribution instead requires the appropriate App Store distribution profile and App Store Connect setup.
