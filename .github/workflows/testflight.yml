@@ -19,11 +19,22 @@ concurrency:
 jobs:
   ios-testflight:
     name: Build signed iOS app
-    runs-on: macos-15
+    runs-on: macos-26
     timeout-minutes: 90
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
+
+      - name: Verify required Apple SDK
+        run: |
+          xcodebuild -version
+          xcrun --sdk iphoneos --show-sdk-version
+          python3 - <<'PY'
+          import subprocess
+          sdk = subprocess.check_output(['xcrun', '--sdk', 'iphoneos', '--show-sdk-version'], text=True).strip()
+          if int(sdk.split('.')[0]) < 26:
+              raise SystemExit(f'Apple requires iOS SDK 26 or newer; found {sdk}')
+          PY
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -49,6 +60,32 @@ jobs:
 
       - name: Resolve Flutter dependencies
         run: flutter pub get
+
+      - name: Generate branded iOS App Store icon
+        run: |
+          dart run tool/prepare_app_icon.dart
+          dart run flutter_launcher_icons
+          python3 - <<'PY'
+          from pathlib import Path
+          import json, struct
+          directory = Path('ios/Runner/Assets.xcassets/AppIcon.appiconset')
+          catalog = json.loads((directory / 'Contents.json').read_text())
+          entries = catalog.setdefault('images', [])
+          master = Path('assets/brand/kabulfit-icon-square.png')
+          data = master.read_bytes()
+          if data[:8] != b'\\x89PNG\\r\\n\\x1a\\n':
+              raise SystemExit('App icon master is not PNG')
+          width, height = struct.unpack('>II', data[16:24])
+          if (width, height) != (1024, 1024):
+              raise SystemExit(f'App icon must be 1024x1024, found {width}x{height}')
+          destination = directory / 'Icon-App-1024x1024.png'
+          destination.write_bytes(data)
+          entries = [item for item in entries if not (item.get('idiom') == 'ios-marketing' or (item.get('idiom') == 'universal' and item.get('size') == '1024x1024'))]
+          entries.append({'idiom': 'ios-marketing', 'size': '1024x1024', 'scale': '1x', 'filename': destination.name})
+          catalog['images'] = entries
+          (directory / 'Contents.json').write_text(json.dumps(catalog, indent=2) + '\\n')
+          print('Verified 1024x1024 App Store icon in iOS asset catalog')
+          PY
 
       - name: Install Xcode project editor
         run: gem install xcodeproj --no-document
