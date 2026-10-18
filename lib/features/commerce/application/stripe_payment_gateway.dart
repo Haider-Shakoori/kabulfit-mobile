@@ -9,6 +9,8 @@ class StripePaymentGateway {
   static Future<void> initialize() async {}
 
   Future<void> present(String clientSecret) async {
-    throw StateError('Payments are temporarily unavailable in this TestFlight build.');
+    throw StateError(
+      'Payments are temporarily unavailable in this TestFlight build.',
+    );
   }
 }
