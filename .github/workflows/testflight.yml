@@ -73,7 +73,7 @@ jobs:
           entries = catalog.setdefault('images', [])
           master = Path('assets/brand/kabulfit-icon-square.png')
           data = master.read_bytes()
-          if data[:8] != b'\\x89PNG\\r\\n\\x1a\\n':
+          if data[:8] != b'\x89PNG\r\n\x1a\n':
               raise SystemExit('App icon master is not PNG')
           width, height = struct.unpack('>II', data[16:24])
           if (width, height) != (1024, 1024):
@@ -83,7 +83,7 @@ jobs:
           entries = [item for item in entries if not (item.get('idiom') == 'ios-marketing' or (item.get('idiom') == 'universal' and item.get('size') == '1024x1024'))]
           entries.append({'idiom': 'ios-marketing', 'size': '1024x1024', 'scale': '1x', 'filename': destination.name})
           catalog['images'] = entries
-          (directory / 'Contents.json').write_text(json.dumps(catalog, indent=2) + '\\n')
+          (directory / 'Contents.json').write_text(json.dumps(catalog, indent=2) + '\n')
           print('Verified 1024x1024 App Store icon in iOS asset catalog')
           PY
 
