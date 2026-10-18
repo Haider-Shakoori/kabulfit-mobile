@@ -185,7 +185,7 @@ jobs:
             --target=lib/main_production.dart \
             --build-name=1.0.0 \
             --build-number="$build_number" \
-            --dart-define=API_BASE_URL=https://kabulfit.com/api/v1 \
+            --dart-define=API_BASE_URL=https://kabulfit.businessos.af/api/v1 \
             --export-options-plist=ios/ExportOptions.plist
 
       - name: Locate signed IPA
