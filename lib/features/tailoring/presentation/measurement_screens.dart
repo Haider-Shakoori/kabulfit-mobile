@@ -196,6 +196,7 @@ class _NewMeasurementProfileScreenState
   }
 
   final form = GlobalKey<FormState>();
+  final scrollController = ScrollController();
   final name = TextEditingController();
   final values = <String, TextEditingController>{};
   String garmentType = garmentTypes.first;
@@ -223,6 +224,7 @@ class _NewMeasurementProfileScreenState
 
   @override
   void dispose() {
+    scrollController.dispose();
     name.dispose();
     for (final controller in values.values) {
       controller.dispose();
@@ -245,6 +247,7 @@ class _NewMeasurementProfileScreenState
         key: form,
         autovalidateMode: AutovalidateMode.onUserInteraction,
         child: ListView(
+          controller: scrollController,
           padding: const EdgeInsets.all(20),
           children: [
             if (saveError != null) ...[
@@ -342,11 +345,13 @@ class _NewMeasurementProfileScreenState
                       if (!form.currentState!.validate()) {
                         setState(() => saveError =
                             'Please correct the highlighted fields above, including the profile name.');
-                        await Scrollable.ensureVisible(
-                          form.currentContext!,
-                          alignment: 0,
-                          duration: const Duration(milliseconds: 250),
-                        );
+                        if (scrollController.hasClients) {
+                          await scrollController.animateTo(
+                            0,
+                            duration: const Duration(milliseconds: 250),
+                            curve: Curves.easeOut,
+                          );
+                        }
                         return;
                       }
                       setState(() => saveError = null);
