@@ -306,9 +306,9 @@ class _NewMeasurementProfileScreenState
                             return null;
                           }
                           final number = double.tryParse(raw?.trim() ?? '');
-                          final min = (item['min'] as num?)?.toDouble() ?? 0;
+                          final min = double.tryParse(item['min']?.toString() ?? '') ?? 0;
                           final max =
-                              (item['max'] as num?)?.toDouble() ??
+                              double.tryParse(item['max']?.toString() ?? '') ??
                               double.infinity;
                           return number == null || number < min || number > max
                               ? 'Enter a value between $min and $max cm'
