@@ -200,6 +200,7 @@ class _NewMeasurementProfileScreenState
   final values = <String, TextEditingController>{};
   String garmentType = garmentTypes.first;
   bool saving = false;
+  String? saveError;
 
   @override
   void initState() {
@@ -242,9 +243,22 @@ class _NewMeasurementProfileScreenState
       ),
       body: Form(
         key: form,
+        autovalidateMode: AutovalidateMode.onUserInteraction,
         child: ListView(
           padding: const EdgeInsets.all(20),
           children: [
+            if (saveError != null) ...[
+              MaterialBanner(
+                content: Text(saveError!),
+                actions: [
+                  TextButton(
+                    onPressed: () => setState(() => saveError = null),
+                    child: const Text('Dismiss'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+            ],
             TextFormField(
               controller: name,
               decoration: InputDecoration(
@@ -324,7 +338,18 @@ class _NewMeasurementProfileScreenState
               onPressed: saving || !definitions.hasValue
                   ? null
                   : () async {
-                      if (!form.currentState!.validate()) return;
+                      FocusScope.of(context).unfocus();
+                      if (!form.currentState!.validate()) {
+                        setState(() => saveError =
+                            'Please correct the highlighted fields above, including the profile name.');
+                        await Scrollable.ensureVisible(
+                          form.currentContext!,
+                          alignment: 0,
+                          duration: const Duration(milliseconds: 250),
+                        );
+                        return;
+                      }
+                      setState(() => saveError = null);
                       final measurements = <Map<String, dynamic>>[];
                       for (final item in definitions.value!) {
                         final code = item['code'].toString();
@@ -348,9 +373,10 @@ class _NewMeasurementProfileScreenState
                             );
                         if (context.mounted) context.pop();
                       } catch (error) {
-                        if (context.mounted) {
+                        if (mounted) {
+                          setState(() => saveError = error.toString());
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(error.toString())),
+                            SnackBar(content: Text('Unable to save measurements: $error')),
                           );
                         }
                       } finally {
