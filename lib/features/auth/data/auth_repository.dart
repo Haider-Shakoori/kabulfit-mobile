@@ -49,6 +49,34 @@ class AuthRepository {
     );
   }
 
+  Future<AuthSession> register({
+    required String name,
+    required String email,
+    required String password,
+    required String passwordConfirmation,
+    String? phone,
+  }) async {
+    final device = await _deviceIdentity.payload();
+    final response = await _client.post(
+      '/auth/register',
+      data: {
+        'name': name.trim(),
+        'email': email.trim(),
+        'password': password,
+        'password_confirmation': passwordConfirmation,
+        if (phone != null && phone.trim().isNotEmpty) 'phone': phone.trim(),
+        ...device,
+      },
+    );
+    final data = response['data'] as Map<String, dynamic>? ?? response;
+    await _tokenStore.write(data['token'] as String);
+    final user = data['user'] as Map<String, dynamic>;
+    return AuthSession(
+      userUuid: user['uuid'] as String,
+      email: user['email'] as String,
+    );
+  }
+
   Future<void> signOut() async {
     try {
       await _client.post('/auth/logout');

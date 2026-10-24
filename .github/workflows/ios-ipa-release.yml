@@ -1,6 +1,9 @@
 name: KabulFit iOS Signed IPA
 
 on:
+  push:
+    branches:
+      - feat/batch-19-luxury-showcase-ui
   workflow_dispatch:
     inputs:
       api_base_url:
@@ -11,7 +14,7 @@ on:
       distribution_method:
         description: Apple distribution method
         required: true
-        default: ad-hoc
+        default: app-store
         type: choice
         options:
           - ad-hoc
@@ -31,9 +34,9 @@ jobs:
 
       - name: Check release prerequisites
         env:
-          API_BASE_URL: ${{ inputs.api_base_url }}
-          CERT_B64: ${{ secrets.IOS_DISTRIBUTION_CERT_P12_BASE64 }}
-          CERT_PASSWORD: ${{ secrets.IOS_DISTRIBUTION_CERT_PASSWORD }}
+          API_BASE_URL: ${{ inputs.api_base_url || 'https://kabulfit.businessos.af/api/v1' }}
+          CERT_B64: ${{ secrets.APPSTORE_CERTIFICATES_FILE_BASE64 }}
+          CERT_PASSWORD: ${{ secrets.APPSTORE_CERTIFICATES_PASSWORD }}
           PROFILE_B64: ${{ secrets.IOS_PROVISIONING_PROFILE_BASE64 }}
           TEAM_ID: ${{ secrets.IOS_TEAM_ID }}
           BUNDLE_ID: ${{ secrets.IOS_BUNDLE_ID }}
@@ -53,8 +56,8 @@ jobs:
 
       - name: Install signing certificate and profile
         env:
-          CERT_B64: ${{ secrets.IOS_DISTRIBUTION_CERT_P12_BASE64 }}
-          CERT_PASSWORD: ${{ secrets.IOS_DISTRIBUTION_CERT_PASSWORD }}
+          CERT_B64: ${{ secrets.APPSTORE_CERTIFICATES_FILE_BASE64 }}
+          CERT_PASSWORD: ${{ secrets.APPSTORE_CERTIFICATES_PASSWORD }}
           PROFILE_B64: ${{ secrets.IOS_PROVISIONING_PROFILE_BASE64 }}
           KEYCHAIN_PASSWORD: ${{ secrets.IOS_KEYCHAIN_PASSWORD }}
         shell: bash
@@ -81,7 +84,7 @@ jobs:
         env:
           TEAM_ID: ${{ secrets.IOS_TEAM_ID }}
           BUNDLE_ID: ${{ secrets.IOS_BUNDLE_ID }}
-          EXPORT_METHOD: ${{ inputs.distribution_method }}
+          EXPORT_METHOD: ${{ inputs.distribution_method || 'app-store' }}
         shell: bash
         run: |
           set -euo pipefail
@@ -127,13 +130,14 @@ jobs:
 
       - name: Test and build signed IPA
         env:
-          API_BASE_URL: ${{ inputs.api_base_url }}
+          API_BASE_URL: ${{ inputs.api_base_url || 'https://kabulfit.businessos.af/api/v1' }}
         shell: bash
         run: |
           flutter pub get
           flutter analyze --fatal-infos
           flutter test
           flutter build ipa --release -t lib/main_production.dart \
+            --build-number="$(date -u +%Y%m%d%H%M)" \
             --dart-define=API_BASE_URL="$API_BASE_URL" \
             --export-options-plist="$RUNNER_TEMP/ExportOptions.plist"
           test -n "$(find build/ios/ipa -name '*.ipa' -print -quit)"
@@ -158,6 +162,27 @@ jobs:
             build/ios/ipa/SHA256SUMS.txt
           if-no-files-found: error
           retention-days: 14
+
+      - name: Upload to TestFlight
+        if: ${{ (inputs.distribution_method || 'app-store') == 'app-store' }}
+        env:
+          ASC_KEY_ID: ${{ secrets.APPSTORE_API_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.APPSTORE_ISSUER_ID }}
+          ASC_KEY_P8: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for key in ASC_KEY_ID ASC_ISSUER_ID ASC_KEY_P8; do
+            [[ -n "${!key}" ]] || { echo "Missing App Store Connect secret: $key"; exit 1; }
+          done
+          mkdir -p "$HOME/.appstoreconnect/private_keys"
+          KEY_PATH="$HOME/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8"
+          printf '%s' "$ASC_KEY_P8" > "$KEY_PATH"
+          chmod 600 "$KEY_PATH"
+          xcrun altool --upload-app --type ios \
+            --file build/ios/ipa/KabulFit.ipa \
+            --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID"
+          rm -f "$KEY_PATH"
 
       - name: Remove temporary signing material
         if: always()

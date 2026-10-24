@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/localization/app_localizations.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../auth/application/auth_controller.dart';
 import '../application/address_order_providers.dart';
 
@@ -245,23 +246,85 @@ class OrdersScreen extends ConsumerWidget {
                     child: Text(AppLocalizations.of(context).text('noOrders')),
                   )
                 : ListView.builder(
+                    padding: const EdgeInsets.fromLTRB(16, 18, 16, 28),
                     itemCount: items.length,
                     itemBuilder: (context, i) {
                       final order = items[i];
                       final uuid = order['uuid']?.toString() ?? '';
-                      return ListTile(
-                        title: Text(
-                          "${AppLocalizations.of(context).text('orderLabel')} ${order['number']}",
+                      final status = order['status']?.toString() ?? '';
+                      final payment = order['payment_status']?.toString() ?? '';
+                      final number = order['number']?.toString() ?? '';
+                      return Card(
+                        margin: const EdgeInsets.only(bottom: 14),
+                        child: InkWell(
+                          onTap: uuid.isEmpty
+                              ? null
+                              : () => context.push(
+                                  '/orders/${Uri.encodeComponent(uuid)}/tracking',
+                                ),
+                          borderRadius: BorderRadius.circular(20),
+                          child: Padding(
+                            padding: const EdgeInsets.all(18),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    const CircleAvatar(
+                                      backgroundColor: BrandColors.cream,
+                                      child: Icon(
+                                        Icons.local_mall_outlined,
+                                        color: BrandColors.burgundy,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Text(
+                                        "${AppLocalizations.of(context).text('orderLabel')} $number",
+                                        style: Theme.of(
+                                          context,
+                                        ).textTheme.titleMedium,
+                                      ),
+                                    ),
+                                    const Icon(
+                                      Icons.chevron_right,
+                                      color: BrandColors.burgundy,
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 13),
+                                const Divider(),
+                                const SizedBox(height: 10),
+                                Wrap(
+                                  spacing: 8,
+                                  runSpacing: 8,
+                                  children: [
+                                    Chip(
+                                      avatar: const Icon(
+                                        Icons.inventory_2_outlined,
+                                        size: 16,
+                                        color: BrandColors.burgundy,
+                                      ),
+                                      label: Text(
+                                        "${AppLocalizations.of(context).text('statusLabel')}: $status",
+                                      ),
+                                    ),
+                                    Chip(
+                                      avatar: const Icon(
+                                        Icons.credit_card_outlined,
+                                        size: 16,
+                                        color: BrandColors.burgundy,
+                                      ),
+                                      label: Text(
+                                        "${AppLocalizations.of(context).text('paymentLabel')}: $payment",
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
-                        subtitle: Text(
-                          "${AppLocalizations.of(context).text('statusLabel')}: ${order['status']} · ${AppLocalizations.of(context).text('paymentLabel')}: ${order['payment_status']}",
-                        ),
-                        trailing: const Icon(Icons.chevron_right),
-                        onTap: uuid.isEmpty
-                            ? null
-                            : () => context.push(
-                                '/orders/${Uri.encodeComponent(uuid)}/tracking',
-                              ),
                       );
                     },
                   ),
