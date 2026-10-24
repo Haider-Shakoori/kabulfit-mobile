@@ -220,70 +220,97 @@ class HomeScreen extends ConsumerWidget {
             categories.when(
               loading: () => const SizedBox(height: 120),
               error: (_, _) => const SizedBox.shrink(),
-              data: (items) => items.isEmpty
-                  ? const SizedBox.shrink()
-                  : SizedBox(
-                      height: 118,
-                      child: ListView.separated(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        scrollDirection: Axis.horizontal,
-                        itemCount: items.length,
-                        separatorBuilder: (_, _) => const SizedBox(width: 14),
-                        itemBuilder: (context, index) {
-                          final category = items[index];
-                          final name = category['name']?.toString() ?? '';
-                          final slug = category['slug']?.toString() ?? '';
-                          final photos =
-                              catalog.value ?? const <KabulProduct>[];
-                          KabulProduct? sample;
-                          for (final product in photos) {
-                            if (product.categorySlug == slug &&
-                                product.imageUrl != null) {
-                              sample = product;
-                              break;
-                            }
-                          }
-                          return SizedBox(
-                            width: 75,
-                            child: InkWell(
-                              borderRadius: BorderRadius.circular(13),
-                              onTap: () => context.go(
-                                '/shop?category=${Uri.encodeQueryComponent(slug)}',
-                              ),
-                              child: Column(
-                                children: [
-                                  CircleAvatar(
-                                    radius: 35,
-                                    backgroundColor: BrandColors.champagne,
-                                    backgroundImage: sample?.imageUrl == null
-                                        ? null
-                                        : NetworkImage(sample!.imageUrl!),
-                                    child: sample?.imageUrl == null
-                                        ? const Icon(
-                                            Icons.checkroom_outlined,
-                                            color: BrandColors.burgundy,
-                                          )
-                                        : null,
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    name,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    textAlign: TextAlign.center,
-                                    style: const TextStyle(
-                                      fontSize: 11,
-                                      color: BrandColors.ink,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
+              data: (items) {
+                // Only the four audience categories belong on the homepage.
+                // Garments such as Gand-e-Afghani remain in the shop catalog.
+                const groups = <String, List<String>>{
+                  'Men': ['men', 'man'],
+                  'Women': ['women', 'woman'],
+                  'Boys': ['boys', 'boy'],
+                  'Girls': ['girls', 'girl'],
+                };
+                final photos = catalog.value ?? const <KabulProduct>[];
+                return SizedBox(
+                  height: 118,
+                  child: ListView.separated(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    scrollDirection: Axis.horizontal,
+                    itemCount: groups.length,
+                    separatorBuilder: (_, _) => const SizedBox(width: 14),
+                    itemBuilder: (context, index) {
+                      final label = groups.keys.elementAt(index);
+                      final aliases = groups[label]!;
+                      Map<String, dynamic>? match;
+                      for (final item in items) {
+                        final slug = (item['slug'] ?? '').toString().toLowerCase();
+                        final name = (item['name'] ?? '').toString().toLowerCase();
+                        if (aliases.contains(slug) || aliases.contains(name)) {
+                          match = item;
+                          break;
+                        }
+                      }
+                      final slug = (match?['slug'] ?? aliases.first).toString();
+                      KabulProduct? sample;
+                      for (final product in photos) {
+                        if (product.categorySlug == slug && product.imageUrl != null) {
+                          sample = product;
+                          break;
+                        }
+                      }
+                      final title = switch (locale) {
+                        'fa' => switch (label) {
+                          'Men' => 'مردانه',
+                          'Women' => 'زنانه',
+                          'Boys' => 'پسرانه',
+                          _ => 'دخترانه',
                         },
-                      ),
-                    ),
+                        'ps' => switch (label) {
+                          'Men' => 'نارینه',
+                          'Women' => 'ښځینه',
+                          'Boys' => 'هلکان',
+                          _ => 'نجونې',
+                        },
+                        _ => label,
+                      };
+                      return SizedBox(
+                        width: 75,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(13),
+                          onTap: () => context.go(
+                            '/shop?category=${Uri.encodeQueryComponent(slug)}',
+                          ),
+                          child: Column(
+                            children: [
+                              CircleAvatar(
+                                radius: 35,
+                                backgroundColor: BrandColors.champagne,
+                                backgroundImage: sample?.imageUrl == null
+                                    ? null
+                                    : NetworkImage(sample!.imageUrl!),
+                                child: sample?.imageUrl == null
+                                    ? const Icon(Icons.checkroom_outlined,
+                                        color: BrandColors.burgundy)
+                                    : null,
+                              ),
+                              const SizedBox(height: 8),
+                              Text(title,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  color: BrandColors.ink,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                );
+              },
             ),
             const SizedBox(height: 32),
             _SectionHeading(

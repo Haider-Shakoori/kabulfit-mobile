@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/theme/app_theme.dart';
@@ -161,9 +162,8 @@ class _MeasurementGuideScreenState
       if (mounted) context.go('/measurements');
     } catch (error) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(error.toString())));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(error.toString())));
       }
     } finally {
       if (mounted) setState(() => saving = false);
@@ -171,9 +171,8 @@ class _MeasurementGuideScreenState
   }
 
   void _showInvalid(String field) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('Check measurement: $field')));
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text('Check measurement: $field')));
   }
 
   Future<void> _promptForAccount() async {
@@ -298,9 +297,8 @@ class _MeasurementGuideScreenState
                     'خپلې دقیقې اندازې واخلئ',
                   ),
                   textAlign: TextAlign.center,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleLarge?.copyWith(color: Colors.white),
+                  style: Theme.of(context).textTheme.titleLarge
+                      ?.copyWith(color: Colors.white),
                 ),
                 const SizedBox(height: 9),
                 Text(
@@ -370,6 +368,71 @@ class _MeasurementGuideScreenState
           ),
           const SizedBox(height: 18),
           if (!enteringValues) ...[
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(14),
+                child: Column(
+                  children: [
+                    Text(
+                      selected.title(language),
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    const SizedBox(height: 12),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(13),
+                      child: AspectRatio(
+                        aspectRatio: 1,
+                        child: Image.network(
+                          selected.imageUrl,
+                          fit: BoxFit.contain,
+                          errorBuilder: (_, _, _) => const ColoredBox(
+                            color: BrandColors.cream,
+                            child: Icon(Icons.image_not_supported_outlined),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    if (selected.video(language).isNotEmpty) ...[
+                      _EmbeddedMeasurementVideo(
+                        key: ValueKey('${selected.id}-$language-$isMale'),
+                        url: selected.video(language),
+                      ),
+                      const SizedBox(height: 8),
+                      TextButton.icon(
+                        onPressed: () => _watchVideo(selected.video(language)),
+                        icon: const Icon(Icons.open_in_new),
+                        label: Text(_copy(language, 'Open on YouTube',
+                            'باز کردن در یوتیوب', 'په یوټیوب کې پرانیزئ')),
+                      ),
+                    ],
+                    const SizedBox(height: 10),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        TextButton.icon(
+                          onPressed: safeIndex > 0
+                              ? () => setState(() => selectedIndex--)
+                              : null,
+                          icon: const Icon(Icons.chevron_left),
+                          label: Text(
+                            _copy(language, 'Previous', 'قبلی', 'مخکې'),
+                          ),
+                        ),
+                        Text('${safeIndex + 1} / ${guideSteps.length}'),
+                        TextButton.icon(
+                          onPressed: safeIndex < guideSteps.length - 1
+                              ? () => setState(() => selectedIndex++)
+                              : null,
+                          icon: const Icon(Icons.chevron_right),
+                          label: Text(_copy(language, 'Next', 'بعدی', 'بل')),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
             Text(
               _copy(
                 language,
@@ -431,71 +494,6 @@ class _MeasurementGuideScreenState
               },
             ),
             const SizedBox(height: 18),
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(14),
-                child: Column(
-                  children: [
-                    Text(
-                      selected.title(language),
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                    const SizedBox(height: 12),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(13),
-                      child: AspectRatio(
-                        aspectRatio: 1,
-                        child: Image.network(
-                          selected.imageUrl,
-                          fit: BoxFit.contain,
-                          errorBuilder: (_, _, _) => const ColoredBox(
-                            color: BrandColors.cream,
-                            child: Icon(Icons.image_not_supported_outlined),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    if (selected.video(language).isNotEmpty)
-                      FilledButton.icon(
-                        onPressed: () => _watchVideo(selected.video(language)),
-                        icon: const Icon(Icons.play_circle_outline),
-                        label: Text(
-                          _copy(
-                            language,
-                            'Watch original tutorial',
-                            'تماشای ویدیوی اصلی',
-                            'اصلي ویډیو وګورئ',
-                          ),
-                        ),
-                      ),
-                    const SizedBox(height: 10),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        TextButton.icon(
-                          onPressed: safeIndex > 0
-                              ? () => setState(() => selectedIndex--)
-                              : null,
-                          icon: const Icon(Icons.chevron_left),
-                          label: Text(
-                            _copy(language, 'Previous', 'قبلی', 'مخکې'),
-                          ),
-                        ),
-                        Text('${safeIndex + 1} / ${guideSteps.length}'),
-                        TextButton.icon(
-                          onPressed: safeIndex < guideSteps.length - 1
-                              ? () => setState(() => selectedIndex++)
-                              : null,
-                          icon: const Icon(Icons.chevron_right),
-                          label: Text(_copy(language, 'Next', 'بعدی', 'بل')),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
             const SizedBox(height: 16),
             Text(
               _copy(
@@ -614,9 +612,8 @@ class _MeasurementGuideScreenState
                       saving
                           ? AppLocalizations.of(context).text('saving')
                           : authenticated
-                          ? AppLocalizations.of(
-                              context,
-                            ).text('saveMeasurements')
+                          ? AppLocalizations.of(context)
+                                .text('saveMeasurements')
                           : _copy(
                               language,
                               'Save measurements (sign in)',
@@ -639,6 +636,44 @@ class _MeasurementGuideScreenState
               ),
           ],
         ],
+      ),
+    );
+  }
+}
+
+/// Inline player for the original per-step tutorial; external link is a fallback.
+class _EmbeddedMeasurementVideo extends StatefulWidget {
+  const _EmbeddedMeasurementVideo({super.key, required this.url});
+  final String url;
+
+  @override
+  State<_EmbeddedMeasurementVideo> createState() => _EmbeddedMeasurementVideoState();
+}
+
+class _EmbeddedMeasurementVideoState extends State<_EmbeddedMeasurementVideo> {
+  WebViewController? controller;
+
+  @override
+  void initState() {
+    super.initState();
+    final uri = Uri.tryParse(widget.url);
+    if (uri == null || uri.scheme != 'https' ||
+        !{'www.youtube.com', 'youtube.com', 'www.youtube-nocookie.com'}
+            .contains(uri.host) || !uri.path.startsWith('/embed/')) return;
+    controller = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..loadRequest(uri);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final player = controller;
+    if (player == null) return const SizedBox.shrink();
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(12),
+      child: AspectRatio(
+        aspectRatio: 16 / 9,
+        child: WebViewWidget(controller: player),
       ),
     );
   }
