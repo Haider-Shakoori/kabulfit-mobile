@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:webview_flutter/webview_flutter.dart';
 
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/theme/app_theme.dart';
@@ -235,7 +234,15 @@ class _MeasurementGuideScreenState
         !({'www.youtube.com', 'youtube.com', 'youtu.be'}).contains(uri.host)) {
       return;
     }
-    final opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    final videoId = uri.host == 'youtu.be'
+        ? uri.pathSegments.firstOrNull
+        : uri.pathSegments.length > 1 && uri.pathSegments.first == 'embed'
+            ? uri.pathSegments[1]
+            : uri.queryParameters['v'];
+    final watchUri = videoId == null
+        ? uri
+        : Uri.https('www.youtube.com', '/watch', {'v': videoId});
+    final opened = await launchUrl(watchUri, mode: LaunchMode.inAppBrowserView);
     if (!opened && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Unable to open tutorial video.')),
@@ -385,36 +392,36 @@ class _MeasurementGuideScreenState
                       borderRadius: BorderRadius.circular(13),
                       child: AspectRatio(
                         aspectRatio: 1,
-                        child: Image.network(
-                          selected.imageUrl,
-                          fit: BoxFit.contain,
-                          errorBuilder: (_, _, _) => const ColoredBox(
-                            color: BrandColors.cream,
-                            child: Icon(Icons.image_not_supported_outlined),
-                          ),
+                        child: Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            Image.network(
+                              selected.imageUrl,
+                              fit: BoxFit.contain,
+                              errorBuilder: (_, _, _) => const ColoredBox(
+                                color: BrandColors.cream,
+                                child: Icon(Icons.image_not_supported_outlined),
+                              ),
+                            ),
+                            if (selected.video(language).isNotEmpty)
+                              Positioned(
+                                right: 12,
+                                bottom: 12,
+                                child: Material(
+                                  color: BrandColors.cream,
+                                  elevation: 3,
+                                  shape: const CircleBorder(),
+                                  child: IconButton(
+                                    tooltip: _copy(language, 'Play tutorial', 'پخش آموزش', 'لارښود وګورئ'),
+                                    icon: const Icon(Icons.play_arrow_rounded),
+                                    onPressed: () => _watchVideo(selected.video(language)),
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
                       ),
                     ),
-                    const SizedBox(height: 12),
-                    if (selected.video(language).isNotEmpty) ...[
-                      _EmbeddedMeasurementVideo(
-                        key: ValueKey('${selected.id}-$language-$isMale'),
-                        url: selected.video(language),
-                      ),
-                      const SizedBox(height: 8),
-                      TextButton.icon(
-                        onPressed: () => _watchVideo(selected.video(language)),
-                        icon: const Icon(Icons.open_in_new),
-                        label: Text(
-                          _copy(
-                            language,
-                            'Open on YouTube',
-                            'باز کردن در یوتیوب',
-                            'په یوټیوب کې پرانیزئ',
-                          ),
-                        ),
-                      ),
-                    ],
                     const SizedBox(height: 10),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -646,54 +653,6 @@ class _MeasurementGuideScreenState
               ),
           ],
         ],
-      ),
-    );
-  }
-}
-
-/// Inline player for the original per-step tutorial; external link is a fallback.
-class _EmbeddedMeasurementVideo extends StatefulWidget {
-  const _EmbeddedMeasurementVideo({super.key, required this.url});
-  final String url;
-
-  @override
-  State<_EmbeddedMeasurementVideo> createState() =>
-      _EmbeddedMeasurementVideoState();
-}
-
-class _EmbeddedMeasurementVideoState extends State<_EmbeddedMeasurementVideo> {
-  WebViewController? controller;
-
-  @override
-  void initState() {
-    super.initState();
-    final uri = Uri.tryParse(widget.url);
-    if (uri == null ||
-        uri.scheme != 'https' ||
-        !{
-          'www.youtube.com',
-          'youtube.com',
-          'www.youtube-nocookie.com',
-        }.contains(uri.host) ||
-        !uri.path.startsWith('/embed/')) {
-      return;
-    }
-    controller = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..loadRequest(uri);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final player = controller;
-    if (player == null) {
-      return const SizedBox.shrink();
-    }
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
-      child: AspectRatio(
-        aspectRatio: 16 / 9,
-        child: WebViewWidget(controller: player),
       ),
     );
   }
