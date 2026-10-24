@@ -13,7 +13,7 @@ class ApiClient {
     : _tokenStore = tokenStore,
       _dio = Dio(
         BaseOptions(
-          baseUrl: config.apiBaseUrl.toString().replaceFirst(RegExp(r'/$'), ''),
+          baseUrl: '${config.apiBaseUrl.toString()}/',
           connectTimeout: const Duration(seconds: 15),
           receiveTimeout: const Duration(seconds: 20),
           sendTimeout: const Duration(seconds: 20),
@@ -63,7 +63,7 @@ class ApiClient {
     try {
       final locale = await _supportedLocale();
       final response = await _dio.request<Map<String, dynamic>>(
-        '/$locale${path.startsWith('/') ? path : '/$path'}',
+        '$locale/${path.replaceFirst(RegExp(r'^/+'), '')}',
         data: data,
         options: Options(method: method),
       );

@@ -20,11 +20,9 @@ class AuthRepository {
     if (await _tokenStore.read() == null) return null;
     try {
       final response = await _client.get('/account');
-      final data = response['data'] as Map<String, dynamic>? ?? response;
-      return AuthSession(
-        userUuid: data['uuid'] as String,
-        email: data['email'] as String,
-      );
+      final nested = response['data'];
+      final account = nested is Map<String, dynamic> ? nested : response;
+      return AuthSession.fromAccount(account);
     } catch (_) {
       await _tokenStore.clear();
       return null;
@@ -40,13 +38,7 @@ class AuthRepository {
       '/auth/login',
       data: {'email': email, 'password': password, ...device},
     );
-    final data = response['data'] as Map<String, dynamic>? ?? response;
-    await _tokenStore.write(data['token'] as String);
-    final user = data['user'] as Map<String, dynamic>;
-    return AuthSession(
-      userUuid: user['uuid'] as String,
-      email: user['email'] as String,
-    );
+    return _persistSession(response);
   }
 
   Future<AuthSession> register({
@@ -68,13 +60,27 @@ class AuthRepository {
         ...device,
       },
     );
-    final data = response['data'] as Map<String, dynamic>? ?? response;
-    await _tokenStore.write(data['token'] as String);
-    final user = data['user'] as Map<String, dynamic>;
-    return AuthSession(
-      userUuid: user['uuid'] as String,
-      email: user['email'] as String,
-    );
+    return _persistSession(response);
+  }
+
+  /// Validate the whole authentication payload before storing credentials.
+  /// The API's AccountResource contains an email, not a customer UUID.
+  Future<AuthSession> _persistSession(Map<String, dynamic> response) async {
+    final nested = response['data'];
+    final data = nested is Map<String, dynamic> ? nested : response;
+    final token = data['token'];
+    final account = data['user'];
+
+    if (token is! String || token.isEmpty) {
+      throw const FormatException('Invalid authentication response.');
+    }
+    if (account is! Map<String, dynamic>) {
+      throw const FormatException('Invalid authentication response.');
+    }
+
+    final session = AuthSession.fromAccount(account);
+    await _tokenStore.write(token);
+    return session;
   }
 
   Future<void> signOut() async {

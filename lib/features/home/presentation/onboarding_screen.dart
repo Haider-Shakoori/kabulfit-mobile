@@ -27,9 +27,22 @@ class _KabulFitLaunchScreenState extends State<KabulFitLaunchScreen> {
   }
 
   Future<void> _restore() async {
-    final prefs = await SharedPreferences.getInstance();
+    // Keep the branded startup visible briefly, without blocking longer
+    // than necessary for onboarding preferences to load.
+    var wasCompleted = false;
+    try {
+      await Future.wait<void>([
+        () async {
+          final prefs = await SharedPreferences.getInstance();
+          wasCompleted = prefs.getBool(completedKey) ?? false;
+        }(),
+        Future<void>.delayed(const Duration(milliseconds: 1500)),
+      ]);
+    } catch (error) {
+      debugPrint('Unable to restore KabulFit onboarding state: $error');
+    }
     if (mounted) {
-      setState(() => completed = prefs.getBool(completedKey) ?? false);
+      setState(() => completed = wasCompleted);
     }
   }
 
@@ -42,11 +55,63 @@ class _KabulFitLaunchScreenState extends State<KabulFitLaunchScreen> {
   @override
   Widget build(BuildContext context) {
     if (completed == null) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return const KabulFitPreloader();
     }
     return completed!
         ? const HomeScreen()
         : _LuxuryOnboarding(onContinue: _complete);
+  }
+}
+
+/// A lightweight, offline-safe branded startup screen. This is not the
+/// first-install onboarding flow, which still appears only on first launch.
+class KabulFitPreloader extends StatelessWidget {
+  const KabulFitPreloader({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: BrandColors.warmWhite,
+      body: SafeArea(
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TweenAnimationBuilder<double>(
+                tween: Tween<double>(begin: 0.86, end: 1.0),
+                duration: const Duration(milliseconds: 850),
+                curve: Curves.easeOutCubic,
+                builder: (context, value, child) => Opacity(
+                  opacity: value,
+                  child: Transform.scale(scale: value, child: child),
+                ),
+                child: const KabulFitBrandLogo(width: 260, height: 110),
+              ),
+              const SizedBox(height: 22),
+              const Text(
+                'TIMELESS ELEGANCE',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 10,
+                  letterSpacing: 3,
+                  color: BrandColors.burgundy,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 30),
+              const SizedBox(
+                width: 84,
+                child: LinearProgressIndicator(
+                  minHeight: 2,
+                  color: BrandColors.gold,
+                  backgroundColor: BrandColors.champagne,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 
