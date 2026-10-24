@@ -402,8 +402,14 @@ class _MeasurementGuideScreenState
                       TextButton.icon(
                         onPressed: () => _watchVideo(selected.video(language)),
                         icon: const Icon(Icons.open_in_new),
-                        label: Text(_copy(language, 'Open on YouTube',
-                            'باز کردن در یوتیوب', 'په یوټیوب کې پرانیزئ')),
+                        label: Text(
+                          _copy(
+                            language,
+                            'Open on YouTube',
+                            'باز کردن در یوتیوب',
+                            'په یوټیوب کې پرانیزئ',
+                          ),
+                        ),
                       ),
                     ],
                     const SizedBox(height: 10),
@@ -647,7 +653,8 @@ class _EmbeddedMeasurementVideo extends StatefulWidget {
   final String url;
 
   @override
-  State<_EmbeddedMeasurementVideo> createState() => _EmbeddedMeasurementVideoState();
+  State<_EmbeddedMeasurementVideo> createState() =>
+      _EmbeddedMeasurementVideoState();
 }
 
 class _EmbeddedMeasurementVideoState extends State<_EmbeddedMeasurementVideo> {
@@ -657,9 +664,15 @@ class _EmbeddedMeasurementVideoState extends State<_EmbeddedMeasurementVideo> {
   void initState() {
     super.initState();
     final uri = Uri.tryParse(widget.url);
-    if (uri == null || uri.scheme != 'https' ||
-        !{'www.youtube.com', 'youtube.com', 'www.youtube-nocookie.com'}
-            .contains(uri.host) || !uri.path.startsWith('/embed/')) return;
+    if (uri == null ||
+        uri.scheme != 'https' ||
+        !{
+          'www.youtube.com',
+          'youtube.com',
+          'www.youtube-nocookie.com',
+        }.contains(uri.host) ||
+        !uri.path.startsWith('/embed/'))
+      return;
     controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..loadRequest(uri);

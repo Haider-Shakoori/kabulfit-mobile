@@ -242,8 +242,12 @@ class HomeScreen extends ConsumerWidget {
                       final aliases = groups[label]!;
                       Map<String, dynamic>? match;
                       for (final item in items) {
-                        final slug = (item['slug'] ?? '').toString().toLowerCase();
-                        final name = (item['name'] ?? '').toString().toLowerCase();
+                        final slug = (item['slug'] ?? '')
+                            .toString()
+                            .toLowerCase();
+                        final name = (item['name'] ?? '')
+                            .toString()
+                            .toLowerCase();
                         if (aliases.contains(slug) || aliases.contains(name)) {
                           match = item;
                           break;
@@ -252,7 +256,8 @@ class HomeScreen extends ConsumerWidget {
                       final slug = (match?['slug'] ?? aliases.first).toString();
                       KabulProduct? sample;
                       for (final product in photos) {
-                        if (product.categorySlug == slug && product.imageUrl != null) {
+                        if (product.categorySlug == slug &&
+                            product.imageUrl != null) {
                           sample = product;
                           break;
                         }
@@ -288,12 +293,15 @@ class HomeScreen extends ConsumerWidget {
                                     ? null
                                     : NetworkImage(sample!.imageUrl!),
                                 child: sample?.imageUrl == null
-                                    ? const Icon(Icons.checkroom_outlined,
-                                        color: BrandColors.burgundy)
+                                    ? const Icon(
+                                        Icons.checkroom_outlined,
+                                        color: BrandColors.burgundy,
+                                      )
                                     : null,
                               ),
                               const SizedBox(height: 8),
-                              Text(title,
+                              Text(
+                                title,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 textAlign: TextAlign.center,
