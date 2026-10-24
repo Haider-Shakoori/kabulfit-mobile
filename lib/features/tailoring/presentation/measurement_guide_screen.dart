@@ -675,8 +675,9 @@ class _EmbeddedMeasurementVideoState extends State<_EmbeddedMeasurementVideo> {
           'youtube.com',
           'www.youtube-nocookie.com',
         }.contains(uri.host) ||
-        !uri.path.startsWith('/embed/'))
+        !uri.path.startsWith('/embed/')) {
       return;
+    }
     controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..loadRequest(uri);
@@ -685,7 +686,9 @@ class _EmbeddedMeasurementVideoState extends State<_EmbeddedMeasurementVideo> {
   @override
   Widget build(BuildContext context) {
     final player = controller;
-    if (player == null) return const SizedBox.shrink();
+    if (player == null) {
+      return const SizedBox.shrink();
+    }
     return ClipRRect(
       borderRadius: BorderRadius.circular(12),
       child: AspectRatio(
